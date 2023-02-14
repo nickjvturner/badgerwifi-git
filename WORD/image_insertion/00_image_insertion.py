@@ -6,7 +6,7 @@ This script will find 'the' word doc in the same directory as the script
 iterate through all the table cells and replace text strings with
 corresponding images at specified heights.
 
-Initially created in December 2022 in response to a throw-away comment by Jerry Olla
+Initially created in December 2022 in response to a throw-away comment by Jerry Olla @jolla
 Latest meaningful update: 2023-02-14
 """
 

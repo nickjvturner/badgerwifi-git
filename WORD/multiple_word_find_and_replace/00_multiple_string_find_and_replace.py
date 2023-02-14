@@ -6,7 +6,7 @@ This script will find 'the' word doc in the same directory as the script
 iterate through all the table cells and replace text strings with
 specified replacement strings.
 
-Created December 2022 in response to a throw-away comment by Jerry Olla
+Created December 2022 in response to a throw-away comment by Jerry Olla @jolla
 """
 
 from pathlib import Path
