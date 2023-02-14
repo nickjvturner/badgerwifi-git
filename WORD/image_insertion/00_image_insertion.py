@@ -11,12 +11,20 @@ Latest meaningful update: 2023-02-14
 """
 
 from pathlib import Path
-import shutil
 import time
 
-import inflect
-from docx import Document
-from docx.shared import Mm
+nl = '\n'
+
+try:
+	import inflect
+except ImportError as e:
+	print(f'{e}{nl}try installing inflect module{nl}"pip install inflect"')
+
+try:
+	from docx import Document
+	from docx.shared import Mm
+except ImportError as e:
+	print(f'{e}{nl}try installing python-docx module{nl}"pip install python-docx"')
 
 
 def pretty_time_delta(seconds, lang=inflect.engine()):
@@ -41,12 +49,12 @@ def main():
 	# Get local file with extension .docx
 	for file in sorted(Path.cwd().iterdir()):
 		# ignore files in directory containing output
-		if (file.suffix == '.docx') and (not ('output' in file.stem)):
-			proceed = input(f'Proceed with file: {str(file.name)}? (YES/no)')
+		if (file.suffix == '.docx') and (not ('OUTPUT' in file.stem)):
+			proceed = input(f'{nl}Proceed with file: {str(file.name)}? (YES/no)')
 			if proceed == 'no':
 				exit()
 
-			print('filename:', file.name)
+			print(f'{nl}filename: {file.name}')
 
 			document = Document(file)
 
@@ -83,7 +91,23 @@ def main():
 					'height': 18}
 			}
 
-			images_inserted = 0
+			image_insertion_points = []
+
+			# count image insertions to be conducted
+			for table in document.tables:
+				for row in table.rows:
+					for cell in row.cells:
+						for paragraph in cell.paragraphs:
+							for key in image_search.keys():
+								if str_prefix + key in paragraph.text:
+									image_insertion_points.append(key)
+									print(len(image_insertion_points), end='\r')
+
+			total_image_insertion_points = len(image_insertion_points)
+			print(f'{nl}* {total_image_insertion_points} image insertion points identified *{nl}')
+
+			# progress counter
+			images_inserted = 1
 
 			for table in document.tables:
 				for row in table.rows:
@@ -94,13 +118,14 @@ def main():
 									paragraph.text = paragraph.text.replace(str_prefix + key, "")
 									picture_path = Path.cwd() / 'insert-images' / image_search[key]['image']
 									paragraph.add_run().add_picture(str(picture_path), height=Mm(image_search[key]['height']))
-									print(key, 'image inserted, with height:', image_search[key]['height'], 'mm')
+									message = f"{key} image inserted, with height: {image_search[key]['height']} mm  ({images_inserted}/{total_image_insertion_points})"
+									print(f'{message :>50}')
 									images_inserted += 1
 
-			shutil.copy(file, Path.cwd() / Path(file.stem + '-ORIGINAL.docx'))
-			document.save(file)
 
-			nl = '\nl'
+			# shutil.copy(file, Path.cwd() / Path(file.stem + '-ORIGINAL.docx'))
+			document.save(Path.cwd() / Path(file.stem + '-OUTPUT-IMAGES_ADDED.docx'))
+
 			print(f'{nl}* {images_inserted} images inserted *')
 
 
