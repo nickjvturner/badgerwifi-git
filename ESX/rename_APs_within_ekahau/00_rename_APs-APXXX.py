@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 """
-mangled by Nick Turner (@nickjvturner)
+Created by Nick Turner (@nickjvturner)
 
-This script will rename all your [SIMULATED APs] throughout each floor
-from left to right
+This script is created with [SIMULATED APs] as the targets...
+Script will rename all APs throughout each floor from left to right
 
 """
 
@@ -17,9 +17,9 @@ from pprint import pprint
 
 
 def main():
-    nl = '/nl'
+    nl = '\n'
 
-    # Get current working directory
+    # Get filename and current working directory
     print(f'{nl}{Path(__file__).name}')
     print(f'working_directory: {Path.cwd()}{nl}')
 
@@ -56,23 +56,6 @@ def main():
                 floorPlansDict[floor['id']] = floor['name']
             # pprint(floorPlansDict)
 
-            # Try to load the tagKeys.json file into the tagKeysJSON dictionary
-            try:
-                with open(Path(project_name) / 'tagKeys.json') as json_file:
-                    tagKeysJSON = json.load(json_file)
-                    json_file.close()
-                # pprint(tagKeysJSON)
-
-                # Create an intermediary dictionary to lookup tags
-                tagKeysDict = {}
-
-                # Populate the intermediary dictionary
-                for tag in tagKeysJSON['tagKeys']:
-                    tagKeysDict[tag['id']] = tag['key']
-
-            except:
-                pass
-
             # Load the accessPoints.json file into the accessPointsJSON dictionary
             with open(Path(project_name) / 'accessPoints.json') as json_file:
                 accessPointsJSON = json.load(json_file)
@@ -89,25 +72,10 @@ def main():
                 # print(floorPlansDict.get(floorPlanId))
                 return floorPlansDict.get(floorPlanId)
 
-            def tagKeyGetter(tagId):
-                # print(tagId)
-                # if tagId list is not empty
-                if tagId:
-                    tagKeyHash = tagId[0]['tagKeyId']
-                    tagKey = tagKeysDict[tagKeyHash]
-                    if tagKey == tagKey:
-                        # print(tagId[0]['value'])
-                        return tagId[0]['value']
-                # If the tags list is empty substitute letter Z
-                return 'A'
-
-            # Use .sorted and lambda functions to sort the list
             # by floor name(floorPlanId lookup), tag:value(filtered within tagKeyGetter) and x coord
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
-                                             key=lambda i: (
-                                             floorPlanGetter(i['location']['floorPlanId']), tagKeyGetter(i['tags']), i['model'],
-                                             i['location']['coord']['x']))
-                                             # key=lambda i: (floorPlanGetter(i['location']['floorPlanId']), tagKeyGetter(i['tags']), i['location']['coord']['x']))
+                                             key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
+                                                            i['location']['coord']['x']))
 
             apSeqNum = 1
 
@@ -116,8 +84,7 @@ def main():
                 # Define the pattern to rename your APs
                 new_AP_name = f'AP-{apSeqNum:03}'
 
-
-                print(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} | sorting tag: {tagKeyGetter(ap['tags'])} ] renamed to {new_AP_name}")
+                print(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] renamed to {new_AP_name}")
 
                 ap['name'] = new_AP_name
                 apSeqNum += 1
@@ -139,9 +106,9 @@ def main():
             try:
                 shutil.make_archive(str(output_esx), 'zip', project_name)
                 shutil.move(output_esx.with_suffix('.zip'), output_esx.with_suffix('.esx'))
-                print(f'''
-                Process complete {output_esx} re-bundled
-                ''')
+                print(f'{nl}** Process complete **{nl}{output_esx} re-bundled into .esx file{nl}')
+                shutil.rmtree(project_name)
+                print(f'Temporary project contents directory removed{nl}')
             except Exception as e:
                 print(e)
 

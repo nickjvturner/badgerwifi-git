@@ -3,7 +3,7 @@
 import shutil
 from pathlib import Path
 
-nl = '\n'
+nl = '\nl'
 
 # Get current working directory
 print(f'{nl}{Path(__file__).name}')

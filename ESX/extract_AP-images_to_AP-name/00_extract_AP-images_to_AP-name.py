@@ -61,12 +61,6 @@ def main():
 				json_file.close()
 			# pprint(floorPlansJSON)
 
-			# Load the floorPlans.json file into the floorPlansJSON Dictionary
-			with open(Path(project_name) / 'floorPlans.json') as json_file:
-				floorPlansJSON = json.load(json_file)
-				json_file.close()
-			# pprint(floorPlansJSON)
-
 			# Load the accessPoints.json file into the accessPointsJSON dictionary
 			with open(Path(project_name) / 'accessPoints.json') as json_file:
 				accessPointsJSON = json.load(json_file)

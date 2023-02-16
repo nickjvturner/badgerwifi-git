@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 """
-mangled by Nick Turner (@nickjvturner)
+Created by Nick Turner (@nickjvturner)
 
-This script will rename all your [SIMULATED APs] throughout each floor
+This script was created with [SIMULATED APs] as the targets
+ throughout each floor
 from left to right
 
 """
@@ -17,9 +18,9 @@ from pprint import pprint
 
 
 def main():
-    nl = '/nl'
+    nl = '\n'
 
-    # Get current working directory
+    # Get filename and current working directory
     print(f'{nl}{Path(__file__).name}')
     print(f'working_directory: {Path.cwd()}{nl}')
 
@@ -70,7 +71,7 @@ def main():
                 for tag in tagKeysJSON['tagKeys']:
                     tagKeysDict[tag['key']] = tag['id']
 
-            except:
+            except IOError:
                 pass
 
             # Load the accessPoints.json file into the accessPointsJSON dictionary
@@ -88,7 +89,6 @@ def main():
             def floorPlanGetter(floorPlanId):
                 # print(floorPlansDict.get(floorPlanId))
                 return floorPlansDict.get(floorPlanId)
-
 
             def sortTagValueGetter(tagsList):
                 # function receives a list containing a dictionary of unique tag ids and corresponding values
@@ -113,7 +113,9 @@ def main():
                             # print(value.get('value'))
                             return value.get('value')
 
-                # If the tags list is empty substitute letter Z
+                # If the AP does not have a tag substitute a letter
+                # 'A' - group and number APs without tags before APs with tags
+                # 'Z' - group and number APs without tags after APs with tags
                 return 'Z'
 
             # Use .sorted and lambda functions to sort the list in order
@@ -121,9 +123,9 @@ def main():
             # specified tag:value(filtered within sortTagValueGetter function)
             # x coordinate (this numbers the APs from left to right)
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
-                                             key=lambda i: (
-                                             floorPlanGetter(i['location']['floorPlanId']), sortTagValueGetter(i['tags']),
-                                             i['location']['coord']['x']))
+                                             key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
+                                                            sortTagValueGetter(i['tags']),
+                                                            i['location']['coord']['x']))
 
             apSeqNum = 1
 
@@ -153,7 +155,9 @@ def main():
             try:
                 shutil.make_archive(str(output_esx), 'zip', project_name)
                 shutil.move(output_esx.with_suffix('.zip'), output_esx.with_suffix('.esx'))
-                print(f'{nl}Process complete {output_esx} re-bundled{nl}')
+                print(f'{nl}** Process complete **{nl}{output_esx} re-bundled into .esx file{nl}')
+                shutil.rmtree(project_name)
+                print(f'Temporary project contents directory removed{nl}')
             except Exception as e:
                 print(e)
 

@@ -3,7 +3,7 @@
 import zipfile
 from pathlib import Path
 
-nl = '/n'
+nl = '\n'
 
 # Get current working directory
 print(f'{nl}{Path(__file__).name}')
