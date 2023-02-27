@@ -151,7 +151,7 @@ def main():
             with open("accessPoints.json", "w") as outfile:
                 json.dump(sorted_accessPointsJSON_dict, outfile, indent=4)
 
-            # move file into unpacked folder OVERWRITING ORIGINAL
+            # move modified accessPoints.json into unpacked folder OVERWRITING ORIGINAL
             shutil.move('accessPoints.json', Path(project_name) / 'accessPoints.json')
 
             output_esx = Path(project_name + '_re-zip')

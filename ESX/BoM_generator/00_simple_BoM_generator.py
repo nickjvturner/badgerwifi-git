@@ -12,7 +12,9 @@ Intended for Simulation project files
 import zipfile
 import json
 import time
+import shutil
 from pathlib import Path
+from collections import Counter
 from pprint import pprint
 
 
@@ -23,7 +25,7 @@ def main():
     print(f'{nl}{Path(__file__).name}')
     print(f'working_directory: {Path.cwd()}{nl}')
 
-    # Get local file with extension .esx
+    # Get local file(s) with extension .esx
     for file in sorted(Path.cwd().iterdir()):
         # ignore files in directory containing _re-zip
         if (file.suffix == '.esx') and (not('re-zip' in file.stem)):
@@ -62,37 +64,40 @@ def main():
                 json_file.close()
             # pprint(accessPointsJSON)
 
+            try:
+                # Remove temporary directory containing unzipped project file
+                shutil.rmtree(project_name)
+            except Exception as e:
+                print(e)
+
             # Convert accessPointsJSON from dictionary to list
-            # We do this to make the sorting procedure more simple
             accessPointsLIST = []
             for ap in accessPointsJSON['accessPoints']:
                 accessPointsLIST.append(ap)
 
+            # Create a list to store AP models and external antennas
             ap_model_list = []
 
             for ap in accessPointsLIST:
                 if ' +  ' in ap['model']:
-                    # print('ap + ant detected')
-                    # print((ap['model']).split(' +  ')[0])
-                    ap_model_list.append((ap['model']).split(' +  ')[0])
-                    ap_model_list.append((ap['model']).split(' +  ')[1])
+                    apmodel_split_antenna = (ap['model']).split(' +  ')
+                    for entry in apmodel_split_antenna:
+                        ap_model_list.append(entry)
                 else:
                     ap_model_list.append(ap['model'])
 
-            # print(ap_model)
-            model_counter = {}
 
-            for ap_model in ap_model_list:
-                if ap_model not in model_counter:
-                    model_counter[ap_model] = 0
-                model_counter[ap_model] += 1
+            simple_BoM = Counter(ap_model_list)
 
-            # print(model_counter)
-            print(f'{nl}{nl}')
+            # print(simple_BoM)
+            print(f'{nl}')
             print(f'{file.stem}')
-            for key, value in model_counter.items():
+            print('-' * len(file.stem))
+
+            for key, value in simple_BoM.items():
                 print(f'{key} {value}')
             print(f'{nl}{nl}')
+
 
 if __name__ == "__main__":
     start_time = time.time()
