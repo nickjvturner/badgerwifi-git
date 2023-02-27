@@ -3,7 +3,9 @@
 """
 Created by Nick Turner (@nickjvturner)
 
-Not really working yet!!
+Super Ugly work in progress
+
+Intended for Simulation project files
 
 """
 
@@ -69,7 +71,13 @@ def main():
             ap_model_list = []
 
             for ap in accessPointsLIST:
-                ap_model_list.append(ap['model'])
+                if ' +  ' in ap['model']:
+                    # print('ap + ant detected')
+                    # print((ap['model']).split(' +  ')[0])
+                    ap_model_list.append((ap['model']).split(' +  ')[0])
+                    ap_model_list.append((ap['model']).split(' +  ')[1])
+                else:
+                    ap_model_list.append(ap['model'])
 
             # print(ap_model)
             model_counter = {}
@@ -80,9 +88,11 @@ def main():
                 model_counter[ap_model] += 1
 
             # print(model_counter)
-            print(f'{nl}{nl}{file.name}')
+            print(f'{nl}{nl}')
+            print(f'{file.stem}')
             for key, value in model_counter.items():
                 print(f'{key} {value}')
+            print(f'{nl}{nl}')
 
 if __name__ == "__main__":
     start_time = time.time()
