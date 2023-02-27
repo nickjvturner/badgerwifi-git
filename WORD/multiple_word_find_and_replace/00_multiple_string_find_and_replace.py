@@ -11,7 +11,6 @@ Created December 2022 in response to a throw-away comment by Jerry Olla @jolla
 
 from pathlib import Path
 from docx import Document
-import shutil
 import time
 
 
@@ -30,13 +29,22 @@ def main():
 
 			text_search = {
 				'Aruba AP-514 +  Aruba AP-ANT-45': 'Aruba AP-514',
-				'Aruba AP-ANT-45 5GHz 5.5dBi': 'Aruba AP-ANT-45',
-				'Aruba AP-655 5GHz': 'Integrated',
-				'Aruba AP-577 5GHz': 'Integrated',
-				'Aruba ANT-3x3-D608 5GHz': 'Aruba ANT-3x3-D608',
 				'Aruba AP-574 +  Aruba ANT-4x4-D608': 'Aruba AP-574',
-				'Aruba ANT-4x4-D608 5GHz': 'Aruba ANT-4x4-D608'
-			}
+				'Aruba AP-514 +  Aruba AP-ANT-48': 'Aruba AP-514',
+
+				'Aruba AP-ANT-45 5GHz 5.5dBi': 'Aruba AP-ANT-45',
+				'Aruba AP-ANT-48 5GHz 8.5dBi': 'Aruba AP-ANT-48',
+				'Aruba ANT-3x3-D608 5GHz': 'Aruba ANT-3x3-D608',
+				'Aruba ANT-4x4-D608 5GHz': 'Aruba ANT-4x4-D608',
+
+				'Aruba AP-515 5GHz': 'Integrated',
+				'Aruba AP-565 5GHz': 'Integrated',
+				'Aruba AP-567 5GHz': 'Integrated',
+				'Aruba AP-577 5GHz': 'Integrated',
+				'Aruba AP-655 5GHz': 'Integrated',
+
+				'0.0 dBm': ''
+				}
 
 			for table in document.tables:
 				for row in table.rows:
@@ -48,9 +56,7 @@ def main():
 									print(key, 'text replaced with', text_search[key])
 									# print(key, text_search[key])
 
-			shutil.copy(file, Path.cwd() / Path(file.stem + '-ORIGINAL.docx'))
-			document.save(file)
-
+			document.save(Path.cwd() / Path(file.stem + '-STRINGS SWAPPED.docx'))
 
 
 if __name__ == "__main__":
@@ -58,3 +64,4 @@ if __name__ == "__main__":
 	main()
 	run_time = time.time() - start_time
 	print(f'** Time to run: {round(run_time, 2)} seconds **')
+
