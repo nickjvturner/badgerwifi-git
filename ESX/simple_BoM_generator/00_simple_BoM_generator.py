@@ -96,7 +96,7 @@ def main():
 
             for key, value in simple_BoM.items():
                 print(f'{key} {value}')
-            print(f'{nl}{nl}')
+            print(f'{nl}')
 
 
 if __name__ == "__main__":
