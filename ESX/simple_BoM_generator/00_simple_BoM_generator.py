@@ -79,12 +79,21 @@ def main():
             ap_model_list = []
 
             for ap in accessPointsLIST:
-                if ' +  ' in ap['model']:
-                    apmodel_split_antenna = (ap['model']).split(' +  ')
-                    for entry in apmodel_split_antenna:
-                        ap_model_list.append(entry)
+                if 'model' in ap:
+                    if ' +  ' in ap['model']:
+                        apmodel_split_antenna = (ap['model']).split(' +  ')
+                        for entry in apmodel_split_antenna:
+                            ap_model_list.append(entry)
+
+                    elif ap['model'] == '':
+                        ap_model_list.append('measured AP, model unavailable, vendor: ' + ap['vendor'])
+
+                    else:
+                        ap_model_list.append(ap['model'])
+
                 else:
-                    ap_model_list.append(ap['model'])
+                    # print(ap)
+                    ap_model_list.append(f"measured AP, model & vendor information available")
 
 
             simple_BoM = Counter(ap_model_list)
@@ -94,7 +103,7 @@ def main():
             print(f'{file.stem}')
             print('-' * len(file.stem))
 
-            for key, value in simple_BoM.items():
+            for key, value in sorted(simple_BoM.items()):
                 print(f'{key} {value}')
             print(f'{nl}')
 

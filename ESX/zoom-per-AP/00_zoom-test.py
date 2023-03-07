@@ -3,8 +3,6 @@
 """
 Created by Nick Turner (@nickjvturner)
 
-This script is created with [SIMULATED APs] as the targets...
-Script will rename all APs throughout each floor from left to right
 
 """
 
@@ -13,6 +11,7 @@ import json
 import shutil
 import time
 from pathlib import Path
+from PIL import Image, ImageDraw
 from pprint import pprint
 
 
@@ -75,39 +74,59 @@ def main():
             # by floor name(floorPlanId lookup), tag:value(filtered within tagKeyGetter) and x coord
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
-                                                            i['model'],
                                                             i['location']['coord']['x']))
 
-            apSeqNum = 1
+            # Open the image file
+            image = Image.open("/Users/nick/Dropbox/Development/badgerwifi-ekahau/ESX/zoom-per-AP/01 First_blank.png")
+
+            # Create an ImageDraw object
+            draw = ImageDraw.Draw(image)
+
+            # configure PIL parameters
+            x_size = 40
+            line_thickness = 8
+            circle_radius = x_size + 30
+            crop_size = 2000
+
 
             for ap in accessPointsLIST_SORTED:
-                # Define new AP naming scheme
-                # Define the pattern to rename your APs
-                new_AP_name = f'AP-{apSeqNum:03}'
+                print(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ]"\
+                      f"has coordinates {ap['location']['coord']['x']}, {ap['location']['coord']['y']} {nl}{nl}")
 
-                print(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] renamed to {new_AP_name}")
+                # establish x and y
+                x, y = (ap['location']['coord']['x'], ap['location']['coord']['y'])
 
-                ap['name'] = new_AP_name
-                apSeqNum += 1
+                print(x)
+                print(y)
+
+                # Draw the X at the specified x, y coordinates
+                draw.line((x - x_size, y - x_size, x + x_size, y + x_size), fill="red", width=line_thickness)
+                draw.line((x - x_size, y + x_size, x + x_size, y - x_size), fill="red", width=line_thickness)
+
+                # Draw the circle around the X
+                draw.ellipse((x - circle_radius, y - circle_radius, x + circle_radius, y + circle_radius),
+                             outline='red', width=line_thickness)
+
+                # Calculate the crop box for the new image
+                crop_box = (x - crop_size // 2, y - crop_size // 2, x + crop_size // 2, y + crop_size // 2)
+
+                # Crop the image
+                cropped_image = image.crop(crop_box)
+
+                # Save the cropped image with a new filename
+                cropped_image.save(f"/Users/nick/Dropbox/Development/badgerwifi-ekahau/ESX/zoom-per-AP/{ap['name']} - zoomed.jpg")
+
+            # Save the modified image
+            image.save("/Users/nick/Dropbox/Development/badgerwifi-ekahau/ESX/zoom-per-AP/EDIT.png")
+
+
+
+
+
+
             # print(accessPointsLIST_SORTED)
 
-            # Convert modified list back into dictionary
-            sorted_accessPointsJSON_dict = {'accessPoints': accessPointsLIST_SORTED}
-            # print(sorted_accessPointsJSON_dict)
-
-            # save the modified dictionary as accessPoints.json
-            with open("accessPoints.json", "w") as outfile:
-                json.dump(sorted_accessPointsJSON_dict, outfile, indent=4)
-
-            # move file into unpacked folder OVERWRITING ORIGINAL
-            shutil.move('accessPoints.json', Path(project_name) / 'accessPoints.json')
-
-            output_esx = Path(project_name + '_re-zip')
-
             try:
-                shutil.make_archive(str(output_esx), 'zip', project_name)
-                shutil.move(output_esx.with_suffix('.zip'), output_esx.with_suffix('.esx'))
-                print(f'{nl}** Process complete **{nl}{output_esx} re-bundled into .esx file{nl}')
                 shutil.rmtree(project_name)
                 print(f'Temporary project contents directory removed{nl}')
             except Exception as e:

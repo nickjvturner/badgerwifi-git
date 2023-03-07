@@ -15,7 +15,7 @@ for dir in sorted(Path.cwd().iterdir()):
 	if dir.is_dir():
 		proceed = input(f'Proceed to rebundle this directory: {str(dir.name)}? (YES/no)')
 		if proceed == 'no':
-			exit()
+			continue
 
 		print(f'directory name: {dir.name}{nl}')
 

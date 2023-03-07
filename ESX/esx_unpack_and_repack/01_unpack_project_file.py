@@ -15,7 +15,7 @@ for file in sorted(Path.cwd().iterdir()):
 	if (file.suffix == '.esx') and (not ('re-zip' in file.stem)):
 		proceed = input(f'Proceed with file: {str(file.name)}? (YES/no)')
 		if proceed == 'no':
-			exit()
+			continue
 
 		print('filename:', file.name)
 
