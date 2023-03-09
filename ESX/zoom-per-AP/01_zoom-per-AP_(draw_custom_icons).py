@@ -80,7 +80,6 @@ def main():
             zoomed_AP_destination = Path.cwd() / 'OUTPUT' / 'zoomed-APs'
             create_directory(zoomed_AP_destination)
 
-
             for floor in floorPlans['floorPlans']:
                 # Extract floorplans
                 # print(floor['id'])
@@ -103,7 +102,7 @@ def main():
                     # print(ap['location']['floorPlanId'])
                     if ap['location']['floorPlanId'] == floor['id']:
 
-                        print(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ]"\
+                        print(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ]"
                               f"has coordinates {ap['location']['coord']['x']}, {ap['location']['coord']['y']} {nl}")
 
                         # establish x and y
@@ -129,14 +128,12 @@ def main():
                 # Remove raw floorplan source files
                 os.remove(floor['imageId'])
 
-
                 # Annotated floor plan destination
                 annotated_floorplan_destination = Path.cwd() / 'OUTPUT' / 'annotated'
                 create_directory(annotated_floorplan_destination)
 
                 # Save the modified image
                 image.save(Path(annotated_floorplan_destination / floor['name']).with_suffix('.png'))
-
 
             try:
                 shutil.rmtree(project_name)

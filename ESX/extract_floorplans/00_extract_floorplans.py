@@ -40,7 +40,7 @@ def main():
                 zip_ref.extractall(project_name)
             print('project successfully unzipped')
 
-            # Load the floorPlans.json file into the floorPlansJSON Dictionary
+            # Load the floorPlans.json file into the floorPlans Dictionary
             with open(Path(project_name) / 'floorPlans.json') as json_file:
                 floorPlans = json.load(json_file)
             # pprint(floorPlans)
