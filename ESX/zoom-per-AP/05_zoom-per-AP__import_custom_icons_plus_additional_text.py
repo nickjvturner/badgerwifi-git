@@ -37,7 +37,7 @@ def main():
         width = text_box[2] - text_box[0]
         height = text_box[3] - text_box[1]
 
-        return (width, height)
+        return width, height
 
     nl = '\n'
 
@@ -104,9 +104,6 @@ def main():
                 accessPoints = json.load(json_file)
             # pprint(accessPoints)
 
-            # Sort the dictionary by AP Name
-            # accessPointsDict = dict(sorted(accessPoints.items(), key=lambda i: i[1]['name']))
-
             # Create directory to hold output directories
             create_directory(Path.cwd() / 'OUTPUT')
 
@@ -150,7 +147,7 @@ def main():
                 # Create an ImageDraw object
                 draw_all_APs = ImageDraw.Draw(all_APs)
 
-                for ap in accessPoints['accessPoints']:
+                for ap in sorted(accessPoints['accessPoints'], key=lambda i: i['name']):
                     # print(ap)
                     # print(ap['location']['floorPlanId'])
                     if ap['location']['floorPlanId'] == floor['id']:
