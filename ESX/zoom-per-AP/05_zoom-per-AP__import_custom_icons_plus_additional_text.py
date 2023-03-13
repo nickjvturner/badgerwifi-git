@@ -139,7 +139,7 @@ def main():
 
             # Define text, font and size
             if platform.system() == "Windows":
-                font = ImageFont.truetype("Consolas.ttf", 30)
+                font = ImageFont.truetype("Consola.ttf", 30)
             else:
                 font = ImageFont.truetype("Menlo.ttc", 30)
 
