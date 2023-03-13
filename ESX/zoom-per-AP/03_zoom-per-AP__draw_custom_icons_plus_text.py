@@ -11,6 +11,7 @@ import zipfile
 import json
 import shutil
 import time
+import platform
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from pprint import pprint
@@ -105,6 +106,13 @@ def main():
                 crop_size = 2000
                 offset = 10
 
+                # Define text, font and size
+                if platform.system() == "Windows":
+                    font_path = os.path.join(os.environ["SystemRoot"], "Fonts", "Consola.ttf")
+                    font = ImageFont.truetype(font_path, 30)
+                else:
+                    font = ImageFont.truetype("Menlo.ttc", 30)
+
                 for ap in accessPoints['accessPoints']:
                     # print(ap['location']['floorPlanId'])
                     if ap['location']['floorPlanId'] == floor['id']:
@@ -133,8 +141,7 @@ def main():
                             plan.ellipse((x - encircle_radius, y - encircle_radius, x + encircle_radius,
                                           y + encircle_radius), outline='red', width=line_thickness)
 
-                            # Define text, font and size
-                            font = ImageFont.truetype("Menlo.ttc", 30)
+                            # Define text
                             text = ap['name']
 
                             # Calculate the height and width of the text

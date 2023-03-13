@@ -11,6 +11,7 @@ import zipfile
 import json
 import shutil
 import time
+import platform
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from pprint import pprint
@@ -120,6 +121,13 @@ def main():
             crop_size = 1200
             offset = 10
 
+            # Define text, font and size
+            if platform.system() == "Windows":
+                font_path = os.path.join(os.environ["SystemRoot"], "Fonts", "Consola.ttf")
+                font = ImageFont.truetype(font_path, 30)
+            else:
+                font = ImageFont.truetype("Menlo.ttc", 30)
+
             for floor in floorPlans['floorPlans']:
                 # Extract floorplans
                 shutil.copy((Path(project_name) / ('image-' + floor['imageId'])), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
@@ -186,8 +194,7 @@ def main():
                                 # Paste the arrow onto the floorplan at the calculated location
                                 plan.paste(spot, top_left, mask=spot)
 
-                        # Define text, font and size
-                        font = ImageFont.truetype("Menlo.ttc", 30)
+                        # Define text
                         text = ap['name']
 
                         # Calculate the height and width of the text
