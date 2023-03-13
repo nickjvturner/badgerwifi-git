@@ -139,12 +139,9 @@ def main():
 
             # Define text, font and size
             if platform.system() == "Windows":
-                font_path = os.path.join(os.environ["SystemRoot"], "Fonts", "Menlo.ttc")
+                font = ImageFont.truetype("Consolas.ttf", 30)
             else:
-                font_path = "/Library/Fonts/Menlo.ttc"
-
-            font = ImageFont.truetype(font_path, 30)
-            # font = ImageFont.truetype("Menlo.ttc", 30)
+                font = ImageFont.truetype("Menlo.ttc", 30)
 
             for floor in floorPlans['floorPlans']:
                 # Extract floorplans
