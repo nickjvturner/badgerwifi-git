@@ -139,7 +139,8 @@ def main():
 
             # Define text, font and size
             if platform.system() == "Windows":
-                font = ImageFont.truetype("Consola.ttf", 30)
+                font_path = os.path.join(os.environ["SystemRoot"], "Fonts", "Consola.ttf")
+                font = ImageFont.truetype(font_path, 30)
             else:
                 font = ImageFont.truetype("Menlo.ttc", 30)
 
