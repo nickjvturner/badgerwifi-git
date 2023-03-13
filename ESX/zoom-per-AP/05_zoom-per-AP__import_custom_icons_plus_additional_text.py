@@ -11,6 +11,7 @@ import zipfile
 import json
 import shutil
 import time
+import platform
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from pprint import pprint
@@ -136,6 +137,15 @@ def main():
             crop_size = 1200
             offset = 15
 
+            # Define text, font and size
+            if platform.system() == "Windows":
+                font_path = os.path.join(os.environ["SystemRoot"], "Fonts", "Menlo.ttc")
+            else:
+                font_path = "/Library/Fonts/Menlo.ttc"
+
+            font = ImageFont.truetype(font_path, 30)
+            # font = ImageFont.truetype("Menlo.ttc", 30)
+
             for floor in floorPlans['floorPlans']:
                 # Extract floorplans
                 shutil.copy((Path(project_name) / ('image-' + floor['imageId'])), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
@@ -203,8 +213,7 @@ def main():
                                 # Paste the arrow onto the floorplan at the calculated location
                                 plan.paste(spot, top_left, mask=spot)
 
-                        # Define text, font and size
-                        font = ImageFont.truetype("Menlo.ttc", 30)
+                        #  Define ap_info text
                         ap_info = (
                             f"AP Name: {ap['name']}{nl}"
                             f"AP Vendor: {ap['vendor']}{nl}"
@@ -219,15 +228,20 @@ def main():
                         # Calculate the crop box for the new image
                         crop_box = (x - crop_size // 2, y - crop_size // 2, x + crop_size // 2, y + crop_size // 2)
 
+                        # Crop the image
+                        cropped_image = isolated_AP.crop(crop_box)
+
+                        draw_isolated_AP = ImageDraw.Draw(cropped_image)
+
                         # Establish coordinates for the ap_info rounded rectangle
                         # Keep ap_info box away from the edges of the cropped AP image
                         edge_buffer = 100
 
-                        x1 = crop_box[2] - edge_buffer - text_width - (offset * 2)
-                        y1 = crop_box[1] + edge_buffer - (offset * 2)
+                        x1 = crop_size - edge_buffer - text_width - (offset * 2)
+                        y1 = edge_buffer - (offset * 2)
 
-                        x2 = crop_box[2] - edge_buffer + offset
-                        y2 = crop_box[1] + edge_buffer + text_height + offset
+                        x2 = crop_size - edge_buffer + offset
+                        y2 = edge_buffer + text_height + offset
 
                         # Corner radius
                         r = 20
@@ -237,11 +251,8 @@ def main():
 
                         # draw the ap_info text
                         draw_isolated_AP.text(
-                            ((crop_box[2] - 100) - (text_width / 2), crop_box[1] + 100 + text_height / 2 - 5),
+                            (crop_size - 100 - (text_width / 2), 100 + text_height / 2 - 5),
                             ap_info, anchor='mm', fill='black', font=font)
-
-                        # Crop the image
-                        cropped_image = isolated_AP.crop(crop_box)
 
                         # Save the cropped image with a new filename
                         cropped_image.save(Path(zoomed_AP_destination / (ap['name'] + '-zoomed')).with_suffix('.png'))
