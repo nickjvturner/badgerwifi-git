@@ -129,7 +129,7 @@ def main():
                 font = ImageFont.truetype("Menlo.ttc", 30)
 
             for floor in floorPlans['floorPlans']:
-                # temp floor Id
+                # If the floorplan source file was .dwg we need to reference the bitmapImageId instead of imageId plantemp floor Id
                 try:
                     floor_id = floor['bitmapImageId']
                 except Exception as e:
@@ -157,7 +157,7 @@ def main():
                             f"has coordinates {x}, {y}")
 
                         # Open the floorplan to be used for isolated AP image
-                        isolated_AP = Image.open(floor['imageId'])
+                        isolated_AP = Image.open(floor_id)
 
                         # Create ImageDraw object
                         draw_isolated_AP = ImageDraw.Draw(isolated_AP)
