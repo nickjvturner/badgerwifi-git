@@ -107,9 +107,12 @@ def main():
             annotated_floorplan_destination = Path.cwd() / 'OUTPUT' / 'annotated'
             create_directory(annotated_floorplan_destination)
 
+            # Define assets directory path
+            assets_dir = Path.cwd() / 'assets'
+
             # Import custom icons
-            arrow = Image.open('arrow.png')
-            spot = Image.open('spot.png')
+            arrow = Image.open(assets_dir / 'arrow.png')
+            spot = Image.open(assets_dir / 'spot.png')
 
             # Resize icons if necessary (default size is 350x350 px)
             icon_resize = 200
@@ -158,7 +161,7 @@ def main():
                     # save blank copy
                     shutil.copy((Path(project_name) / ('image-' + floor_id)), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
 
-                # Create an ImageDraw object
+                # Create ImageDraw object
                 draw_all_APs = ImageDraw.Draw(all_APs)
 
                 for ap in accessPoints['accessPoints']:
@@ -181,9 +184,6 @@ def main():
                         angle = apDirectionGetter(ap['id'])
                         print(f'AP has rotational angle of: {angle}')
 
-                        # Offset the text below the AP icon
-                        y_offsetter = arrow.height / 2.5
-
                         plans = (all_APs, isolated_AP)
                         draw_objects = (draw_all_APs, draw_isolated_AP)
 
@@ -192,7 +192,6 @@ def main():
 
                             # Define the centre point of the rotated icon
                             rotated_arrow_centre_point = (rotated_arrow.width // 2, rotated_arrow.height // 2)
-                            # print(rotated_arrow_centre_point)
 
                             # Calculate the top-left corner of the icon based on the center point and x, y
                             top_left = (int(x) - rotated_arrow_centre_point[0], int(y) - rotated_arrow_centre_point[1])
@@ -217,10 +216,13 @@ def main():
                                 # Paste the spot onto the floorplan at the calculated location
                                 plan.paste(spot, top_left, mask=spot)
 
+                            # Offset the text below the AP icon
+                            y_offsetter = arrow.height / 2.5
+
                         # Define text
                         text = ap['name']
 
-                        # Calculate the height and width of the text
+                        # Calculate the width and height of the text
                         text_box = draw_all_APs.textbbox((0, 0, 1000, 1000), text, font=font, spacing=4,
                                                  align="center")
 
@@ -230,8 +232,10 @@ def main():
                         # Establish coordinates for the rounded rectangle
                         x1 = x - (text_width / 2) - offset
                         y1 = y + y_offsetter - (text_height / 2) - offset
+
                         x2 = x + (text_width / 2) + offset
                         y2 = y + y_offsetter + (text_height / 2) + offset
+
                         r = (y2 - y1) / 3
 
                         for draw_object in draw_objects:

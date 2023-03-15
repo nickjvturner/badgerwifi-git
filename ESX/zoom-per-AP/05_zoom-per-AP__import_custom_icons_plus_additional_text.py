@@ -120,9 +120,12 @@ def main():
             annotated_floorplan_destination = Path.cwd() / 'OUTPUT' / 'annotated'
             create_directory(annotated_floorplan_destination)
 
+            # Define assets directory path
+            assets_dir = Path.cwd() / 'assets'
+
             # Import custom icons
-            arrow = Image.open('arrow.png')
-            spot = Image.open('spot.png')
+            arrow = Image.open(assets_dir / 'arrow.png')
+            spot = Image.open(assets_dir / 'spot.png')
 
             # Resize icons if necessary (default size is 350x350 px)
             icon_resize = 200
@@ -130,12 +133,18 @@ def main():
             arrow = arrow.resize((icon_resize, icon_resize))
             spot = spot.resize((icon_resize, icon_resize))
 
-            # Define the centre point of the icon
-            arrow_centre_point = (arrow.width // 2, arrow.height // 2)
-
-            # PIL Parameters
+            ### PIL Parameters ###
             crop_size = 1200
+
+            # gap between text and box edge
             offset = 15
+
+            # gap between cropped image edge and rounded rectangle
+            edge_buffer = 80
+
+            # degrees either side of 180 that text should get additional offset
+            deviation = 35
+
 
             # Define text, font and size
             if platform.system() == "Windows":
@@ -145,14 +154,52 @@ def main():
                 font = ImageFont.truetype("Menlo.ttc", 30)
 
             for floor in floorPlans['floorPlans']:
-                # Extract floorplans
-                shutil.copy((Path(project_name) / ('image-' + floor['imageId'])), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
-                shutil.copy((Path(project_name) / ('image-' + floor['imageId'])), floor['imageId'])
+                # Check if floorplan source was .dwg, by checking if bitmapImageId exists
+                try:
+                    floor_id = floor['bitmapImageId']
+
+                except Exception as e:
+                    floor_id = floor['imageId']
+
+                # Extract floorplan
+                shutil.copy((Path(project_name) / ('image-' + floor_id)), floor_id)
 
                 # Open the floorplan to be used for all AP placement
-                all_APs = Image.open(floor['imageId'])
+                all_APs = Image.open(floor_id)
 
-                # Create an ImageDraw object
+                # Check if the floorplan has been cropped within Ekahau?
+                crop_bitmap = (floor['cropMinX'], floor['cropMinY'], floor['cropMaxX'], floor['cropMaxY'])
+
+                if crop_bitmap[0] != 0.0 or crop_bitmap[1] != 0.0:
+
+                    # Calculate scaling ratio
+                    scaling_ratio = all_APs.width / floor['width']
+
+                    # Calculate x,y coordinates of the crop within Ekahau
+                    crop_bitmap = (crop_bitmap[0] * scaling_ratio,
+                                   crop_bitmap[1] * scaling_ratio,
+                                   crop_bitmap[2] * scaling_ratio,
+                                   crop_bitmap[3] * scaling_ratio)
+
+                    # set boolean value
+                    map_cropped_within_Ekahau = True
+
+                    # save a blank copy of the cropped floorplan
+                    cropped_blank_map = all_APs.copy()
+                    cropped_blank_map = cropped_blank_map.crop(crop_bitmap)
+                    cropped_blank_map.save(Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
+
+                else:
+                    # There is no crop
+                    scaling_ratio = 1
+
+                    # set boolean value
+                    map_cropped_within_Ekahau = False
+
+                    # save a blank copy of the floorplan
+                    shutil.copy((Path(project_name) / ('image-' + floor_id)), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
+
+                # Create ImageDraw object for all APs map
                 draw_all_APs = ImageDraw.Draw(all_APs)
 
                 for ap in sorted(accessPoints['accessPoints'], key=lambda i: i['name']):
@@ -161,21 +208,22 @@ def main():
                     if ap['location']['floorPlanId'] == floor['id']:
 
                         # establish x and y
-                        x, y = (ap['location']['coord']['x'], ap['location']['coord']['y'])
+                        x, y = (ap['location']['coord']['x'] * scaling_ratio, ap['location']['coord']['y'] * scaling_ratio)
 
                         print(
                             f"{nl}[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] "
                             f"has coordinates {x}, {y}")
 
                         # Open the floorplan to be used for isolated AP image
-                        isolated_AP = Image.open(floor['imageId'])
+                        isolated_AP = Image.open(floor_id)
 
-                        # Create ImageDraw object
+                        # Create ImageDraw object for isolated AP image
                         draw_isolated_AP = ImageDraw.Draw(isolated_AP)
 
                         angle = simulatedRadioDict[ap['id']]['antennaDirection']
                         print(f'AP has rotational angle of: {angle}')
 
+                        # set simulatedRadio variables
                         antennaTilt = simulatedRadioDict[ap['id']]['antennaTilt']
                         antennaMounting = simulatedRadioDict[ap['id']]['antennaMounting']
                         antennaHeight = simulatedRadioDict[ap['id']]['antennaHeight']
@@ -186,7 +234,7 @@ def main():
                         y_offsetter = arrow.height / 2.5
 
                         if angle != 0.0:
-                            rotated_arrow = arrow.rotate(angle, expand=True)
+                            rotated_arrow = arrow.rotate(-angle, expand=True)
 
                             # Define the centre point of the rotated icon
                             rotated_arrow_centre_point = (rotated_arrow.width // 2, rotated_arrow.height // 2)
@@ -194,18 +242,20 @@ def main():
                             # Calculate the top-left corner of the icon based on the center point and x, y
                             top_left = (int(x) - rotated_arrow_centre_point[0], int(y) - rotated_arrow_centre_point[1])
 
+                            # draw the rotated arrow onto the floorplan
                             for plan in plans:
                                 plan.paste(rotated_arrow, top_left, mask=rotated_arrow)
 
-                            deviation = 30
-
                             if (180 - deviation) < angle < (180 + deviation):
                                 # Override y_offsetter the text below the AP icon
-                                y_offsetter = arrow.height / 1.9
+                                y_offsetter = arrow.height / 2
 
                         else:
+                            # Define the centre point of the spot
+                            spot_centre_point = (spot.width // 2, spot.height // 2)
+
                             # Calculate the top-left corner of the icon based on the center point and x, y
-                            top_left = (int(x) - arrow_centre_point[0], int(y) - arrow_centre_point[1])
+                            top_left = (int(x) - spot_centre_point[0], int(y) - spot_centre_point[1])
 
                             for plan in plans:
                                 # Paste the arrow onto the floorplan at the calculated location
@@ -217,10 +267,10 @@ def main():
                             f"AP Vendor: {ap['vendor']}{nl}"
                             f"AP Model: {ap['model']}{nl}"
                             f"AP Mount: {antennaMounting}{nl}"
-                            f"AP Height: {antennaHeight}{nl}"
+                            f"AP Height: {antennaHeight:.1f}{nl}"
                             f"Antenna Tilt: {antennaTilt}")
 
-                        # Calculate the height and width of the text
+                        # Calculate the width and height of the text
                         text_width, text_height = text_width_and_height_getter(ap_info)
 
                         # Calculate the crop box for the new image
@@ -229,12 +279,10 @@ def main():
                         # Crop the image
                         cropped_image = isolated_AP.crop(crop_box)
 
+                        # create ImageDraw object for isolated AP
                         draw_isolated_AP = ImageDraw.Draw(cropped_image)
 
                         # Establish coordinates for the ap_info rounded rectangle
-                        # Keep ap_info box away from the edges of the cropped AP image
-                        edge_buffer = 100
-
                         x1 = crop_size - edge_buffer - text_width - (offset * 2)
                         y1 = edge_buffer - (offset * 2)
 
@@ -249,33 +297,36 @@ def main():
 
                         # draw the ap_info text
                         draw_isolated_AP.text(
-                            (crop_size - 100 - (text_width / 2), 100 + text_height / 2 - 5),
+                            (crop_size - edge_buffer - (text_width / 2), edge_buffer + (text_height / 2) - 5),
                             ap_info, anchor='mm', fill='black', font=font)
 
                         # Save the cropped image with a new filename
                         cropped_image.save(Path(zoomed_AP_destination / (ap['name'] + '-zoomed')).with_suffix('.png'))
 
-                        # Handle AP Names drawn onto overview maps
-                        ap_name = ap['name']
-
                         # Calculate the height and width of the text
-                        text_width, text_height = text_width_and_height_getter(ap_name)
+                        text_width, text_height = text_width_and_height_getter(ap['name'])
 
                         # Establish coordinates for the rounded rectangle
                         x1 = x - (text_width / 2) - offset
                         y1 = y + y_offsetter - (text_height / 2) - offset
+
                         x2 = x + (text_width / 2) + offset
                         y2 = y + y_offsetter + (text_height / 2) + offset
+
                         r = (y2 - y1) / 3
 
-                        # draw the rounded rectangle
+                        # draw the AP Name rounded rectangle
                         draw_all_APs.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
 
-                        # draw the text
-                        draw_all_APs.text((x, y + y_offsetter + 2), ap_name, anchor='mm', fill='black', font=font)
+                        # draw the AP Name
+                        draw_all_APs.text((x, y + y_offsetter + 2), ap['name'], anchor='mm', fill='black', font=font)
 
                 # Remove raw floorplan source files
-                os.remove(floor['imageId'])
+                os.remove(floor_id)
+
+                # If map was cropped within Ekahau, crop the all_AP map
+                if map_cropped_within_Ekahau:
+                    all_APs = all_APs.crop(crop_bitmap)
 
                 # Save the modified image
                 all_APs.save(Path(annotated_floorplan_destination / floor['name']).with_suffix('.png'))
