@@ -129,18 +129,34 @@ def main():
                 font = ImageFont.truetype("Menlo.ttc", 30)
 
             for floor in floorPlans['floorPlans']:
-                # If the floorplan source file was .dwg we need to reference the bitmapImageId instead of imageId plantemp floor Id
+                # If the floorplan source file was .dwg we need to reference the bitmapImageId instead of imageId
                 try:
                     floor_id = floor['bitmapImageId']
                 except Exception as e:
                     floor_id = floor['imageId']
 
                 # Extract floorplans
-                shutil.copy((Path(project_name) / ('image-' + floor_id)), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
                 shutil.copy((Path(project_name) / ('image-' + floor_id)), floor_id)
 
                 # Open the floorplan to be used for all AP placement
                 all_APs = Image.open(floor_id)
+
+                # is the floorplan cropped?
+                crop_bitmap = (floor['cropMinX'], floor['cropMinY'], floor['cropMaxX'], floor['cropMaxY'])
+
+                if crop_bitmap[0] != 0.0 or crop_bitmap[1] != 0.0:
+                    scaling_ratio = all_APs.width / floor['width']
+                    crop_bitmap = (crop_bitmap[0] * scaling_ratio, crop_bitmap[1] * scaling_ratio, crop_bitmap[2] * scaling_ratio, crop_bitmap[3] * scaling_ratio)
+                    map_cropped_within_Ekahau = True
+                    cropped_blank_map = all_APs.copy()
+                    cropped_blank_map = cropped_blank_map.crop(crop_bitmap)
+                    cropped_blank_map.save(Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
+
+                else:
+                    scaling_ratio = 1
+                    map_cropped_within_Ekahau = False
+                    # save blank copy
+                    shutil.copy((Path(project_name) / ('image-' + floor_id)), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
 
                 # Create an ImageDraw object
                 draw_all_APs = ImageDraw.Draw(all_APs)
@@ -150,7 +166,7 @@ def main():
                     if ap['location']['floorPlanId'] == floor['id']:
 
                         # establish x and y
-                        x, y = (ap['location']['coord']['x'], ap['location']['coord']['y'])
+                        x, y = (ap['location']['coord']['x'] * scaling_ratio, ap['location']['coord']['y'] * scaling_ratio)
 
                         print(
                             f"{nl}[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] "
@@ -172,10 +188,11 @@ def main():
                         draw_objects = (draw_all_APs, draw_isolated_AP)
 
                         if angle != 0.0:
-                            rotated_arrow = arrow.rotate(angle, expand=True)
+                            rotated_arrow = arrow.rotate(-angle, expand=True)
 
                             # Define the centre point of the rotated icon
                             rotated_arrow_centre_point = (rotated_arrow.width // 2, rotated_arrow.height // 2)
+                            # print(rotated_arrow_centre_point)
 
                             # Calculate the top-left corner of the icon based on the center point and x, y
                             top_left = (int(x) - rotated_arrow_centre_point[0], int(y) - rotated_arrow_centre_point[1])
@@ -190,14 +207,14 @@ def main():
                                 plan.paste(rotated_arrow, top_left, mask=rotated_arrow)
 
                         else:
-                            # Define the cenre point of the icon
+                            # Define the centre point of the icon
                             arrow_centre_point = (arrow.width // 2, arrow.height // 2)
 
                             # Calculate the top-left corner of the icon based on the center point and x, y
                             top_left = (int(x) - arrow_centre_point[0], int(y) - arrow_centre_point[1])
 
                             for plan in plans:
-                                # Paste the arrow onto the floorplan at the calculated location
+                                # Paste the spot onto the floorplan at the calculated location
                                 plan.paste(spot, top_left, mask=spot)
 
                         # Define text
@@ -237,8 +254,12 @@ def main():
                 # Remove raw floorplan source files
                 os.remove(floor_id)
 
+                # If map was cropped within Ekahau, crop the all_AP map
+                if map_cropped_within_Ekahau:
+                    all_APs = all_APs.crop(crop_bitmap)
+
                 # Save the modified image
-                all_APs.save(Path(annotated_floorplan_destination / floor_id).with_suffix('.png'))
+                all_APs.save(Path(annotated_floorplan_destination / floor['name']).with_suffix('.png'))
 
             try:
                 shutil.rmtree(project_name)
