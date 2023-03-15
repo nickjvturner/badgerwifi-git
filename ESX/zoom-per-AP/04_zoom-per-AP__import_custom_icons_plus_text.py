@@ -129,12 +129,18 @@ def main():
                 font = ImageFont.truetype("Menlo.ttc", 30)
 
             for floor in floorPlans['floorPlans']:
+                # temp floor Id
+                try:
+                    floor_id = floor['bitmapImageId']
+                except Exception as e:
+                    floor_id = floor['imageId']
+
                 # Extract floorplans
-                shutil.copy((Path(project_name) / ('image-' + floor['imageId'])), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
-                shutil.copy((Path(project_name) / ('image-' + floor['imageId'])), floor['imageId'])
+                shutil.copy((Path(project_name) / ('image-' + floor_id)), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
+                shutil.copy((Path(project_name) / ('image-' + floor_id)), floor_id)
 
                 # Open the floorplan to be used for all AP placement
-                all_APs = Image.open(floor['imageId'])
+                all_APs = Image.open(floor_id)
 
                 # Create an ImageDraw object
                 draw_all_APs = ImageDraw.Draw(all_APs)
