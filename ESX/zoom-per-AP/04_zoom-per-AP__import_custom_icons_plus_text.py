@@ -235,10 +235,10 @@ def main():
                         cropped_image.save(Path(zoomed_AP_destination / (ap['name'] + '-zoomed')).with_suffix('.png'))
 
                 # Remove raw floorplan source files
-                os.remove(floor['imageId'])
+                os.remove(floor_id)
 
                 # Save the modified image
-                all_APs.save(Path(annotated_floorplan_destination / floor['name']).with_suffix('.png'))
+                all_APs.save(Path(annotated_floorplan_destination / floor_id).with_suffix('.png'))
 
             try:
                 shutil.rmtree(project_name)
