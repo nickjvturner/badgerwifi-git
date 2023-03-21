@@ -104,7 +104,7 @@ def main():
             print('-' * len(file.stem))
 
             for key, value in sorted(simple_BoM.items()):
-                print(f'{key} {value}')
+                print(f'{key}, {value}')
             print(f'{nl}')
 
 

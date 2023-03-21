@@ -98,7 +98,10 @@ def main():
                 sortTagKey = 'group'
 
                 # Get the unique Id that corresponds with this key
-                sortTagUniqueId = tagKeysDict[sortTagKey]
+                try:
+                    sortTagUniqueId = tagKeysDict[sortTagKey]
+                except Exception:
+                    sortTagUniqueId = ''
 
                 # if tagId list is not empty, check if the AP has any tags?
                 if tagsList:
@@ -123,9 +126,10 @@ def main():
             # specified tag:value(filtered within sortTagValueGetter function)
             # x coordinate (this numbers the APs from left to right)
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
-                                             key=lambda i: (floorPlanGetter(i['location']['floorPlanId']), i['model'],
+                                             key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
+                                                            i['model'],
                                                             sortTagValueGetter(i['tags']),
-                                                            i['location']['coord']['x']))
+                                                            i['location']['coord']['y']))
 
             apSeqNum = 1
 
