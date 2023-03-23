@@ -22,23 +22,6 @@ from pprint import pprint
 def main():
     nl = '\n'
 
-    def antennaIdentifier(ap):
-        if 'model' in ap:
-            if ' +  ' in ap['model']:
-                apmodel_split_antenna = (ap['model']).split(' +  ')
-                for entry in apmodel_split_antenna:
-                    return ap_model_list
-
-            elif ap['model'] == '':
-                return 'measured AP, model unavailable, vendor: ' + ap['vendor']
-
-            else:
-                return ap['model']
-
-        else:
-            # print(ap)
-            ap_model_list.append(f"measured AP, model & vendor information available")
-
     # Get filename and current working directory
     print(f'{nl}{Path(__file__).name}')
     print(f'working_directory: {Path.cwd()}{nl}')
@@ -97,6 +80,8 @@ def main():
                     # print(x, y)
                     simulatedRadioDict[radio['accessPointId']][x] = y
 
+            pprint(simulatedRadioDict)
+
             try:
             # Remove temporary directory containing unzipped project file
                 shutil.rmtree(project_name)
@@ -105,9 +90,14 @@ def main():
 
             print(f'{nl}{file.stem}')
 
+            ap_model_list = []
+
+            version = '1.2'
+            output_filename = f'{file.stem} - BoM v{version}.xlsx'
+
             # Create an XLSX file
-            with pd.ExcelWriter(file.stem + '.xlsx') as writer:
-                pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]}).to_excel(writer, sheet_name='Sheet1', index=False)
+            with pd.ExcelWriter(output_filename) as writer:
+                pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]}).to_excel(writer, sheet_name=file.stem, index=False)
 
             for floor in sorted(floorPlans['floorPlans'], key=lambda i: i['name']):
 
@@ -134,20 +124,53 @@ def main():
                         print(f"{ap['name']}, {ap['model']}, {antennaMounting}, {antennaHeight}, {antennaTilt}")
                         accessPointXLSX.append([f"{ap['name']}", f"{ap['model']}", f"{antennaMounting}", f"{antennaHeight}", f"{antennaTilt}"])
 
-                        print(accessPointXLSX)
+                        # print(accessPointXLSX)
 
                         # create a pandas DataFrame
                         df = pd.DataFrame(accessPointXLSX, columns=['AP Name', 'Model', 'Mount', 'AP Height', 'Antenna Tilt'])
 
+                        if 'model' in ap:
+                            if ' +  ' in ap['model']:
+                                apmodel_split_antenna = (ap['model']).split(' +  ')
+                                for entry in apmodel_split_antenna:
+                                    ap_model_list.append(entry)
+
+                            elif ap['model'] == '':
+                                ap_model_list.append('measured AP, model unavailable, vendor: ' + ap['vendor'])
+
+                            else:
+                                ap_model_list.append(ap['model'])
+
+                        else:
+                            # print(ap)
+                            ap_model_list.append(f"measured AP, model & vendor information available")
+
                     # Append data
-                    with pd.ExcelWriter(file.stem + '.xlsx', mode='a', if_sheet_exists='replace') as writer:
+                    with pd.ExcelWriter(output_filename, mode='a', if_sheet_exists='replace') as writer:
                         df.to_excel(writer, index=False, sheet_name=floor['name'])
 
+            simple_BoM = Counter(ap_model_list)
 
-                    # df.to_excel(file.stem + '.xlsx', index=False, sheet_name=floor['name'])
+            summary_XLSX = []
 
-                print(f'{nl}')
+            # print(simple_BoM)
+            print(f'{nl}')
+            print(f'{file.stem}')
+            print('-' * len(file.stem))
+            summary_XLSX.append([f'{file.stem}', ''])
+            summary_XLSX.append([f'{"--" * len(file.stem)}', ''])
 
+            for key, value in sorted(simple_BoM.items()):
+                print(f'{key}, {value}')
+                summary_XLSX.append([f'{key}', f'{value}'])
+            print(f'{nl}')
+
+            # create a pandas DataFrame
+            summary_df = pd.DataFrame(summary_XLSX, columns=['Equipment', 'Count'])
+
+            # Overwrite Initial sheet data
+            with pd.ExcelWriter(output_filename, mode='a', if_sheet_exists='replace') as writer:
+                summary_df.to_excel(writer, index=False, sheet_name=file.stem)
 
 if __name__ == "__main__":
     start_time = time.time()

@@ -129,7 +129,7 @@ def main():
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
                                                             i['model'],
                                                             sortTagValueGetter(i['tags']),
-                                                            i['location']['coord']['y']))
+                                                            i['location']['coord']['x']))
 
             apSeqNum = 1
 
