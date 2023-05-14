@@ -25,26 +25,6 @@ def create_directory(new_dir):
     else:
         return f'Directory {new_dir} already exists'
 
-
-def text_width_and_height_getter(text):
-    # Create a working space image and draw object
-    working_space = Image.new("RGB", (500, 500), color="white")
-    draw = ImageDraw.Draw(working_space)
-
-    # Draw the text onto the image and get its bounding box
-    text_box = draw.textbbox((0, 0), text, font=font, spacing=4, align="center")
-
-    # Print the width and height of the bounding box
-    width = text_box[2] - text_box[0]
-    height = text_box[3] - text_box[1]
-
-    return width, height
-
-
-def floorPlanGetter(floorPlanId):
-    # print(floorPlansDict.get(floorPlanId))
-    return floorPlansDict.get(floorPlanId)
-
 def setFont():
     # Define text, font and size
     if platform.system() == "Windows":
@@ -53,7 +33,73 @@ def setFont():
     else:
         return ImageFont.truetype("Menlo.ttc", 30)
 
+def vectorSourceCheck(floor):
+    # Check if floorplan source was .dwg, by checking if bitmapImageId exists
+    try:
+        print(f'bitmapImageId detected, floor plan source probably vector')
+        return floor['bitmapImageId']
+
+    except Exception as e:
+        return floor['imageId']
+
 def main():
+    def floorPlanGetter(floorPlanId):
+        # print(floorPlansDict.get(floorPlanId))
+        return floorPlansDict.get(floorPlanId)
+
+    def text_width_and_height_getter(text):
+        # Create a working space image and draw object
+        working_space = Image.new("RGB", (500, 500), color="white")
+        draw = ImageDraw.Draw(working_space)
+
+        # Draw the text onto the image and get its bounding box
+        text_box = draw.textbbox((0, 0), text, font=font, spacing=4, align="center")
+
+        # Print the width and height of the bounding box
+        width = text_box[2] - text_box[0]
+        height = text_box[3] - text_box[1]
+
+        return width, height
+
+    def cropAssesment():
+        # Check if the floorplan has been cropped within Ekahau?
+        crop_bitmap = (floor['cropMinX'], floor['cropMinY'], floor['cropMaxX'], floor['cropMaxY'])
+
+        if crop_bitmap[0] != 0.0 or crop_bitmap[1] != 0.0:
+
+            # Calculate scaling ratio
+            scaling_ratio = all_APs.width / floor['width']
+
+            # Calculate x,y coordinates of the crop within Ekahau
+            crop_bitmap = (crop_bitmap[0] * scaling_ratio,
+                           crop_bitmap[1] * scaling_ratio,
+                           crop_bitmap[2] * scaling_ratio,
+                           crop_bitmap[3] * scaling_ratio)
+
+            # set boolean value
+            map_cropped_within_Ekahau = True
+
+            # save a blank copy of the cropped floorplan
+            cropped_blank_map = all_APs.copy()
+            cropped_blank_map = cropped_blank_map.crop(crop_bitmap)
+            cropped_blank_map.save(Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
+
+            return map_cropped_within_Ekahau, scaling_ratio, crop_bitmap
+
+        else:
+            # There is no crop
+            scaling_ratio = 1
+
+            # set boolean value
+            map_cropped_within_Ekahau = False
+
+            # save a blank copy of the floorplan
+            shutil.copy((Path(project_name) / ('image-' + floor_id)),
+                        Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
+
+            return map_cropped_within_Ekahau, scaling_ratio, None
+
+
     # Get filename and current working directory
     print(f'{nl}{Path(__file__).name}')
     print(f'working_directory: {Path.cwd()}{nl}')
@@ -128,6 +174,10 @@ def main():
             annotated_floorplan_destination = Path.cwd() / 'OUTPUT' / 'annotated'
             create_directory(annotated_floorplan_destination)
 
+            # Create subdirectory for temporary files
+            tempfile_destination = Path.cwd() / 'OUTPUT' / 'temp'
+            create_directory(tempfile_destination)
+
             # Define assets directory path
             assets_dir = Path.cwd() / 'assets'
 
@@ -150,50 +200,15 @@ def main():
             font = setFont()
 
             for floor in floorPlans['floorPlans']:
-                # Check if floorplan source was .dwg, by checking if bitmapImageId exists
-                try:
-                    floor_id = floor['bitmapImageId']
-
-                except Exception as e:
-                    floor_id = floor['imageId']
+                floor_id = vectorSourceCheck(floor)
 
                 # Extract floorplan
-                shutil.copy((Path(project_name) / ('image-' + floor_id)), floor_id)
+                shutil.copy((Path(project_name) / ('image-' + floor_id)), tempfile_destination / floor_id)
 
                 # Open the floorplan to be used for all AP placement
-                all_APs = Image.open(floor_id)
+                all_APs = Image.open(tempfile_destination / floor_id)
 
-                # Check if the floorplan has been cropped within Ekahau?
-                crop_bitmap = (floor['cropMinX'], floor['cropMinY'], floor['cropMaxX'], floor['cropMaxY'])
-
-                if crop_bitmap[0] != 0.0 or crop_bitmap[1] != 0.0:
-
-                    # Calculate scaling ratio
-                    scaling_ratio = all_APs.width / floor['width']
-
-                    # Calculate x,y coordinates of the crop within Ekahau
-                    crop_bitmap = (crop_bitmap[0] * scaling_ratio,
-                                   crop_bitmap[1] * scaling_ratio,
-                                   crop_bitmap[2] * scaling_ratio,
-                                   crop_bitmap[3] * scaling_ratio)
-
-                    # set boolean value
-                    map_cropped_within_Ekahau = True
-
-                    # save a blank copy of the cropped floorplan
-                    cropped_blank_map = all_APs.copy()
-                    cropped_blank_map = cropped_blank_map.crop(crop_bitmap)
-                    cropped_blank_map.save(Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
-
-                else:
-                    # There is no crop
-                    scaling_ratio = 1
-
-                    # set boolean value
-                    map_cropped_within_Ekahau = False
-
-                    # save a blank copy of the floorplan
-                    shutil.copy((Path(project_name) / ('image-' + floor_id)), Path(plain_floorplan_destination / floor['name']).with_suffix('.png'))
+                map_cropped_within_Ekahau, scaling_ratio, crop_bitmap = cropAssesment()
 
                 # Create ImageDraw object for all APs map
                 draw_all_APs = ImageDraw.Draw(all_APs)
@@ -203,15 +218,20 @@ def main():
                     # print(ap['location']['floorPlanId'])
                     if ap['location']['floorPlanId'] == floor['id']:
 
-                        # establish x and y
-                        x, y = (ap['location']['coord']['x'] * scaling_ratio, ap['location']['coord']['y'] * scaling_ratio)
+                        try:
+                            # establish x and y
+                            x, y = (ap['location']['coord']['x'] * scaling_ratio, ap['location']['coord']['y'] * scaling_ratio)
 
-                        print(
-                            f"{nl}[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] "
-                            f"has coordinates {x}, {y}")
+                            print(
+                                f"{nl}[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] "
+                                f"has coordinates {x}, {y}")
+
+                        except Exception as e:
+                            print(f"no x, y coordinates found for {ap['name']}, this AP is not place on a map... skipping AP")
+                            continue
 
                         # Open the floorplan to be used for isolated AP image
-                        isolated_AP = Image.open(floor_id)
+                        isolated_AP = Image.open(tempfile_destination / floor_id)
 
                         # Create ImageDraw object for isolated AP image
                         draw_isolated_AP = ImageDraw.Draw(isolated_AP)
@@ -317,9 +337,6 @@ def main():
                         # draw the AP Name
                         draw_all_APs.text((x, y + y_offsetter + 2), ap['name'], anchor='mm', fill='black', font=font)
 
-                # Remove raw floorplan source files
-                os.remove(floor_id)
-
                 # If map was cropped within Ekahau, crop the all_AP map
                 if map_cropped_within_Ekahau:
                     all_APs = all_APs.crop(crop_bitmap)
@@ -329,6 +346,7 @@ def main():
 
             try:
                 shutil.rmtree(project_name)
+                shutil.rmtree(tempfile_destination)
                 print(f'Temporary project contents directory removed{nl}')
             except Exception as e:
                 print(e)
