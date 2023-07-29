@@ -104,7 +104,7 @@ def main():
                 missing_TagKey = 'Z'
 
                 # Define the key to be used for sorting
-                sortTagKey = 'Unit'
+                sortTagKey = 'UNIT'
 
                 # Get the unique Id that corresponds with this key
                 sortTagUniqueId = tagKeysDict[sortTagKey]
