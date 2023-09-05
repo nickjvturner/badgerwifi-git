@@ -89,7 +89,7 @@ def main():
                 # print(floorPlansDict.get(floorPlanId))
                 return floorPlansDict.get(floorPlanId)
 
-            def sortTagValueGetter(tagsList):
+            def sortTagValueGetter(tagsList, sortTagKey):
                 # function receives a list containing a dictionary of unique tag ids and corresponding values
                 # print(tagId)
 
@@ -102,9 +102,6 @@ def main():
                 # 'Z' - group and number APs without tags after APs with tags
 
                 missing_TagKey = 'Z'
-
-                # Define the key to be used for sorting
-                sortTagKey = 'UNIT'
 
                 # Get the unique Id that corresponds with this key
                 sortTagUniqueId = tagKeysDict[sortTagKey]
@@ -135,22 +132,24 @@ def main():
             # x coordinate (this numbers the APs from left to right)
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
                                              key=lambda i: (
-                                             floorPlanGetter(i['location']['floorPlanId']), sortTagValueGetter(i['tags']),
+                                             sortTagValueGetter(i['tags'],'UNIT'),
+                                             sortTagValueGetter(i['tags'], 'building-group'),
+                                             floorPlanGetter(i['location']['floorPlanId']),
                                              i['location']['coord']['x']))
 
             # Use this variable to detect when the unit changes
             unit_grouping = 'x'
 
             for ap in accessPointsLIST_SORTED:
-                if sortTagValueGetter(ap['tags']) != unit_grouping:
+                if sortTagValueGetter(ap['tags'], 'UNIT') != unit_grouping:
                     apSeqNum = 1
-                    print(f"{nl}** Unit:{sortTagValueGetter(ap['tags'])}, Reset AP numbering **")
+                    print(f"{nl}** Unit:{sortTagValueGetter(ap['tags'], 'UNIT')}, Reset AP numbering **")
 
                 # Define new AP naming pattern
-                new_AP_name = f"{sortTagValueGetter(ap['tags'])}-AP{apSeqNum:03}"
-                unit_grouping = sortTagValueGetter(ap['tags'])
+                new_AP_name = f"{sortTagValueGetter(ap['tags'], 'UNIT')}-AP{apSeqNum:03}"
+                unit_grouping = sortTagValueGetter(ap['tags'], 'UNIT')
 
-                print(f"[[ {ap['name']} [{ap['model']}]] from map: {floorPlanGetter(ap['location']['floorPlanId'])} | sorting tag: {sortTagValueGetter(ap['tags'])} ] renamed to {new_AP_name}")
+                print(f"[[ {ap['name']} [{ap['model']}]] from map: {floorPlanGetter(ap['location']['floorPlanId'])} | sorting tag: {sortTagValueGetter(ap['tags'], 'UNIT')} ] renamed to {new_AP_name}")
 
                 ap['name'] = new_AP_name
                 apSeqNum += 1
