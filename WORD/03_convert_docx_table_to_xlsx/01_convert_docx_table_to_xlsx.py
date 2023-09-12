@@ -14,6 +14,11 @@ from pathlib import Path
 nl = '\n'
 
 try:
+	from docx import Document
+except ImportError as e:
+	print(f'{e}{nl}try installing docx2pdf module{nl}"pip install python-docx"')
+
+try:
 	from openpyxl import Workbook
 	from openpyxl.styles import Font
 	from openpyxl.utils import get_column_letter
@@ -85,8 +90,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
-
-
-
-
