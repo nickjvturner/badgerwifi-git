@@ -149,7 +149,7 @@ def main():
                 new_AP_name = f"{sortTagValueGetter(ap['tags'], 'UNIT')}-AP{apSeqNum:03}"
                 unit_grouping = sortTagValueGetter(ap['tags'], 'UNIT')
 
-                print(f"[[ {ap['name']} [{ap['model']}]] from map: {floorPlanGetter(ap['location']['floorPlanId'])} | sorting tag: {sortTagValueGetter(ap['tags'], 'UNIT')} ] renamed to {new_AP_name}")
+                print(f"[[ {ap['name']} [{ap['model']} ]] from map: {floorPlanGetter(ap['location']['floorPlanId'])} | sorting tag: {sortTagValueGetter(ap['tags'], 'UNIT')} ] renamed to {new_AP_name}")
 
                 ap['name'] = new_AP_name
                 apSeqNum += 1
@@ -166,12 +166,18 @@ def main():
             # move modified accessPoints.json into unpacked folder OVERWRITING ORIGINAL
             shutil.move('accessPoints.json', Path(project_name) / 'accessPoints.json')
 
-            output_esx = Path(project_name + '_re-zip')
+            output_stem = str(Path(file.stem + '_re-zip'))
+
+            output_zip = output_stem + '.zip'
+            output_esx = output_stem + '.esx'
 
             try:
-                shutil.make_archive(str(output_esx), 'zip', project_name)
-                shutil.move(output_esx.with_suffix('.zip'), output_esx.with_suffix('.esx'))
+                shutil.make_archive(output_stem, 'zip', project_name)
+                shutil.move(output_zip, output_esx)
                 print(f'{nl}Process complete {output_esx} re-bundled{nl}')
+
+                shutil.rmtree(project_name)
+                print(f"Temp folder used to unzip project file, REMOVED, you're welcome")
             except Exception as e:
                 print(e)
 
