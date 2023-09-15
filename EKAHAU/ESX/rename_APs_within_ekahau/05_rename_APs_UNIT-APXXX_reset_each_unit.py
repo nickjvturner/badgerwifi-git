@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
 """
-mangled by Nick Turner (@nickjvturner)
+mangled together by Nick Turner (@nickjvturner@mastodon.social)
 
-This script will rename all your [SIMULATED APs] throughout each floor
-respectful of the Ekahau tag 'Unit' and then numerically from left to right
+This script will rename all your [SIMULATED APs] in order of:
+'UNIT'
+'building-group'
+'floor name'
+'x-axis' (from left to right)
+
 numbering restarts within each unit
 """
 
@@ -138,7 +142,7 @@ def main():
                                              i['location']['coord']['x']))
 
             # Use this variable to detect when the unit changes
-            unit_grouping = 'x'
+            unit_grouping = '_'
 
             for ap in accessPointsLIST_SORTED:
                 if sortTagValueGetter(ap['tags'], 'UNIT') != unit_grouping:
@@ -158,6 +162,8 @@ def main():
             # Convert modified list back into dictionary
             sorted_accessPointsJSON_dict = {'accessPoints': accessPointsLIST_SORTED}
             # print(sorted_accessPointsJSON_dict)
+
+            print('re-bundling modified files back into .esx file... Please wait')
 
             # save the modified dictionary as accessPoints.json
             with open("accessPoints.json", "w") as outfile:
