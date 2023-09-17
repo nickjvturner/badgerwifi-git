@@ -2,35 +2,38 @@
 
 image_search = {
     'AP-MNT-A': {
-        'image': 'MNT-A.png',
+        'image': 'AP-MNT-A.png',
         'height': 23},
     'AP-MNT-B': {
-        'image': 'MNT-B.png',
+        'image': 'AP-MNT-B.png',
         'height': 23},
     'AP-MNT-C': {
-        'image': 'MNT-C.png',
+        'image': 'AP-MNT-C.png',
         'height': 23},
     'AP-MNT-D': {
-        'image': 'MNT-E.png',
+        'image': 'AP-MNT-D.png',
         'height': 23},
     'AP-MNT-E': {
-        'image': 'MNT-E.png',
+        'image': 'AP-MNT-E.png',
         'height': 16},
 
     'H1': {
-        'image': 'MNT-H1.png',
+        'image': 'AP-270-MNT-H1.png',
         'height': 23},
     'H2': {
-        'image': 'MNT-H2.png',
+        'image': 'AP-270-MNT-H2.png',
         'height': 23},
     'H3': {
-        'image': 'MNT-H3.png',
+        'image': 'AP-270-MNT-H3.png',
+        'height': 23},
+    'V1A': {
+        'image': 'AP-OUT-MNT-V1A.png',
         'height': 23},
     'V1': {
-        'image': 'MNT-V1A.png',
+        'image': 'AP-270-MNT-V1.png',
         'height': 23},
     'V2': {
-        'image': 'MNT-V2.png',
+        'image': 'AP-270-MNT-V2.png',
         'height': 23},
 
     '0.0°': {
