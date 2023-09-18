@@ -189,7 +189,7 @@ def main():
                         draw_all_APs.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
 
                         # draw the text
-                        draw_all_APs.text((x, y + y_offsetter + 2), ap_name, anchor='mm', fill='black', font=font)
+                        draw_all_APs.text((x + 1, y + y_offsetter + 1), ap_name, anchor='mm', fill='black', font=font)
 
                 # Remove raw floorplan source files
                 os.remove(floor['imageId'])

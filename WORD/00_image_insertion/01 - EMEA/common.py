@@ -29,9 +29,6 @@ image_search = {
     'V1A': {
         'image': 'AP-OUT-MNT-V1A.png',
         'height': 23},
-    'V1': {
-        'image': 'AP-270-MNT-V1.png',
-        'height': 23},
     'V2': {
         'image': 'AP-270-MNT-V2.png',
         'height': 23},

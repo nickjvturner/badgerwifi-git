@@ -76,14 +76,17 @@ def main():
 		# count image insertions to be conducted
 		for table in document.tables:
 			for row in table.rows:
+				count_image_insertion_point = True
 				for cell in row.cells:
 					for paragraph in cell.paragraphs:
 						if paragraph.text in ['Tilt:', 'Height:']:
-							image_insertion_points -= 1
+							# if the row contains 'Tilt' or 'Height' ignore, skip it
+							count_image_insertion_point = False
 						for key in image_search.keys():
 							if str_prefix + key in paragraph.text:
-								image_insertion_points += 1
-								print('*', image_insertion_points, end='\r')
+								if count_image_insertion_point:
+									image_insertion_points += 1
+									print('*', image_insertion_points, end='\r')
 
 		total_image_insertion_points = int(image_insertion_points)
 
