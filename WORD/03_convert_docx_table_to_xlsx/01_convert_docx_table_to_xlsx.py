@@ -23,7 +23,7 @@ try:
 	from openpyxl.styles import Font
 	from openpyxl.utils import get_column_letter
 except ImportError as e:
-	print(f'{e}{nl}try installing docx2pdf module{nl}"pip install openpyxl"')
+	print(f'{e}{nl}try installing openpyxl module{nl}"pip install openpyxl"')
 
 def main():
 	docx_files = []

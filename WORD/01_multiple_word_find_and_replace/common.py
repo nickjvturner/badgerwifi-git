@@ -8,11 +8,11 @@ text_search = {
     'Aruba ANT-3x3-D608 5GHz': 'Aruba ANT-3x3-D608',
     'Aruba ANT-4x4-D608 5GHz': 'Aruba ANT-4x4-D608',
 
-    'Aruba AP-515 5GHz': 'Integrated',
-    'Aruba AP-565 5GHz': 'Integrated',
-    'Aruba AP-567 5GHz': 'Integrated',
-    'Aruba AP-577 5GHz': 'Integrated',
-    'Aruba AP-655 5GHz': 'Integrated',
+    'Aruba AP-515 5GHz': 'Integrated, Omnidirectional',
+    'Aruba AP-565 5GHz': 'Integrated, Omnidirectional',
+    'Aruba AP-567 5GHz': 'Integrated, Directional',
+    'Aruba AP-577 5GHz': 'Integrated, Directional',
+    'Aruba AP-655 5GHz': 'Integrated, Omnidirectional',
 
     '0.0 dBm': ''
 }

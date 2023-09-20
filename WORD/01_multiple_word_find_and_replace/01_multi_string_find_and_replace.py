@@ -20,7 +20,7 @@ def main():
 	# Get local file with extension .docx
 	for file in sorted(Path.cwd().iterdir()):
 		# ignore files in directory containing output
-		if (file.suffix == '.docx') and (not ('output' in file.stem)):
+		if (file.suffix == '.docx') and (all(char not in file.stem for char in ('$', 'SWAPPED'))):
 			proceed = input(f'Proceed with file: {str(file.name)}? (YES/no)')
 			if proceed == 'no':
 				exit()
