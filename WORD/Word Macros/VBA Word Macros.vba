@@ -47,3 +47,39 @@ End With
 Next pic
 End With
 End Sub
+
+Sub ReplaceAndSave()
+    Dim FindText As String
+    Dim ReplaceText As String
+    Dim SavePath As String
+    Dim i As Integer
+
+    ' Define the list of replacement values
+    Dim ReplacementList As Variant
+    ReplacementList = Array("AAA", "BBB", "CCC", "DDD") ' Add more values as needed
+
+    ' Specify the folder where you want to save the copies
+    SavePath = "/Users/nick/Desktop/" ' Change this to your desired folder path
+
+    FindText = "*UNIT*" ' Set the FindText to the current value in ReplacementList
+
+    ' Loop through the list of replacement values
+    For i = LBound(ReplacementList) To UBound(ReplacementList)
+
+        ReplaceText = ReplacementList(i)
+        ' Perform the find and replace
+        With ActiveDocument.Content.Find
+            .ClearFormatting
+            .Text = FindText
+            .Replacement.Text = ReplaceText
+            .Forward = True
+            .Wrap = wdFindContinue
+            .Execute Replace:=wdReplaceAll
+        End With
+
+        FindText = ReplacementList(i)
+
+        ' Save the document with the current replace text
+        ActiveDocument.SaveAs2 SavePath & ReplaceText & ".docx"
+    Next i
+End Sub

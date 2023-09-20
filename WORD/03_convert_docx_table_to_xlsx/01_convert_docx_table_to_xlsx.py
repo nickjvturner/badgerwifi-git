@@ -52,6 +52,9 @@ def main():
 		wb = Workbook()
 		ws = wb.active
 
+		# Set the sheet name (you can modify this line to set a custom name)
+		ws.title = 'AP Tracker'
+
 		# Initialize row and column counters
 		row_num = 1
 		col_num = 1
