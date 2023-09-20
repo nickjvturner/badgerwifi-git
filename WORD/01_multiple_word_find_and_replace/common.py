@@ -15,4 +15,5 @@ text_search = {
     'Aruba AP-655 5GHz': 'Integrated, Omnidirectional',
 
     '0.0 dBm': ''
+
 }
