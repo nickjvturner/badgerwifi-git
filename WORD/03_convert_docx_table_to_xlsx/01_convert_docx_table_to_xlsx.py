@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Written by Nick Turner (@nickjvturner)
+Written by Nick Turner (@nickjvturner@mastodon.social)
 This script will find 'the' word doc in the same directory as the script
 Convert the contents of 'the' tables into an XLSX file
 
@@ -11,19 +11,14 @@ Latest meaningful update: 2023-09-05
 
 from pathlib import Path
 
+from docx import Document
+
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from openpyxl.utils import get_column_letter
+
 nl = '\n'
 
-try:
-	from docx import Document
-except ImportError as e:
-	print(f'{e}{nl}try installing docx2pdf module{nl}"pip install python-docx"')
-
-try:
-	from openpyxl import Workbook
-	from openpyxl.styles import Font
-	from openpyxl.utils import get_column_letter
-except ImportError as e:
-	print(f'{e}{nl}try installing openpyxl module{nl}"pip install openpyxl"')
 
 def main():
 	docx_files = []
@@ -83,13 +78,14 @@ def main():
 				try:
 					if len(str(cell.value)) > max_length:
 						max_length = len(cell.value)
-				except:
+				except Exception:
 					pass
 			adjusted_width = (max_length + 5)
 			ws.column_dimensions[column_letter].width = adjusted_width
 
 		# Save the Excel workbook
 		wb.save(docx.stem + 'converted_table.xlsx')
+
 
 if __name__ == "__main__":
 	main()

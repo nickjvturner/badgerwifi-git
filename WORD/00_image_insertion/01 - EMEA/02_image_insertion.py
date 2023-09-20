@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-Written by Nick Turner (@nickjvturner)
+Written by Nick Turner (@nickjvturner@mastodon.social)
+
 This script will find 'the' word doc in the same directory as the script
 iterate through all the table cells and replace text strings with
 corresponding images at specified heights.
@@ -11,21 +12,15 @@ Latest meaningful update: 2023-02-14
 """
 
 from pathlib import Path
+import inflect
 import time
+
+from docx import Document
+from docx.shared import Mm
+
 from common import image_search, text_search
 
 nl = '\n'
-
-try:
-	import inflect
-except ImportError as e:
-	print(f'{e}{nl}try installing inflect module{nl}"pip install inflect"')
-
-try:
-	from docx import Document
-	from docx.shared import Mm
-except ImportError as e:
-	print(f'{e}{nl}try installing python-docx module{nl}"pip install python-docx"')
 
 
 def pretty_time_delta(seconds, lang=inflect.engine()):
@@ -70,7 +65,7 @@ def main():
 		# Search terms are prefixed with string 'REPLACE-WITH-IMAGE='
 		str_prefix = 'REPLACE-WITH-IMAGE='
 
-		#Keep track
+		# Keep track
 		image_insertion_points = 0
 
 		# count image insertions to be conducted
@@ -107,7 +102,6 @@ def main():
 								images_inserted += 1
 								message = f"{key} image inserted, with height: {image_search[key]['height']} mm  ({images_inserted}/{total_image_insertion_points})"
 								print(f'{message :>55}{nl}')
-
 
 		text_replacements = []
 

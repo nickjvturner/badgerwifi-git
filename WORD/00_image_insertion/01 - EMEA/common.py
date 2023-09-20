@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 image_search = {
     'AP-MNT-A': {
         'image': 'AP-MNT-A.png',

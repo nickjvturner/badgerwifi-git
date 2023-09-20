@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Written by Nick Turner (@nickjvturner)
+Written by Nick Turner (@nickjvturner@mastodon.social)
 This script will find 'the' word doc in the same directory as the script
-iterate through all the table cells and replace text strings with
-specified replacement strings.
 
-Created December 2022 in response to a throw-away comment by Jerry Olla @jolla
+search through all the table cells and replace text strings from common.py
+after this the table from the docx file will be converted into an xlsx file
 """
 
 from pathlib import Path
@@ -44,7 +43,6 @@ def main():
 									print(key, 'text replaced with', text_search[key])
 									# print(key, text_search[key])
 
-
 			# Create a new Excel workbook
 			wb = Workbook()
 			ws = wb.active
@@ -80,7 +78,7 @@ def main():
 					try:
 						if len(str(cell.value)) > max_length:
 							max_length = len(cell.value)
-					except:
+					except Exception:
 						pass
 				adjusted_width = (max_length + 8)
 				ws.column_dimensions[column_letter].width = adjusted_width
@@ -94,4 +92,3 @@ if __name__ == "__main__":
 	main()
 	run_time = time.time() - start_time
 	print(f'** Time to run: {round(run_time, 2)} seconds **')
-

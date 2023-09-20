@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Written by Nick Turner (@nickjvturner)
+Written by Nick Turner (@nickjvturner@mastodon.social)
 This script will find 'the' word doc in the same directory as the script
 Create an output directory called 'PDF Output'
 
@@ -10,13 +10,10 @@ Latest meaningful update: 2023-08-10
 """
 
 from pathlib import Path
+from docx2pdf import convert
 
 nl = '\n'
 
-try:
-    from docx2pdf import convert
-except ImportError as e:
-	print(f'{e}{nl}try installing docx2pdf module{nl}"pip install docx2pdf"')
 
 def main():
 	docx_files = []
@@ -40,6 +37,7 @@ def main():
 		output_pdf_file = docx.stem + ".pdf"
 
 		convert(docx.name, output_pdf_file)
+
 
 if __name__ == "__main__":
 	main()

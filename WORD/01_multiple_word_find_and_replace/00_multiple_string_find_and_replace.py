@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-Written by Nick Turner (@nickjvturner)
+Written by Nick Turner (@nickjvturner@mastodon.social)
+
 This script will find 'the' word doc in the same directory as the script
 iterate through all the table cells and replace text strings with
 specified replacement strings.
@@ -64,4 +65,3 @@ if __name__ == "__main__":
 	main()
 	run_time = time.time() - start_time
 	print(f'** Time to run: {round(run_time, 2)} seconds **')
-
