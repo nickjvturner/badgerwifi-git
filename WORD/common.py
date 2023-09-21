@@ -17,3 +17,4 @@ text_search = {
     '0.0 dBm': ''
 
 }
+

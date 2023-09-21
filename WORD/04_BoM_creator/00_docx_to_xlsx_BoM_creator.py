@@ -10,12 +10,15 @@ after this the table from the docx file will be converted into an xlsx file
 
 from pathlib import Path
 import time
+import sys
 
 from docx import Document
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
+
+sys.path.append(str(Path.cwd().parent))
 
 from common import text_search
 
