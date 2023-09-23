@@ -25,7 +25,7 @@ cwd = Path.cwd()
 # Iterate through parent directories
 for parent in cwd.parents:
 	# Construct the path to the common_dir.py file in the current parent directory
-	common_path = parent / "common.py"
+	common_path = parent / "text_replacement.py"
 
 	# Check if the common_dir.py file exists
 	if common_path.is_file():

@@ -4,7 +4,7 @@
 Written by Nick Turner (@nickjvturner@mastodon.social)
 This script will find 'the' word doc in the same directory as the script
 
-search through all the table cells and replace text strings from common.py
+search through all the table cells and replace text strings from text_replacement.py
 after this the table from the docx file will be converted into an xlsx file
 """
 
@@ -20,7 +20,7 @@ from openpyxl.utils import get_column_letter
 
 sys.path.append(str(Path.cwd().parent))
 
-from common import text_search
+from common.text_replacement import text_search
 
 
 def main():
