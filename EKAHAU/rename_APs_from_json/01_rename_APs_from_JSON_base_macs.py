@@ -87,7 +87,7 @@ def main():
                                 ap['name'] = new_AP_name
 
                             final_octet_int += 1
-                            final_octet_hex = hex(final_octet_int).lstrip('0x')
+                            final_octet_hex_str = hex(final_octet_int).lstrip('0x')
 
             # Convert modified list back into dictionary
             modified_accessPointsJSON_dict = {'accessPoints': accessPointsLIST}
