@@ -75,7 +75,7 @@ def main():
                         penultimate_octet_str = mac_address[-5:-3]
 
                         final_octet_hex_str = mac_address[-2:]
-                        final_octet_int = int(final_octet_hex, 16)
+                        final_octet_int = int(final_octet_hex_str, 16)
 
                         for i in range(16):
                             ekahau_assigned_AP_name = f"Measured AP-{penultimate_octet_str}:{final_octet_hex_str}"

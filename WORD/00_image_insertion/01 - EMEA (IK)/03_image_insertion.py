@@ -8,15 +8,30 @@ iterate through all the table cells and replace text strings with
 corresponding images at specified heights.
 
 Initially created in December 2022 in response to a throw-away comment by Jerry Olla @jolla
-Latest meaningful update: 2023-02-14
+Latest meaningful update: 2023-10-07
 """
 
 from pathlib import Path
 import inflect
 import time
+import sys
 
 from docx import Document
 from docx.shared import Mm
+
+# Get the current working directory as a Path object
+cwd = Path.cwd()
+
+# Iterate through parent directories
+for parent in cwd.parents:
+	# Construct the path to the common_dir.py file in the current parent directory
+	common_path = parent / "text_replacement.py"
+
+	# Check if the common_dir.py file exists
+	if common_path.is_file():
+		# Convert the path to a string and add the directory to sys.path
+		common_dir = str(parent)
+		sys.path.append(common_dir)
 
 from common import image_search, text_search
 
