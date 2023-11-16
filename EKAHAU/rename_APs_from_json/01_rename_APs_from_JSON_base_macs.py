@@ -55,7 +55,7 @@ def main():
             with open(Path(project_name) / 'accessPoints.json') as json_file:
                 accessPointsJSON = json.load(json_file)
                 json_file.close()
-            # pprint(accessPointsJSON)
+            pprint(accessPointsJSON)
 
             # Convert accessPointsJSON from dictionary to list
             # We do this to make the sorting procedure more simple
@@ -64,6 +64,7 @@ def main():
                 accessPointsLIST.append(ap)
 
             for ap in accessPointsLIST:
+                print(ap['name'])
                 # Iterate through the dictionary items
                 for key, mac_addresses in AP_name_to_BSSIDs.items():
                     # print(f"Key: {key}")
@@ -79,6 +80,7 @@ def main():
 
                         for i in range(16):
                             ekahau_assigned_AP_name = f"Measured AP-{penultimate_octet_str}:{final_octet_hex_str}"
+                            # print(ekahau_assigned_AP_name)
                             if ap['name'] == ekahau_assigned_AP_name:
 
                                 new_AP_name = key
@@ -87,7 +89,10 @@ def main():
                                 ap['name'] = new_AP_name
 
                             final_octet_int += 1
-                            final_octet_hex_str = hex(final_octet_int).lstrip('0x')
+                            final_octet_hex = hex(final_octet_int)[2:]  # Remove '0x' prefix
+
+                            # padding the resulting hex was necessary to capture base macs that ended '00'
+                            final_octet_hex_str = f"{final_octet_hex:0>2}"
 
             # Convert modified list back into dictionary
             modified_accessPointsJSON_dict = {'accessPoints': accessPointsLIST}
