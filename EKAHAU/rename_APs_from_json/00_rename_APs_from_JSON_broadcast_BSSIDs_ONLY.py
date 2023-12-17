@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 """
+Put together by Nick Turner (nickjvturner.com)
+
+script takes input json blob from Aruba Central, attempts to match
+broadcast macaddrs with ekahau assigned AP Names
 
 """
 

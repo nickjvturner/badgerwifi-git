@@ -27,7 +27,7 @@ The script will:
  + compare the last 5x characters of the ekahau assigned AP name with the possible BSSIDs
  + when a match is found replace the ekahau assigned AP name with the actual hostname pulled from Aruba Central
 
-This script considers the last 2x characters of the macaddrs
+This script only considers the last character of the macaddrs when incrementing through the 16 possibilities
 """
 
 import csv
@@ -81,7 +81,7 @@ def main():
             with open(Path(project_name) / 'accessPoints.json') as json_file:
                 accessPointsJSON = json.load(json_file)
                 json_file.close()
-            pprint(accessPointsJSON)
+            # pprint(accessPointsJSON)
 
             # Convert accessPointsJSON from dictionary to list
             # We do this to make the sorting procedure more simple
@@ -89,8 +89,10 @@ def main():
             for ap in accessPointsJSON['accessPoints']:
                 accessPointsLIST.append(ap)
 
+            renamed_APs_counter = 0
+
             for ap in accessPointsLIST:
-                print(ap['name'])
+                # print(ap['name'])
                 # Iterate through the dictionary items
                 for key, mac_addresses in AP_name_to_BSSIDs.items():
                     # print(f"Key: {key}")
@@ -101,11 +103,13 @@ def main():
 
                         penultimate_octet_str = mac_address[-5:-3]
 
-                        final_octet_hex_str = mac_address[-2:]
-                        final_octet_int = int(final_octet_hex_str, 16)
+                        final_octet_penultimate_char_str = mac_address[-2:-1]
+                        final_octet_final_char_str = mac_address[-1:]
+
+                        final_octet_final_char_int = int(final_octet_final_char_str, 16)
 
                         for i in range(16):
-                            ekahau_assigned_AP_name = f"Measured AP-{penultimate_octet_str}:{final_octet_hex_str}"
+                            ekahau_assigned_AP_name = f"Measured AP-{penultimate_octet_str}:{final_octet_penultimate_char_str}{final_octet_final_char_str}"
                             # print(ekahau_assigned_AP_name)
                             if ap['name'] == ekahau_assigned_AP_name:
 
@@ -114,11 +118,14 @@ def main():
 
                                 ap['name'] = new_AP_name
 
-                            final_octet_int += 1
-                            final_octet_hex = hex(final_octet_int)[2:]  # Remove '0x' prefix
+                                renamed_APs_counter += 1
 
-                            # padding the resulting hex was necessary to capture base macs that ended '00'
-                            final_octet_hex_str = f"{final_octet_hex:0>2}"
+                            final_octet_final_char_int += 1
+                            final_octet_final_char_hex = hex(final_octet_final_char_int)[2:]  # Remove '0x' prefix
+
+                            final_octet_final_char_str = str(final_octet_final_char_hex)
+
+            print(f"{renamed_APs_counter} APs renamed")
 
             # Convert modified list back into dictionary
             modified_accessPointsJSON_dict = {'accessPoints': accessPointsLIST}
