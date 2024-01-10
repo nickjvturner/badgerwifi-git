@@ -37,6 +37,9 @@ image_search = {
     'Aruba AP-ANT-45 5GHz 5.5dBi': {
         'image': 'AP-ANT-45.png',
         'height': 18},
+    'Aruba AP-ANT-345 5GHz': {
+        'image': 'AP-ANT-345.png',
+        'height': 18},
 
 
     '0.0°': {
@@ -59,8 +62,14 @@ image_search = {
         'image': 'unknown.png',
         'height': 18},
 
-    'Aruba AP-514 +  Aruba AP-ANT-45': {
+    'Aruba AP-514 +  Aruba AP-ANT-45 5 GHz': {
         'image': 'AP-514.png',
+        'height': 18},
+    'Aruba AP-514 +  Aruba AP-ANT-345 5GHz': {
+        'image': 'AP-514.png',
+        'height': 18},
+    'Aruba AP-565': {
+        'image': 'AP-565.png',
         'height': 18},
     'Aruba AP-567': {
         'image': 'AP-567.png',
@@ -76,6 +85,7 @@ text_search = {
     'Aruba AP-ANT-45 5GHz 5.5dBi': 'AP-ANT-45\x0D(external, directional)',
 
     'Aruba AP-655 5GHz': 'integrated, omnidirectional',
+    'Aruba AP-565 5GHz': 'integrated, omnidirectional',
     'Aruba AP-567 5GHz': 'integrated, directional',
     'Aruba AP-585 5GHz': 'integrated, omnidirectional',
     'Aruba AP-635 5GHz': 'integrated, omnidirectional',
