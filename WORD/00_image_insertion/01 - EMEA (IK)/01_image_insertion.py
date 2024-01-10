@@ -96,7 +96,7 @@ def main():
 							if str_prefix + key in paragraph.text:
 								if count_image_insertion_point:
 									image_insertion_points += 1
-									print('*', 'counting image insertion strings:' + image_insertion_points, end='\r')
+									print('*', 'counting image insertion strings:', image_insertion_points, end='\r')
 
 		total_image_insertion_points = int(image_insertion_points)
 
