@@ -26,7 +26,7 @@ def main():
 
 	for docx in docx_files:
 		print(docx.name)
-	proceed = input(f'{nl}Proceed with listed files?: (YES/no)')
+	proceed = input(f'{nl}Proceed with {len(docx_files)} listed files?: (YES/no)')
 	if proceed.lower() == 'no':
 		exit()
 

@@ -9,8 +9,6 @@ This script will rename all your [SIMULATED APs] in order of:
 'floor name'
 'sequence-override'
 'x-axis' (from left to right)
-
-numbering restarts within each unit
 """
 
 import zipfile

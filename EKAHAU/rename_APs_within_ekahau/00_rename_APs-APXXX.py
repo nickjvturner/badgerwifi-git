@@ -82,7 +82,7 @@ def main():
             for ap in accessPointsLIST_SORTED:
                 # Define new AP naming scheme
                 # Define the pattern to rename your APs
-                new_AP_name = f'AP-{apSeqNum:03}'
+                new_AP_name = f'ABCDEFGHIJKLMNOPQRSTUVWXYZ AP-{apSeqNum:03}'
 
                 print(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] renamed to {new_AP_name}")
 
