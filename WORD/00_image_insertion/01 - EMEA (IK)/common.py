@@ -79,7 +79,7 @@ image_search = {
         'height': 18},
     'Aruba AP-655 5GHz': {
         'image': 'AP-655.png',
-        'height': 18}
+        'height': 18},
     'Aruba AP-655': {
         'image': 'AP-655.png',
         'height': 18}

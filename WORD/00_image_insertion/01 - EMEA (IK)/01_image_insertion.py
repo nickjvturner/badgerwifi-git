@@ -116,7 +116,7 @@ def main():
 								paragraph.add_run().add_picture(str(picture_path), height=Mm(image_search[key]['height']))
 								images_inserted += 1
 								message = f"{key} image inserted, with height: {image_search[key]['height']} mm  ({images_inserted}/{total_image_insertion_points})"
-								print(f'{message :>55}{nl}')
+								print(f'{message :>75}{nl}')
 
 		text_replacements = []
 
