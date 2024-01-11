@@ -61,11 +61,14 @@ image_search = {
     'not-required': {
         'image': 'unknown.png',
         'height': 18},
+    'Not-Required': {
+        'image': 'unknown.png',
+        'height': 18},
 
     'Aruba AP-514 +  AP-ANT-45 5GHz': {
         'image': 'AP-514.png',
         'height': 18},
-    'Aruba AP-514 +  AP-ANT-345 5GHz': {
+    'Aruba AP-514 + AP-ANT-345 5GHz': {
         'image': 'AP-514.png',
         'height': 18},
     'Aruba AP-565': {
@@ -74,6 +77,9 @@ image_search = {
     'Aruba AP-567': {
         'image': 'AP-567.png',
         'height': 18},
+    'Aruba AP-655 5GHz': {
+        'image': 'AP-655.png',
+        'height': 18}
     'Aruba AP-655': {
         'image': 'AP-655.png',
         'height': 18}
