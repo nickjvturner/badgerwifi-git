@@ -1,7 +1,7 @@
-/ESX/rename_APs_within_ekahau/ESX files (not in repo)/
-/ESX/simple_BoM_generator/ESX files/
-/IMAGES/image_captioning/example_AP_images_captioned/
+/EKAHAU/esx_unpack_and_repack/esx_files
 /EKAHAU/zoom-per-AP/simulation/esx_files/
+/IMAGES/image_captioning/example_AP_images/
+/IMAGES/image_captioning/example_AP_images_captioned/
 /.idea/misc.xml
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/vcs.xml
