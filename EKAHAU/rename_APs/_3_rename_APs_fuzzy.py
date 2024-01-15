@@ -82,6 +82,9 @@ def main():
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
                                                             i['location']['coord']['x']))
 
+            x_division_factor = 40
+            y_division_factor = 10
+
 
             x_coordinate_group = 1
             current_floor = 0
@@ -90,7 +93,7 @@ def main():
                 if current_floor != ap['location']['floorPlanId']:
                     current_x = ap['location']['coord']['x']
                     # Set a threshold for the maximum x-coordinate difference to be in the same group
-                    x_coordinate_threshold = int(floorPlansDict[ap['location']['floorPlanId']]['width'])/20
+                    x_coordinate_threshold = int(floorPlansDict[ap['location']['floorPlanId']]['width'])/x_division_factor
 
                 if abs(ap['location']['coord']['x'] - current_x) <= x_coordinate_threshold:
                     ap['location']['coord']['x_group'] = x_coordinate_group
@@ -113,7 +116,7 @@ def main():
                 if current_floor != ap['location']['floorPlanId']:
                     current_y = ap['location']['coord']['y']
                     # Set a threshold for the maximum x-coordinate difference to be in the same group
-                    y_coordinate_threshold = int(floorPlansDict[ap['location']['floorPlanId']]['width']) / 20
+                    y_coordinate_threshold = int(floorPlansDict[ap['location']['floorPlanId']]['width']) / y_division_factor
 
                 if abs(ap['location']['coord']['y'] - current_y) <= y_coordinate_threshold:
                     ap['location']['coord']['y_group'] = y_coordinate_group
@@ -127,8 +130,9 @@ def main():
             # by floor name(floorPlanId lookup) and x coord
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
-                                                            i['location']['coord']['x_group'],
-                                                            i['location']['coord']['y_group']))
+                                                            i['model'],
+                                                            i['location']['coord']['y_group'],
+                                                            i['location']['coord']['x_group']))
 
 
             apSeqNum = 1
