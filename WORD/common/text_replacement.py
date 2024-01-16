@@ -14,14 +14,7 @@ text_search = {
     'Aruba AP-577 5GHz': 'Integrated, Directional',
     'Aruba AP-655 5GHz': 'Integrated, Omnidirectional',
 
-    'H1': 'AP-270-MNT-H1',
-    'H2': 'AP-270-MNT-H2',
-    'H3': 'AP-270-MNT-H3',
-
     'V1A': 'AP-OUT-MNT-V1A',
-    'V2': 'AP-270-MNT-V2',
-
-    '0.0 dBm': ''
-
+    'V2': 'AP-270-MNT-V2'
 }
 
