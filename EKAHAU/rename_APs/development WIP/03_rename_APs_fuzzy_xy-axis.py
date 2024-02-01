@@ -1,10 +1,43 @@
 #!/usr/bin/env python3
 
 """
-Created by Nick Turner (@nickjvturner)
+Created with [SIMULATED APs] as the targets...
 
-This script is created with [SIMULATED APs] as the targets...
-Script will rename all APs throughout each floor from left to right
+WIP - Work in Progress, not tested / necessarily ready to be used
+
+description
+---
+per floor
+script places all APs into a list
+sorts the list by the x-axis value
+iterates through the sorted list
+the very first AP is assigned to x_coordinate_group 1
+establish a value for the acceptable_deviation within the x-axis
+    value is calculated by dividing the current map image width by the horizontal_division_factor
+    one twentieth of the current map image width
+    you can change this value manually
+subsequent APs with an x-axis value within the acceptable_deviation will also be assigned to x_coordinate_group 1
+when an AP with an x-axis value greater than the acceptable_deviation is found, the x_coordinate_group id is increased by 1
+the assessment of subsequent APs continues
+eventually all APs are assigned an x_coordinate_group id
+the list is re-sorted by:
+    x_group, y-axis value
+    specifically in this order
+having been grouped into '20' (vertical) columns
+the APs are now sorted by their y-axis value within each column
+the sorted list is iterated through and a new AP Name is assigned
+AP numbering starts at 1, with:
+    apSeqNum = 1
+    this is an integer
+AP Naming pattern is defined by:
+    new_AP_name = f'AP-{apSeqNum:03}'
+    this is an f-string
+    {apSeqNum:03} is a formatted expression that represents the variable apSeqNum with specific formatting
+    :03 specifies the formatting of this integer should be with leading zeros to have a width of 3 characters
+    If apSeqNum is less than 100, it will be padded with leading zeros to ensure the resulting string has a total of 5 characters
+
+Nick Turner
+nickjvturner.com
 
 """
 

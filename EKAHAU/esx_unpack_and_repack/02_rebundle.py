@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+"""
+Created by Nick Turner
+nickjvturner.com
+@nickjvturner
+@nickjvturner@mastodon.social
+
+This script finds local directories and re-packs them into a *hopefully* functional .esx project file
+
+"""
+
 import shutil
 from pathlib import Path
 

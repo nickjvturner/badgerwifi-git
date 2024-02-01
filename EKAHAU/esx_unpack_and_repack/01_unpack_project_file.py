@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+"""
+Created by Nick Turner
+nickjvturner.com
+@nickjvturner
+@nickjvturner@mastodon.social
+
+This script finds local .esx files and unpacks them into a new local directory
+
+"""
+
 import zipfile
 from pathlib import Path
 

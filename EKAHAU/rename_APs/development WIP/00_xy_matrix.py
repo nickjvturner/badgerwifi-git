@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
 """
-Created by Nick Turner (@nickjvturner)
+Created by Nick Turner
+nickjvturner.com
 
-This script is created with [SIMULATED APs] as the targets...
+Created with [SIMULATED APs] as the targets...
+
+WIP - Work in Progress, not tested / necessarily ready to be used
 
 """
 

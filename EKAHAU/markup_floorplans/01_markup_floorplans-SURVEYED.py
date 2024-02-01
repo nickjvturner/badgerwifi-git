@@ -147,7 +147,7 @@ def main():
             create_directory(annotated_floorplan_destination)
 
             # Import custom icons
-            spot = Image.open(Path.cwd().parent / "assets" / "spot.png")
+            spot = Image.open(Path.cwd().parent / "assets" / "custom" / "spot.png")
 
             # Resize icons if necessary (default size is 350x350 px)
             icon_resize = 200
