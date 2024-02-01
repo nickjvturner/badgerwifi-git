@@ -1,8 +1,10 @@
-/EKAHAU/esx_unpack_and_repack/esx_files
-/EKAHAU/zoom-per-AP/simulation/esx_files/
-/IMAGES/image_captioning/example_AP_images/
-/IMAGES/image_captioning/example_AP_images_captioned/
 /.idea/misc.xml
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/vcs.xml
 /.idea/workspace.xml
+OUTPUT/
+esx_files/
+example_AP_images_captioned/
+example_AP_images/
+*.esx
+*.docx

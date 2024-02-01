@@ -12,19 +12,25 @@ script places all APs into a list
 sorts the list by the x-axis value
 iterates through the sorted list
 the very first AP is assigned to x_coordinate_group 1
-establish a value for the acceptable_deviation within the x-axis
-    value is calculated by dividing the current map image width by the horizontal_division_factor
-    one twentieth of the current map image width
-    you can change this value manually
+establish a value for the acceptable_deviation within the x and y-axis
+    x_deviation value is calculated by dividing the current map image width by the x_division_factor
+    y_deviation value is calculated by dividing the current map image height by the y_division_factor
+    you can change these values manually
 subsequent APs with an x-axis value within the acceptable_deviation will also be assigned to x_coordinate_group 1
 when an AP with an x-axis value greater than the acceptable_deviation is found, the x_coordinate_group id is increased by 1
 the assessment of subsequent APs continues
 eventually all APs are assigned an x_coordinate_group id
+
+the list is re-sorted by y-axis value
+the very first AP is assigned to y_coordinate_group 1
+subsequent APs with a y-axis value within the acceptable_deviation will also be assigned to y_coordinate_group 1
+when an AP with a y-axis value greater than the acceptable_deviation is found, the y_coordinate_group id is increased by 1
+the assessment of subsequent APs continues
+eventually all APs are assigned a y_coordinate_group id
+
 the list is re-sorted by:
-    x_group, y-axis value
+    AP model, x_group, y_group
     specifically in this order
-having been grouped into '20' (vertical) columns
-the APs are now sorted by their y-axis value within each column
 the sorted list is iterated through and a new AP Name is assigned
 AP numbering starts at 1, with:
     apSeqNum = 1
@@ -48,6 +54,8 @@ import time
 from pathlib import Path
 from pprint import pprint
 
+x_division_factor = 40
+y_division_factor = 10
 
 def main():
     nl = '\n'
@@ -115,8 +123,7 @@ def main():
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
                                                             i['location']['coord']['x']))
 
-            x_division_factor = 40
-            y_division_factor = 10
+
 
 
             x_coordinate_group = 1

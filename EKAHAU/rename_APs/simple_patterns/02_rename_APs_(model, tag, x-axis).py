@@ -1,15 +1,37 @@
 #!/usr/bin/env python3
 
 """
-mangled together by Nick Turner (@nickjvturner@mastodon.social)
+Created with [SIMULATED APs] as the targets...
 
-This script will rename all your [SIMULATED APs] in order of:
-'UNIT'
-'building-group'
-'floor name'
-'x-axis' (from left to right)
+description
+---
+script unpacks Ekahau project file
+loads accessPoints.json
+places all APs into a list
 
-numbering restarts within each unit
+sorts the list by:
+    floor name
+    model
+    custom tag value
+    x-axis value
+
+the sorted list is iterated through and a new AP Name is assigned
+AP numbering starts at 1, with:
+    apSeqNum = 1
+    this is an integer
+
+AP Naming pattern is defined by:
+    new_AP_name = f'AP-{apSeqNum:03}'
+    this is an f-string
+    {apSeqNum:03} is a formatted expression that represents the variable apSeqNum with specific formatting
+    :03 specifies the formatting of this integer should be with leading zeros to have a width of 3 characters
+    If apSeqNum is less than 100, it will be padded with leading zeros to ensure the resulting string has a total of 5 characters
+
+Nick Turner
+nickjvturner.com
+
+@nickjvturner@mastodon.social
+
 """
 
 import zipfile
@@ -23,7 +45,7 @@ from pprint import pprint
 def main():
     nl = '\n'
 
-    # Get current working directory
+    # Get filename and current working directory
     print(f'{nl}{Path(__file__).name}')
     print(f'working_directory: {Path.cwd()}{nl}')
 
@@ -74,7 +96,7 @@ def main():
                 for tag in tagKeysJSON['tagKeys']:
                     tagKeysDict[tag['key']] = tag['id']
 
-            except:
+            except IOError:
                 pass
 
             # Load the accessPoints.json file into the accessPointsJSON dictionary
@@ -93,22 +115,18 @@ def main():
                 # print(floorPlansDict.get(floorPlanId))
                 return floorPlansDict.get(floorPlanId)
 
-            def sortTagValueGetter(tagsList, sortTagKey):
+            def sortTagValueGetter(tagsList):
                 # function receives a list containing a dictionary of unique tag ids and corresponding values
                 # print(tagId)
 
-                # Error Handling:
-                # If sortTagKey is present but has value 'None'
-                undefined_TagValue = '-   ***   TagValue is empty   ***   -'
-
-                # If sortTagKey is missing, substitute with:
-                # 'A' - group and number APs without tags before APs with tags
-                # 'Z' - group and number APs without tags after APs with tags
-
-                missing_TagKey = 'Z'
+                # Define the key to be used for sorting
+                sortTagKey = 'group'
 
                 # Get the unique Id that corresponds with this key
-                sortTagUniqueId = tagKeysDict[sortTagKey]
+                try:
+                    sortTagUniqueId = tagKeysDict[sortTagKey]
+                except Exception:
+                    sortTagUniqueId = ''
 
                 # if tagId list is not empty, check if the AP has any tags?
                 if tagsList:
@@ -121,39 +139,30 @@ def main():
                         # for each list item, which is a dictionary key and value pair
                         if value.get('tagKeyId') == sortTagUniqueId:
                             # print(value.get('value'))
-
-                            # handle missing TagValue condition
-                            if value.get('value') is None:
-                                return undefined_TagValue
                             return value.get('value')
 
-                return missing_TagKey
-
+                # If the AP does not have a tag substitute a letter
+                # 'A' - group and number APs without tags before APs with tags
+                # 'Z' - group and number APs without tags after APs with tags
+                return 'A'
 
             # Use .sorted and lambda functions to sort the list in order
             # by floor name(floorPlanId lookup)
             # specified tag:value(filtered within sortTagValueGetter function)
             # x coordinate (this numbers the APs from left to right)
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
-                                             key=lambda i: (
-                                             sortTagValueGetter(i['tags'],'UNIT'),
-                                             sortTagValueGetter(i['tags'], 'building-group'),
-                                             floorPlanGetter(i['location']['floorPlanId']),
-                                             i['location']['coord']['x']))
+                                             key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
+                                                            i['model'],
+                                                            sortTagValueGetter(i['tags']),
+                                                            i['location']['coord']['x']))
 
-            # Use this variable to detect when the unit changes
-            unit_grouping = '_'
+            apSeqNum = 1
 
             for ap in accessPointsLIST_SORTED:
-                if sortTagValueGetter(ap['tags'], 'UNIT') != unit_grouping:
-                    apSeqNum = 1
-                    print(f"{nl}** Unit:{sortTagValueGetter(ap['tags'], 'UNIT')}, Reset AP numbering **")
-
                 # Define new AP naming pattern
-                new_AP_name = f"{sortTagValueGetter(ap['tags'], 'UNIT')}-AP{apSeqNum:03}"
-                unit_grouping = sortTagValueGetter(ap['tags'], 'UNIT')
+                new_AP_name = f"AP{apSeqNum:03}"
 
-                print(f"[[ {ap['name']} [{ap['model']} ]] from map: {floorPlanGetter(ap['location']['floorPlanId'])} | sorting tag: {sortTagValueGetter(ap['tags'], 'UNIT')} ] renamed to {new_AP_name}")
+                print(f"[[ {ap['name']} [{ap['model']}]] from map: {floorPlanGetter(ap['location']['floorPlanId'])} | sorting tag: {sortTagValueGetter(ap['tags'])} ] renamed to {new_AP_name}")
 
                 ap['name'] = new_AP_name
                 apSeqNum += 1
@@ -163,27 +172,21 @@ def main():
             sorted_accessPointsJSON_dict = {'accessPoints': accessPointsLIST_SORTED}
             # print(sorted_accessPointsJSON_dict)
 
-            print('re-bundling modified files back into .esx file... Please wait')
-
             # save the modified dictionary as accessPoints.json
             with open("accessPoints.json", "w") as outfile:
                 json.dump(sorted_accessPointsJSON_dict, outfile, indent=4)
 
-            # move modified accessPoints.json into unpacked folder OVERWRITING ORIGINAL
+            # move file into unpacked folder OVERWRITING ORIGINAL
             shutil.move('accessPoints.json', Path(project_name) / 'accessPoints.json')
 
-            output_stem = str(Path(file.stem + '_re-zip'))
-
-            output_zip = output_stem + '.zip'
-            output_esx = output_stem + '.esx'
+            output_esx = Path(project_name + '_re-zip')
 
             try:
-                shutil.make_archive(output_stem, 'zip', project_name)
-                shutil.move(output_zip, output_esx)
-                print(f'{nl}Process complete {output_esx} re-bundled{nl}')
-
+                shutil.make_archive(str(output_esx), 'zip', project_name)
+                shutil.move(output_esx.with_suffix('.zip'), output_esx.with_suffix('.esx'))
+                print(f'{nl}** Process complete **{nl}{output_esx} re-bundled into .esx file{nl}')
                 shutil.rmtree(project_name)
-                print(f"Temp folder used to unzip project file, REMOVED, you're welcome")
+                print(f'Temporary project contents directory removed{nl}')
             except Exception as e:
                 print(e)
 

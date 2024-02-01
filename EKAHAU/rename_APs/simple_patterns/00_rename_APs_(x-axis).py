@@ -1,10 +1,34 @@
 #!/usr/bin/env python3
 
 """
-Created by Nick Turner (@nickjvturner)
+Created with [SIMULATED APs] as the targets...
 
-This script is created with [SIMULATED APs] as the targets...
-Script will rename all APs throughout each floor from left to right
+description
+---
+script unpacks Ekahau project file
+loads accessPoints.json
+places all APs into a list
+
+sorts the list by:
+    floor name
+    x-axis value
+
+the sorted list is iterated through and a new AP Name is assigned
+AP numbering starts at 1, with:
+    apSeqNum = 1
+    this is an integer
+
+AP Naming pattern is defined by:
+    new_AP_name = f'AP-{apSeqNum:03}'
+    this is an f-string
+    {apSeqNum:03} is a formatted expression that represents the variable apSeqNum with specific formatting
+    :03 specifies the formatting of this integer should be with leading zeros to have a width of 3 characters
+    If apSeqNum is less than 100, it will be padded with leading zeros to ensure the resulting string has a total of 5 characters
+
+Nick Turner
+nickjvturner.com
+
+@nickjvturner@mastodon.social
 
 """
 
@@ -75,7 +99,6 @@ def main():
             # by floor name(floorPlanId lookup), tag:value(filtered within tagKeyGetter) and x coord
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
-                                                            i['model'],
                                                             i['location']['coord']['x']))
 
             apSeqNum = 1

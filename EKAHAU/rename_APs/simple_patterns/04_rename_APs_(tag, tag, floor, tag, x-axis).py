@@ -1,14 +1,35 @@
 #!/usr/bin/env python3
 
 """
-mangled together by Nick Turner (@nickjvturner@mastodon.social)
+Created with [SIMULATED APs] as the targets...
 
-This script will rename all your [SIMULATED APs] in order of:
-'UNIT'
-'building-group'
-'floor name'
-'sequence-override'
-'x-axis' (from left to right)
+description
+---
+script unpacks Ekahau project file
+loads accessPoints.json
+places all APs into a list
+
+sorts the list by:
+    custom tag value 1
+    custom tag value 2
+    floor name
+    custom tag value 3
+    x-axis value
+
+the sorted list is iterated through and a new AP Name is assigned
+AP numbering starts at 1, with:
+    apSeqNum = 1
+    this is an integer
+
+AP Naming pattern is defined by:
+    new_AP_name = f"{sortTagValueGetter(ap['tags'])}-AP{apSeqNum:03}"
+    includes custom tag value in the AP name
+
+Nick Turner
+nickjvturner.com
+
+@nickjvturner@mastodon.social
+
 """
 
 import zipfile

@@ -5,7 +5,7 @@ Created with [SIMULATED APs] as the targets...
 
 WIP - Work in Progress, not tested / not necessarily ready to be used
 
-description
+long description
 ---
 per floor
 script places all APs into a list
@@ -24,7 +24,7 @@ the list is re-sorted by:
     y_group, x-axis value
     specifically in this order
 having been grouped into '20' (horizontal) rows
-the APs are now sorted by their y-axis value within each column
+the APs are now sorted by their x-axis value within each row
 the sorted list is iterated through and a new AP Name is assigned
 AP numbering starts at 1, with:
     apSeqNum = 1
@@ -48,7 +48,7 @@ import time
 from pathlib import Path
 from pprint import pprint
 
-horizontal_division_factor = 20
+vertical_division_factor = 20
 
 def main():
     nl = '\n'
@@ -117,32 +117,32 @@ def main():
             # by floor name(floorPlanId lookup) and x coord
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
-                                                            i['location']['coord']['x']))
+                                                            i['location']['coord']['y']))
 
 
-            x_coordinate_group = 1
+            y_coordinate_group = 1
 
             current_floor = 0
 
             for ap in accessPointsLIST_SORTED:
                 if current_floor != ap['location']['floorPlanId']:
-                    current_x = ap['location']['coord']['x']
+                    current_y = ap['location']['coord']['y']
                     # Set a threshold for the maximum x-coordinate difference to be in the same group
-                    x_coordinate_threshold = int(floorPlanWidthsDict.get(ap['location']['floorPlanId']))/horizontal_division_factor
+                    y_coordinate_threshold = int(floorPlanWidthsDict.get(ap['location']['floorPlanId']))/vertical_division_factor
 
-                if abs(ap['location']['coord']['x'] - current_x) <= x_coordinate_threshold:
-                    ap['location']['coord']['x_group'] = x_coordinate_group
+                if abs(ap['location']['coord']['x'] - current_y) <= y_coordinate_threshold:
+                    ap['location']['coord']['y_group'] = y_coordinate_group
                 else:
-                    x_coordinate_group += 1
-                    current_x = ap['location']['coord']['x']
-                    ap['location']['coord']['x_group'] = x_coordinate_group
+                    y_coordinate_group += 1
+                    current_y = ap['location']['coord']['y']
+                    ap['location']['coord']['y_group'] = y_coordinate_group
                 current_floor = ap['location']['floorPlanId']
 
             # by floor name(floorPlanId lookup) and x coord
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
                                              key=lambda i: (floorPlanGetter(i['location']['floorPlanId']),
-                                                            i['location']['coord']['x_group'],
-                                                            i['location']['coord']['y']))
+                                                            i['location']['coord']['y_group'],
+                                                            i['location']['coord']['x']))
 
             # Start numbering APs from... 1
             apSeqNum = 1
@@ -153,7 +153,7 @@ def main():
                 new_AP_name = f'AP-{apSeqNum:03}'
 
                 print(
-                    f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] renamed to {new_AP_name} {ap['location']['coord']['group']}")
+                    f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] renamed to {new_AP_name} {ap['location']['coord']['y_group']}")
 
                 ap['name'] = new_AP_name
                 apSeqNum += 1

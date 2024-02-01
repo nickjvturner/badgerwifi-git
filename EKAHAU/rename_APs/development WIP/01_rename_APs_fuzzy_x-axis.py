@@ -153,7 +153,7 @@ def main():
                 new_AP_name = f'AP-{apSeqNum:03}'
 
                 print(
-                    f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] renamed to {new_AP_name} {ap['location']['coord']['group']}")
+                    f"[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] renamed to {new_AP_name} {ap['location']['coord']['x_group']}")
 
                 ap['name'] = new_AP_name
                 apSeqNum += 1
