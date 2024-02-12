@@ -1,8 +1,31 @@
 #!/usr/bin/env python3
 
 """
-Created by Nick Turner (@nickjvturner)
+Created with [SIMULATED AP project] as the target
 
+description
+---
+script unpacks Ekahau project file
+
+extracts the floor plan image
+imports a custom X marks the spot AP icon
+drops an X on each AP x,y coordinate
+
+draws a rounded rectangle containing the AP Name below each X mark
+
+
+I have started using this script to create floor plan images in preparation for post-deployment surveys
+These unobtrusive AP location markers make it easy:
+    know the intended AP Name
+    know the intended AP location
+    validate a physical installation
+
+
+
+Nick Turner
+nickjvturner.com
+
+@nickjvturner@mastodon.social
 
 """
 
