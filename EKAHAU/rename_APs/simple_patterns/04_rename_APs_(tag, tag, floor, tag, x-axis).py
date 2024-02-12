@@ -144,11 +144,9 @@ def main():
                                              key=lambda i: (
                                                  sortTagValueGetter(i.get('tags', []), 'UNIT'),
                                                  sortTagValueGetter(i.get('tags', []), 'building-group'),
-                                                 floorPlanGetter(
-                                                     i['location'].get('floorPlanId', 'missing_floorPlanId')),
+                                                 floorPlanGetter(i['location'].get('floorPlanId', 'missing_floorPlanId')),
                                                  sortTagValueGetter(i.get('tags', []), 'sequence-override'),
-                                                 i.get('location', {}).get('coord', {}).get('x', float('inf'))
-                                             # Default for missing x
+                                                 i['location']['coord']['x']
                                              ))
 
             apSeqNum = 1
