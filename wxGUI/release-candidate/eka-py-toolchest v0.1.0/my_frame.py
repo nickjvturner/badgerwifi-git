@@ -15,7 +15,7 @@ class MyFrame(wx.Frame):
         self.list_box = wx.ListBox(self.panel, style=wx.LB_EXTENDED)
 
         # For testing purposes, automatically add the below file path to the ListBox
-        self.list_box.Append("/Users/nick/Desktop/Odense.esx")
+        # self.list_box.Append("/Users/nick/Desktop/Odense.esx")
 
         self.project_unpacked = False  # Initialize the state variable
 
