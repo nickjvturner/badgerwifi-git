@@ -115,41 +115,26 @@ def main():
 
             def sortTagValueGetter(tagsList, sortTagKey):
                 # function receives a list containing a dictionary of unique tag ids and corresponding values
-                # print(tagId)
-
-                # Error Handling:
-                # If sortTagKey is present but has value 'None'
                 undefined_TagValue = '-   ***   TagValue is empty   ***   -'
 
                 # If sortTagKey is missing, substitute with:
                 # 'A' - group and number APs without tags before APs with tags
                 # 'Z' - group and number APs without tags after APs with tags
-
                 missing_TagKey = 'Z'
 
-                # Get the unique Id that corresponds with this key
-                sortTagUniqueId = tagKeysDict[sortTagKey]
-
-                # if tagId list is not empty, check if the AP has any tags?
-                try:
-                    if tagsList:
-                        for value in tagsList:
-                            # print(value.items())
-                            # print(value.keys())
-                            # print(value.values())
-                            # print(value.get('tagKeyId'))
-
-                            # for each list item, which is a dictionary key and value pair
-                            if value.get('tagKeyId') == sortTagUniqueId:
-                                # print(value.get('value'))
-
-                                # handle missing TagValue condition
-                                if value.get('value') is None:
-                                    return undefined_TagValue
-                                return value.get('value')
-
-                except KeyError:
+                # Safely get the unique Id that corresponds with this key
+                sortTagUniqueId = tagKeysDict.get(sortTagKey)
+                if sortTagUniqueId is None:
                     return missing_TagKey
+
+                for value in tagsList:
+                    if value.get('tagKeyId') == sortTagUniqueId:
+                        tagValue = value.get('value')
+                        if tagValue is None:
+                            return undefined_TagValue
+                        return tagValue
+                return missing_TagKey
+
 
             # Use .sorted and lambda functions to sort the list in order
             # by floor name(floorPlanId lookup)
@@ -157,11 +142,14 @@ def main():
             # x coordinate (this numbers the APs from left to right)
             accessPointsLIST_SORTED = sorted(accessPointsLIST,
                                              key=lambda i: (
-                                                 sortTagValueGetter(i['tags'], 'UNIT'),
-                                                 sortTagValueGetter(i['tags'], 'building-group'),
-                                                 floorPlanGetter(i['location']['floorPlanId']),
-                                                 sortTagValueGetter(i['tags'], 'sequence-override'),
-                                                 i['location']['coord']['x']))
+                                                 sortTagValueGetter(i.get('tags', []), 'UNIT'),
+                                                 sortTagValueGetter(i.get('tags', []), 'building-group'),
+                                                 floorPlanGetter(
+                                                     i['location'].get('floorPlanId', 'missing_floorPlanId')),
+                                                 sortTagValueGetter(i.get('tags', []), 'sequence-override'),
+                                                 i.get('location', {}).get('coord', {}).get('x', float('inf'))
+                                             # Default for missing x
+                                             ))
 
             apSeqNum = 1
 
