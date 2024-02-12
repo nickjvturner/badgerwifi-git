@@ -131,23 +131,25 @@ def main():
                 sortTagUniqueId = tagKeysDict[sortTagKey]
 
                 # if tagId list is not empty, check if the AP has any tags?
-                if tagsList:
-                    for value in tagsList:
-                        # print(value.items())
-                        # print(value.keys())
-                        # print(value.values())
-                        # print(value.get('tagKeyId'))
+                try:
+                    if tagsList:
+                        for value in tagsList:
+                            # print(value.items())
+                            # print(value.keys())
+                            # print(value.values())
+                            # print(value.get('tagKeyId'))
 
-                        # for each list item, which is a dictionary key and value pair
-                        if value.get('tagKeyId') == sortTagUniqueId:
-                            # print(value.get('value'))
+                            # for each list item, which is a dictionary key and value pair
+                            if value.get('tagKeyId') == sortTagUniqueId:
+                                # print(value.get('value'))
 
-                            # handle missing TagValue condition
-                            if value.get('value') is None:
-                                return undefined_TagValue
-                            return value.get('value')
+                                # handle missing TagValue condition
+                                if value.get('value') is None:
+                                    return undefined_TagValue
+                                return value.get('value')
 
-                return missing_TagKey
+                except KeyError:
+                    return missing_TagKey
 
             # Use .sorted and lambda functions to sort the list in order
             # by floor name(floorPlanId lookup)
