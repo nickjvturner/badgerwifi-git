@@ -91,10 +91,13 @@ image_search = {
 }
 
 text_search = {
+    # Access Points
     'Aruba AP-514 +  Aruba AP-ANT-45': 'Aruba AP-514',
-    'Aruba AP-514 + Aruba AP-ANT-345': 'Aruba AP-514',
+    'Aruba AP-514 + AP-ANT-345': 'Aruba AP-514',
 
+    # Antennas
     'Aruba AP-ANT-45 5GHz 5.5dBi': 'AP-ANT-45\x0D(external, directional)',
+    'Aruba AP-ANT-345 5GHz': 'AP-ANT-345\x0D(external, directional)',
 
     'Aruba AP-655 5GHz': 'integrated, omnidirectional',
     'Aruba AP-565 5GHz': 'integrated, omnidirectional',
