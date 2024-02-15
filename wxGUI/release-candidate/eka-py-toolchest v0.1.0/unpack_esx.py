@@ -23,7 +23,7 @@ def unpack(file_path, message_callback):
         with zipfile.ZipFile(file, 'r') as zip_ref:
             zip_ref.extractall(working_directory / project_name)
         message_callback(f"Project successfully unzipped{nl}")
-        return True
+        return working_directory, project_name, True
     except Exception as e:
         message_callback('Failed to unpack project file: ' + str(e))
-        return False
+        return '_', '_', False

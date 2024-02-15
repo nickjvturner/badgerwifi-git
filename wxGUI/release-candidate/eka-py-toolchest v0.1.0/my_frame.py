@@ -5,6 +5,8 @@ from drop_target import DropTarget
 from inspect_esx import inspect
 from unpack_esx import unpack
 from rename_aps import rename_aps
+from summarise_esx import summarise
+from generate_bom_xlsx import generate_bom
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
@@ -15,9 +17,11 @@ class MyFrame(wx.Frame):
         self.list_box = wx.ListBox(self.panel, style=wx.LB_EXTENDED)
 
         # For testing purposes, automatically add the below file path to the ListBox
-        # self.list_box.Append("/Users/nick/Desktop/Odense.esx")
+        self.list_box.Append("/Users/nick/Desktop/Odense.esx")
 
         self.project_unpacked = False  # Initialize the state variable
+        self.working_directory = ''
+        self.project_name = ''
 
         self.display_log = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
 
@@ -26,11 +30,13 @@ class MyFrame(wx.Frame):
         self.display_log.SetFont(monospace_font)
 
         self.copy_log_button = wx.Button(self.panel, label="Copy Log")
+        self.clear_log_button = wx.Button(self.panel, label="Clear Log")
+
         self.unpack_button = wx.Button(self.panel, label="Unpack .esx")
-        self.inspect_button = wx.Button(self.panel, label="Inspect")
         self.rename_aps_button = wx.Button(self.panel, label="Rename APs")
+        self.inspect_button = wx.Button(self.panel, label="Inspect")
+        self.summarise_button = wx.Button(self.panel, label="Summarise")
         self.generate_bom_button = wx.Button(self.panel, label="Generate BoM")
-        self.override = wx.Button(self.panel, label="Override")
         self.exit_button = wx.Button(self.panel, label="Exit")
 
         button_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -40,13 +46,14 @@ class MyFrame(wx.Frame):
         button_row1_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
 
         button_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        button_row2_sizer.Add(self.clear_log_button, 0, wx.ALL, 5)
         button_row2_sizer.AddStretchSpacer(1)
         button_row2_sizer.Add(self.inspect_button, 0, wx.ALL, 5)
+        button_row2_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
         button_row2_sizer.Add(self.generate_bom_button, 0, wx.ALL, 5)
 
         button_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_row3_sizer.AddStretchSpacer(1)
-        button_row3_sizer.Add(self.override, 0, wx.ALL, 5)
 
         button_row4_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_row4_sizer.AddStretchSpacer(1)
@@ -64,18 +71,23 @@ class MyFrame(wx.Frame):
 
         self.create_menu()
 
-        dt = DropTarget(self.list_box, ".esx", self.append_message)
+        allowed_extensions = (".esx", ".docx", ".xlsx")  # Define allowed file extensions
+        dt = DropTarget(self.list_box, allowed_extensions, self.append_message)
         self.list_box.SetDropTarget(dt)
 
-        self.unpack_button.Bind(wx.EVT_BUTTON, self.on_unpack)
-        self.inspect_button.Bind(wx.EVT_BUTTON, self.on_inspect)
-        self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
-        self.generate_bom_button.Bind(wx.EVT_BUTTON, self.on_generate_bom)
-        self.generate_bom_button.Disable()
-        self.override.Bind(wx.EVT_BUTTON, self.on_override)
-        self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
-        self.list_box.Bind(wx.EVT_KEY_DOWN, self.on_delete_key)
         self.copy_log_button.Bind(wx.EVT_BUTTON, self.on_copy_log)
+        self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
+
+        self.unpack_button.Bind(wx.EVT_BUTTON, self.on_unpack)
+        self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
+        self.inspect_button.Bind(wx.EVT_BUTTON, self.on_inspect)
+        self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
+        self.generate_bom_button.Bind(wx.EVT_BUTTON, self.on_generate_bom)
+        self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
+
+        self.list_box.Bind(wx.EVT_KEY_DOWN, self.on_delete_key)
+
+        # self.generate_bom_button.Disable()
 
         self.Center()
         self.Show()
@@ -91,6 +103,9 @@ class MyFrame(wx.Frame):
     def append_message(self, message):
         # Append a message to the message display area.
         self.display_log.AppendText(message + '\n')
+
+    def on_clear_log(self, event):
+        self.display_log.SetValue("")  # Clear the contents of the display_log
 
     def on_add_file(self, event):
         wildcard = "Ekahau Project file (*.esx)|*.esx"
@@ -110,10 +125,8 @@ class MyFrame(wx.Frame):
                 self.list_box.Delete(index)
 
     def on_unpack(self, event):
-        filepath = self.list_box.GetString(0)
         if not self.project_unpacked:
-            if unpack(filepath, self.append_message):
-                self.project_unpacked = True
+            self.unpack_project()
         else:
             wx.MessageBox("Project has already been unpacked.", "Information", wx.OK | wx.ICON_INFORMATION)
 
@@ -127,31 +140,16 @@ class MyFrame(wx.Frame):
             self.unpack_project()
         self.rename_aps()
 
-    # Helper methods
-    def unpack_project(self):
-        filepath = self.list_box.GetString(0)
-        if filepath:
-            # Notice how we're now passing self.append_message directly
-            if unpack(filepath, self.append_message):
-                self.project_unpacked = True
-            else:
-                wx.MessageBox("Failed to unpack project file.", "Error", wx.OK | wx.ICON_ERROR)
-        else:
-            wx.MessageBox("No project file selected.", "Error", wx.OK | wx.ICON_ERROR)
+    def on_summarise(self, event):
+        if not self.project_unpacked:
+            self.unpack_project()
+        self.summarise_project()
 
-    def inspect_project(self):
-        filepath = self.list_box.GetString(0)
-        if filepath:
-            inspect(filepath, self.append_message)
-        else:
-            wx.MessageBox("No project file selected.", "Error", wx.OK | wx.ICON_ERROR)
+    def on_generate_bom(self, event):
+        if not self.project_unpacked:
+            self.unpack_project()
+        self.create_bom()
 
-    def rename_aps(self):
-        filepath = self.list_box.GetString(0)
-        if filepath:
-            rename_aps(filepath, self.append_message)
-        else:
-            wx.MessageBox("No project file selected.", "Error", wx.OK | wx.ICON_ERROR)
 
     def on_copy_log(self, event):
         if wx.TheClipboard.Open():
@@ -161,12 +159,33 @@ class MyFrame(wx.Frame):
         else:
             wx.MessageBox("Unable to access the clipboard.", "Error", wx.OK | wx.ICON_ERROR)
 
-    def on_generate_bom(self, event):
-        # Implement the functionality for button 3
-        pass
-
-    def on_override(self, event):
-        self.generate_bom_button.Enable()
 
     def on_exit(self, event):
         self.Close()
+
+
+    # Helper methods
+    def get_specific_file_type(self, extension):
+        for filepath in self.list_box.GetStrings():
+            if filepath.lower().endswith(extension):
+                return filepath
+        self.append_message(f"No file with {extension} present in file list.")
+        return None
+
+    def unpack_project(self):
+        if not self.project_unpacked:
+            self.working_directory, self.project_name, self.project_unpacked = unpack(self.get_specific_file_type('.esx'), self.append_message)
+            self.unpack_button.Disable()
+        pass
+
+    def inspect_project(self):
+        inspect(self.working_directory, self.project_name, self.append_message)
+
+    def rename_aps(self):
+        rename_aps(self.working_directory, self.project_name, self.append_message)
+
+    def summarise_project(self):
+        summarise(self.working_directory, self.project_name, self.append_message)
+
+    def create_bom(self):
+        generate_bom(self.working_directory, self.project_name, self.append_message)

@@ -4,13 +4,8 @@ import shutil
 
 nl = '\n'
 
-def rename_aps(file_path, message_callback):
-    file = Path(file_path)
-    message_callback('Performing action for: ' + file.name)
-    project_name = file.stem
-    message_callback('Project name: ' + project_name)
-    working_directory = file.parent
-    message_callback(f'Working directory: {str(working_directory)}{nl}')
+def rename_aps(working_directory, project_name, message_callback):
+    message_callback(f'Performing action for: {project_name}')
 
     try:
         with open(working_directory / project_name / 'floorPlans.json') as json_file:
@@ -54,7 +49,5 @@ def rename_aps(file_path, message_callback):
         shutil.make_archive(str(Path(working_directory / output_esx)), 'zip', str(working_directory / project_name))
         shutil.move(str(working_directory / output_esx_path.with_suffix('.zip')), str(output_esx_path.with_suffix('.esx')))
         message_callback(f'{nl}Process complete {nl}{output_esx} re-bundled into .esx file')
-        shutil.rmtree(working_directory / project_name)
-        message_callback("Temporary project contents directory removed")
     except Exception as e:
         message_callback(f"An error occurred: {str(e)}")

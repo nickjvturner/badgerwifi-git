@@ -1,0 +1,2 @@
+[console_scripts]
+eka-py-toolchest = your_package_name.your_main_script:main_function

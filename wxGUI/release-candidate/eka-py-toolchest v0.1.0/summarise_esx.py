@@ -2,6 +2,8 @@
 
 import json
 from collections import defaultdict
+from pathlib import Path
+from common import ekahau_color_dict
 from configuration.requiredTagKeys import requiredTagKeys
 from configuration.requiredTagKeys import offender_constructor
 
@@ -42,8 +44,8 @@ def validate_tags(offenders, message_callback):
         return True
     return False
 
-def inspect(working_directory, project_name, message_callback):
-    message_callback(f'Performing action for: {project_name}')
+def summarise(working_directory, project_name, message_callback):
+    message_callback(f'Summarising the Contents of: {project_name}{nl}')
 
     # Load the floorPlans.json file into the floorPlansJSON Dictionary
     with open(working_directory / project_name / 'floorPlans.json') as json_file:
@@ -128,24 +130,22 @@ def inspect(working_directory, project_name, message_callback):
 
         model_counts[ap['model']] += 1
 
+    # Prepare the summary message
+    summary_message = f"Count of each model type:{nl}"
+    for model, count in sorted(model_counts.items()):
+        summary_message += f"{model}: {count}{nl}"
+
+    summary_message += f"{nl}Count of each color:{nl}"
+    for color, count in sorted(color_counts.items()):
+        summary_message += f"{ekahau_color_dict.get(color)}: {count}{nl}"
+
+    summary_message += f"{nl}Count of each AP height:{nl}"
+    for height, count in sorted(antennaHeight_counts.items()):
+        summary_message += f"{height}: {count}{nl}"
 
     # Print the count of each tag key and value pair, sorted
-    # print(f"{nl}Count of each tag key and value pair:")
-    # for (tag_key, tag_value), count in sorted(tag_counts.items()):
-    #     print(f"{tag_key}: {tag_value} - {count}")
+    summary_message += f"{nl}Count of each tag key and value pair:{nl}"
+    for (tag_key, tag_value), count in sorted(tag_counts.items()):
+        summary_message += f"{tag_key} - {tag_value}: {count}{nl}"
 
-    # Validation
-
-    # Perform all validations
-    validations = [
-        validate_color_assignment(offenders, message_callback),
-        validate_height_manipulation(offenders, message_callback),
-        validate_tags(offenders, message_callback)
-    ]
-
-    # Print pass/fail states
-    if all(validations):
-        message_callback(f"{nl}Validation PASSED!")
-    else:
-        message_callback(f"{nl}Validation FAILED")
-    return
+    message_callback(summary_message)
