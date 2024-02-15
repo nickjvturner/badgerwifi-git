@@ -83,6 +83,8 @@ def main():
 		# Keep track
 		image_insertion_points = 0
 
+		print(f'{nl}Searching file for image insertion points')
+
 		# count image insertions to be conducted
 		for table in document.tables:
 			for row in table.rows:
@@ -119,6 +121,8 @@ def main():
 								print(f'{message :>75}{nl}')
 
 		text_replacements = []
+
+		print(f'{nl}Searching file for text replacements')
 
 		for table in document.tables:
 			for row in table.rows:
