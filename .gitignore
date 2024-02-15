@@ -6,5 +6,6 @@ OUTPUT/
 esx_files/
 example_AP_images_captioned/
 example_AP_images/
+development/
 *.esx
 *.docx
