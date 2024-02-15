@@ -1,4 +1,5 @@
 image_search = {
+    # AP Brackets
     'AP-MNT-A': {
         'image': 'AP-MNT-A.png',
         'height': 23},
@@ -18,6 +19,7 @@ image_search = {
         'image': 'AP-MNT-U.png',
         'height': 16},
 
+    # Antenna Brackets
     'AP-270-MNT-H1': {
         'image': 'AP-270-MNT-H1.png',
         'height': 23},
@@ -34,6 +36,7 @@ image_search = {
         'image': 'AP-270-MNT-V2.png',
         'height': 23},
 
+    # Antennas
     'Aruba AP-ANT-45 5GHz 5.5dBi': {
         'image': 'AP-ANT-45.png',
         'height': 18},
@@ -41,7 +44,7 @@ image_search = {
         'image': 'AP-ANT-345.png',
         'height': 18},
 
-
+    # Angles of tilt
     '0.0°': {
         'image': 'EKA-TILT-0.png',
         'height': 18},
@@ -55,6 +58,7 @@ image_search = {
         'image': 'EKA-TILT-45.png',
         'height': 18},
 
+    # fail-safes
     'unknown': {
         'image': 'unknown.png',
         'height': 18},
@@ -65,10 +69,11 @@ image_search = {
         'image': 'unknown.png',
         'height': 18},
 
+    # Access Points
     'Aruba AP-514 +  AP-ANT-45 5GHz': {
         'image': 'AP-514.png',
         'height': 18},
-    'Aruba AP-514 + AP-ANT-345 5GHz': {
+    'Aruba AP-514 + AP-ANT-345': {
         'image': 'AP-514.png',
         'height': 18},
     'Aruba AP-565': {
@@ -87,6 +92,7 @@ image_search = {
 
 text_search = {
     'Aruba AP-514 +  Aruba AP-ANT-45': 'Aruba AP-514',
+    'Aruba AP-514 + Aruba AP-ANT-345': 'Aruba AP-514',
 
     'Aruba AP-ANT-45 5GHz 5.5dBi': 'AP-ANT-45\x0D(external, directional)',
 
