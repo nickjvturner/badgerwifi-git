@@ -41,7 +41,7 @@ def generate_bom(working_directory, project_name, message_callback):
     df.to_excel(writer, sheet_name='AP List', index=False)
     adjust_column_widths(df, writer)
     format_headers(df, writer)
-    writer.save()
+    writer.close()
     message_callback(f'BoM XLSX generated: {output_filename}\n')
 
 def adjust_column_widths(df, writer):
