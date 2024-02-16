@@ -4,7 +4,7 @@ import wx
 from drop_target import DropTarget
 from validate_esx import validate
 from unpack_esx import unpack
-from rename_aps.rename_aps_LY import rename_aps
+from rename_aps.rename_aps_IK import rename_aps
 from summarise_esx import summarise
 from generate_bom_xlsx import generate_bom
 import os
