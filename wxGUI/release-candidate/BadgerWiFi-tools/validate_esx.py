@@ -1,11 +1,17 @@
 # validate_esx.py
 
-import json
+from pathlib import Path
 from collections import defaultdict
+
 from configuration.projectSpecific import requiredTagKeys
 from configuration.projectSpecific import offender_constructor
+from common import load_json
+from common import create_floor_plans_dict
+from common import create_tag_keys_dict
+from common import create_simulated_radios_dict
 
 nl = '\n'
+
 
 def validate_color_assignment(offenders, message_callback):
     if len(offenders.get('color', [])) > 0:
@@ -45,36 +51,24 @@ def validate_tags(offenders, message_callback):
 def validate(working_directory, project_name, message_callback):
     message_callback(f'Performing Validation for: {project_name}')
 
-    # Load the floorPlans.json file into the floorPlansJSON Dictionary
-    with open(working_directory / project_name / 'floorPlans.json') as json_file:
-        floorPlansJSON = json.load(json_file)
+    project_dir = Path(working_directory) / project_name
 
-    # Create dictionary for the floor plans
-    floorPlansDict = {floor['id']: floor['name'] for floor in floorPlansJSON['floorPlans']}
+    # Load JSON data
+    floorPlansJSON = load_json(project_dir, 'floorPlans.json')
+    accessPointsJSON = load_json(project_dir, 'accessPoints.json')
+    simulatedRadiosJSON = load_json(project_dir, 'simulatedRadios.json')
+    tagKeysJSON = load_json(project_dir, 'tagKeys.json')
 
-    # Load the accessPoints.json file into the accessPointsJSON dictionary
-    with open(working_directory / project_name / 'accessPoints.json') as json_file:
-        accessPointsJSON = json.load(json_file)
-
-    # Load the simulatedRadios.json file into the simulatedRadios dictionary
-    with open(working_directory / project_name / 'simulatedRadios.json') as json_file:
-        simulatedRadiosJSON = json.load(json_file)
-
-    # Create dictionary for simulated radios
-    simulatedRadioDict = {radio['accessPointId']: {x: y for x, y in radio.items()} for radio in simulatedRadiosJSON['simulatedRadios']}
+    # Process data
+    floorPlansDict = create_floor_plans_dict(floorPlansJSON)
+    tagKeysDict = create_tag_keys_dict(tagKeysJSON)
+    simulatedRadioDict = create_simulated_radios_dict(simulatedRadiosJSON)
 
     def externalAntSplitAnt(model_string):
         return model_string.split(' +  ')[1] if ' +  ' in model_string else 'integrated'
 
     def externalAntSplitModel(model_string):
         return model_string.split(' +  ')[0] if ' +  ' in model_string else model_string
-
-    # Load takKeys JSON
-    with open(working_directory / project_name / 'tagKeys.json') as json_file:
-        tagKeysJSON = json.load(json_file)
-
-    # Create restructured dictionary for the tagKeys
-    tagKeysDict = {tagKey['id']: tagKey['key'] for tagKey in tagKeysJSON['tagKeys']}
 
     # Process access points
     processedAPdict = {}

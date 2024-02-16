@@ -7,8 +7,8 @@ from common import ekahau_color_dict
 from common import external_ant_split
 from common import note_text_processor
 
-# Project A
-###########
+# Project IK
+############
 
 requiredTagKeys = ("ap-bracket", "antenna-bracket", "rf-group")
 
@@ -37,8 +37,8 @@ def create_custom_AP_list(accessPointsJSON, floorPlansDict, tagKeysDict, simulat
     return sorted(custom_AP_list, key=lambda x: x['Name'])
 
 
-# Project B
-###########
+# Project LY
+############
 
 # requiredTagKeys = ("ap-bracket", "UNIT", "EX", "ind/out", "power", "backhaul")
 # optionalTagKeys = ("building-group", 'sequence-override')

@@ -25,7 +25,7 @@ class MyFrame(wx.Frame):
 
         self.config_dir = 'configuration'
         self.drop_target_contents = 'drop_target_contents.txt'
-        self.config_path = Path.cwd() / self.config_dir / self.drop_target_contents
+        self.config_path = Path(__file__).resolve().parent / self.config_dir / self.drop_target_contents
         self.load_drop_target_contents()  # Load file paths at startup
 
         self.display_log = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY)

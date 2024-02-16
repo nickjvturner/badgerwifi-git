@@ -12,7 +12,9 @@ setup(
     packages=find_packages(),
     package_data={'': ['*.txt', '*.md']},  # Include non-Python files if needed
     install_requires=[
-        'wxPython>=4.1.1'
+        'wxPython>=4.1.1',
+        'openpyxl>=3.1.2',
+        'pandas>=2.2.0'
         # Add other dependencies as needed
     ],
     classifiers=[

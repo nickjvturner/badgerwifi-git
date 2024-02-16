@@ -7,7 +7,7 @@ from my_frame import MyFrame
 
 
 if __name__ == '__main__':
-    sys.path.append(str(Path.cwd()))
+    sys.path.append(Path(__file__).resolve().parent)
     app = wx.App()
-    MyFrame(None, 'eka-py-toolchest')
+    MyFrame(None, 'BadgerWiFi-tools')
     app.MainLoop()
