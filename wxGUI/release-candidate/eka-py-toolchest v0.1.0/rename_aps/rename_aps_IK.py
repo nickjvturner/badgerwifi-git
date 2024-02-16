@@ -1,3 +1,5 @@
+# rename_aps_IK.py
+
 import json
 from pathlib import Path
 import shutil
@@ -39,6 +41,7 @@ def rename_aps(working_directory, project_name, message_callback):
     sorted_accessPointsJSON_dict = {'accessPoints': accessPointsLIST_SORTED}
 
     try:
+        print(project_name)
         with open("accessPoints.json", "w") as outfile:
             json.dump(sorted_accessPointsJSON_dict, outfile, indent=4)
         shutil.move('accessPoints.json', working_directory / project_name / 'accessPoints.json')
@@ -46,8 +49,8 @@ def rename_aps(working_directory, project_name, message_callback):
         output_esx = project_name + '_re-zip'
         output_esx_path = working_directory / output_esx
 
-        shutil.make_archive(str(Path(working_directory / output_esx)), 'zip', str(working_directory / project_name))
-        shutil.move(str(working_directory / output_esx_path.with_suffix('.zip')), str(output_esx_path.with_suffix('.esx')))
+        shutil.make_archive(str(output_esx_path), 'zip', str(working_directory / project_name))
+        shutil.move(str(output_esx_path) + '.zip', str(output_esx_path) + '.esx')  # Using string concatenation in preference to '.withsuffix' due to issues with periods in project names
         message_callback(f'{nl}Process complete {nl}{output_esx} re-bundled into .esx file')
     except Exception as e:
         message_callback(f"An error occurred: {str(e)}")

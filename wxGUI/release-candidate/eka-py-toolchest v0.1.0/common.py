@@ -2,9 +2,10 @@
 
 import json
 
+
 # Constants
-UNKNOWN = 'Unknown'
 VERSION = '1.2'
+UNKNOWN = 'Unknown'
 FIVE_GHZ = 'FIVE'
 
 ekahau_color_dict = {
@@ -48,12 +49,20 @@ def create_notes_dict(notesJSON):
         notesDict[note['id']] = note
     return notesDict
 
+
 def note_text_processor(noteIds, notesDict):
     notes_text = []
     if noteIds:
         for noteId in noteIds:
-            notes_text.append(notesDict.get(noteId).get(('text'), ''))
-        return '\n'.join(notes_text)  # Join all note texts into a single string
+            # Attempt to retrieve the note by ID and its 'text' field
+            note = notesDict.get(noteId, {})
+            text = note.get('text', None)  # Use None as the default
+
+            # Append the text to notes_text only if it exists and is not empty
+            if text:  # This condition is True if text is not None and not an empty string
+                notes_text.append(text)
+
+        return '\n'.join(notes_text)  # Join all non-empty note texts into a single string
     return ''
 
 
@@ -88,28 +97,3 @@ def create_simulated_radios_dict(simulatedRadiosJSON):
 def external_ant_split(s):
     """Split external antenna information."""
     return s.split(' +  ') if ' +  ' in s else (s, 'Integrated')
-
-
-def create_custom_AP_list(accessPointsJSON, floorPlansDict, tagKeysDict, simulatedRadioDict, notesDict):
-    """Process access points to a structured list."""
-    custom_AP_list = []
-    for ap in accessPointsJSON['accessPoints']:
-        miniTagsDict = {tagKeysDict.get(tag['tagKeyId'], UNKNOWN): tag['value'] for tag in ap.get('tags', [])}
-        model, antenna = external_ant_split(ap.get('model', UNKNOWN))
-        ap_details = {
-            'Name': ap['name'],
-            'Floor': floorPlansDict.get(ap['location']['floorPlanId'], UNKNOWN),
-            'Model': model,
-            'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
-            'Mounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaMounting', ''),
-            'AP Bracket': miniTagsDict.get('ap-bracket'),
-            'Antenna': antenna,
-            'Antenna Bracket': miniTagsDict.get('antenna-bracket'),
-            'Antenna Height': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaHeight', ''),
-            'Antenna Tilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaTilt', ''),
-            'Simulated Tx power (5 GHz)': round(simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('transmitPower', 0), 1),
-            'RF-Group': miniTagsDict.get('rf-group'),
-            'Notes': note_text_processor(ap['noteIds'], notesDict)
-        }
-        custom_AP_list.append(ap_details)
-    return sorted(custom_AP_list, key=lambda x: x['Name'])

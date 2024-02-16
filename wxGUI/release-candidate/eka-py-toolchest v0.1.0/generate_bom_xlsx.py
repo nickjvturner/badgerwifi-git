@@ -3,12 +3,13 @@
 import json
 import pandas as pd
 from pathlib import Path
-from common import ekahau_color_dict
+
+from configuration.projectSpecific import create_custom_AP_list
+
 from common import load_json
 from common import create_floor_plans_dict
 from common import create_tag_keys_dict
 from common import create_simulated_radios_dict
-from common import create_custom_AP_list
 from common import create_notes_dict
 
 # Constants

@@ -1,11 +1,10 @@
-# inspect_esx.py
+# validate_esx.py
 
 import json
 from collections import defaultdict
-from pathlib import Path
 from common import ekahau_color_dict
-from configuration.requiredTagKeys import requiredTagKeys
-from configuration.requiredTagKeys import offender_constructor
+from configuration.projectSpecific import offender_constructor
+from configuration.projectSpecific import requiredTagKeys
 
 nl = '\n'
 
@@ -135,7 +134,7 @@ def summarise(working_directory, project_name, message_callback):
     for model, count in sorted(model_counts.items()):
         summary_message += f"{model}: {count}{nl}"
 
-    summary_message += f"{nl}Count of each color:{nl}"
+    summary_message += f"{nl}{nl}Count of each color:{nl}"
     for color, count in sorted(color_counts.items()):
         summary_message += f"{ekahau_color_dict.get(color)}: {count}{nl}"
 

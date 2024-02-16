@@ -1,9 +1,9 @@
-# inspect_esx.py
+# validate_esx.py
 
 import json
 from collections import defaultdict
-from configuration.requiredTagKeys import requiredTagKeys
-from configuration.requiredTagKeys import offender_constructor
+from configuration.projectSpecific import requiredTagKeys
+from configuration.projectSpecific import offender_constructor
 
 nl = '\n'
 
@@ -33,17 +33,17 @@ def validate_tags(offenders, message_callback):
         if len(offenders.get('missing_tags', {}).get(missing_tag, [])) > 0:
             message_callback(
                 f"{nl}There is a problem! The following {len(offenders.get('missing_tags', {}).get(missing_tag, []))} APs are missing the '{missing_tag}' tag")
-            for ap in offenders['missing_tags'][missing_tag]:
+            for ap in sorted(offenders['missing_tags'][missing_tag]):
                 message_callback(ap)
             pass_required_tag_validation.append(False)
         pass_required_tag_validation.append(True)
 
-    if pass_required_tag_validation:
+    if all(pass_required_tag_validation):
         return True
     return False
 
-def inspect(working_directory, project_name, message_callback):
-    message_callback(f'Performing action for: {project_name}')
+def validate(working_directory, project_name, message_callback):
+    message_callback(f'Performing Validation for: {project_name}')
 
     # Load the floorPlans.json file into the floorPlansJSON Dictionary
     with open(working_directory / project_name / 'floorPlans.json') as json_file:
@@ -97,7 +97,7 @@ def inspect(working_directory, project_name, message_callback):
         for tag in ap['tags']:
             processedAPdict[ap['name']]['tags'][tagKeysDict.get(tag['tagKeyId'])] = tag['value']
 
-    # Initialize defaultdict to count attributes
+    # Initialize defaultdicts to count attributes
     color_counts = defaultdict(int)
     antennaHeight_counts = defaultdict(int)
 
@@ -128,13 +128,6 @@ def inspect(working_directory, project_name, message_callback):
 
         model_counts[ap['model']] += 1
 
-
-    # Print the count of each tag key and value pair, sorted
-    # print(f"{nl}Count of each tag key and value pair:")
-    # for (tag_key, tag_value), count in sorted(tag_counts.items()):
-    #     print(f"{tag_key}: {tag_value} - {count}")
-
-    # Validation
 
     # Perform all validations
     validations = [
