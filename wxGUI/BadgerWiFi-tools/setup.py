@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='eka-py-toolchest',
+    name='BadgerWiFi-tools',
     version='0.1.0',
     author='Nick Turner',
     author_email='nick@badgerwifi.co.uk',
@@ -15,6 +15,8 @@ setup(
         'wxPython>=4.1.1',
         'openpyxl>=3.1.2',
         'pandas>=2.2.0'
+        'xlsxwriter>=3.1.9'
+
         # Add other dependencies as needed
     ],
     classifiers=[
@@ -30,7 +32,7 @@ setup(
     python_requires='>=3.9',
     entry_points={
         'console_scripts': [
-            'eka-py-toolchest=your_package_name.your_main_script:main_function',
+            'badgerwifi-tools=your_package_name.your_main_script:main_function',
         ],
     },
 )
