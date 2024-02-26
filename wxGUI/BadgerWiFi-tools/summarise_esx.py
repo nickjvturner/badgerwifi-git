@@ -1,10 +1,9 @@
-# validate_esx.py
+# summarise_esx_.py
 
 import json
 from collections import defaultdict
-from common import ekahau_color_dict
-from configuration.projectSpecific import offender_constructor
-from configuration.projectSpecific import requiredTagKeys
+from root_common import ekahau_color_dict
+from root_common import offender_constructor
 
 nl = '\n'
 
@@ -43,7 +42,7 @@ def validate_tags(offenders, message_callback):
         return True
     return False
 
-def summarise(working_directory, project_name, message_callback):
+def summarise_esx(working_directory, project_name, message_callback, requiredTagKeys, optionalTagKeys):
     message_callback(f'Summarising the Contents of: {project_name}{nl}')
 
     # Load the floorPlans.json file into the floorPlansJSON Dictionary
@@ -106,7 +105,7 @@ def summarise(working_directory, project_name, message_callback):
 
     model_counts = defaultdict(int)
 
-    offenders = offender_constructor()
+    offenders = offender_constructor(requiredTagKeys)
 
     # Count occurrences of each
     for ap in processedAPdict.values():
@@ -135,7 +134,8 @@ def summarise(working_directory, project_name, message_callback):
         summary_message += f"{model}: {count}{nl}"
 
     summary_message += f"{nl}{nl}Count of each color:{nl}"
-    for color, count in sorted(color_counts.items()):
+    color_counts_sorted = sorted(color_counts.items(), key=lambda item: ekahau_color_dict.get(item[0], item[0]))
+    for color, count in color_counts_sorted:
         summary_message += f"{ekahau_color_dict.get(color)}: {count}{nl}"
 
     summary_message += f"{nl}Count of each AP height:{nl}"
@@ -144,7 +144,17 @@ def summarise(working_directory, project_name, message_callback):
 
     # Print the count of each tag key and value pair, sorted
     summary_message += f"{nl}Count of each tag key and value pair:{nl}"
+
+    previous_tag_key = None  # Initialize previous tag_key with None
     for (tag_key, tag_value), count in sorted(tag_counts.items()):
+        # Check if the current tag_key is different from the previous one
+        if tag_key != previous_tag_key:
+            # Add a blank line if it's not the first tag_key
+            if previous_tag_key is not None:
+                summary_message += f"{nl}"
+            previous_tag_key = tag_key  # Update the previous tag_key
+
+        # Append the current tag information
         summary_message += f"{tag_key} - {tag_value}: {count}{nl}"
 
     message_callback(summary_message)

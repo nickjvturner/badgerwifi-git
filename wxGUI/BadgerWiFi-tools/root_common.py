@@ -1,6 +1,7 @@
 # root_common.py
 
 import json
+from pathlib import Path
 
 
 # Constants
@@ -94,6 +95,49 @@ def create_simulated_radios_dict(simulatedRadiosJSON):
     return simulatedRadioDict
 
 
-def external_ant_split(s):
+def model_antenna_split(string):
     """Split external antenna information."""
-    return s.split(' +  ') if ' +  ' in s else (s, 'Integrated')
+    # Split the input string by the '+' sign
+    segments = string.split('+')
+
+    # Strip leading/trailing spaces from each part
+    segments = [segment.strip() for segment in segments]
+
+    # Extract the AP model, which is always present
+    ap_model = segments[0]
+
+    # Extract the external antenna if present
+    if len(segments) > 1:
+        external_antenna = segments[1]
+        antenna_description = 'External'
+    else:
+        external_antenna = None
+        antenna_description = 'Integrated'
+
+    return ap_model, external_antenna, antenna_description
+
+def file_or_dir_exists(path):
+    """
+    Check if a file or directory exists at the given path.
+
+    Parameters:
+    - path (str or Path): The path to the file or directory.
+
+    Returns:
+    - bool: True if the file or directory exists, False otherwise.
+    """
+    target_path = Path(path)
+    return target_path.exists()
+
+
+def offender_constructor(requiredTagKeys):
+    offenders = {
+        'color': [],
+        'antennaHeight': [],
+        'missing_tags': {}
+    }
+
+    for tagKey in requiredTagKeys:
+        offenders['missing_tags'][tagKey] = []
+
+    return offenders

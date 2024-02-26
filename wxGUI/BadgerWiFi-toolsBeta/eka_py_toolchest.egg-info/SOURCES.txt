@@ -1,8 +1,0 @@
-README.md
-setup.py
-eka_py_toolchest.egg-info/PKG-INFO
-eka_py_toolchest.egg-info/SOURCES.txt
-eka_py_toolchest.egg-info/dependency_links.txt
-eka_py_toolchest.egg-info/entry_points.txt
-eka_py_toolchest.egg-info/requires.txt
-eka_py_toolchest.egg-info/top_level.txt

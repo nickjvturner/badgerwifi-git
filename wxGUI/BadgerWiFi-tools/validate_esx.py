@@ -1,14 +1,13 @@
 # validate_esx.py
 
-from pathlib import Path
 from collections import defaultdict
 
-from configuration.projectSpecific import requiredTagKeys
-from configuration.projectSpecific import offender_constructor
-from common import load_json
-from common import create_floor_plans_dict
-from common import create_tag_keys_dict
-from common import create_simulated_radios_dict
+from root_common import load_json
+from root_common import create_floor_plans_dict
+from root_common import create_tag_keys_dict
+from root_common import create_simulated_radios_dict
+from root_common import model_antenna_split
+from root_common import offender_constructor
 
 nl = '\n'
 
@@ -48,10 +47,10 @@ def validate_tags(offenders, message_callback):
         return True
     return False
 
-def validate(working_directory, project_name, message_callback):
+def validate_esx(working_directory, project_name, message_callback, requiredTagKeys, optionalTagKeys):
     message_callback(f'Performing Validation for: {project_name}')
 
-    project_dir = Path(working_directory) / project_name
+    project_dir = working_directory / project_name
 
     # Load JSON data
     floorPlansJSON = load_json(project_dir, 'floorPlans.json')
@@ -64,28 +63,24 @@ def validate(working_directory, project_name, message_callback):
     tagKeysDict = create_tag_keys_dict(tagKeysJSON)
     simulatedRadioDict = create_simulated_radios_dict(simulatedRadiosJSON)
 
-    def externalAntSplitAnt(model_string):
-        return model_string.split(' +  ')[1] if ' +  ' in model_string else 'integrated'
-
-    def externalAntSplitModel(model_string):
-        return model_string.split(' +  ')[0] if ' +  ' in model_string else model_string
-
     # Process access points
     processedAPdict = {}
     for ap in accessPointsJSON['accessPoints']:
+        ap_model, external_antenna, antenna_description = model_antenna_split(ap.get('model', ''))
+
         processedAPdict[ap['name']] = {
-            'name': ap['name'],
-            'color': ap.get('color', 'none'),
-            'model': externalAntSplitModel(ap.get('model', '')),
-            'antenna': externalAntSplitAnt(ap.get('model', '')),
-            'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
-            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get('antennaTilt', ''),
-            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get('antennaMounting', ''),
-            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get('antennaHeight', ''),
-            'remarks': '',
-            'ap bracket': '',
-            'antenna bracket': '',
-            'tags': {}
+        'name': ap['name'],
+        'color': ap.get('color', 'none'),
+        'model': ap_model,
+        'antenna': external_antenna,
+        'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
+        'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get('antennaTilt', ''),
+        'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get('antennaMounting', ''),
+        'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get('antennaHeight', ''),
+        'remarks': '',
+        'ap bracket': '',
+        'antenna bracket': '',
+        'tags': {}
         }
 
         for tag in ap['tags']:
@@ -99,7 +94,7 @@ def validate(working_directory, project_name, message_callback):
 
     model_counts = defaultdict(int)
 
-    offenders = offender_constructor()
+    offenders = offender_constructor(requiredTagKeys)
 
     # Count occurrences of each
     for ap in processedAPdict.values():

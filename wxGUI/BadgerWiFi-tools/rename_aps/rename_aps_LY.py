@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import shutil
 
-from common import load_json, create_floor_plans_dict
+from root_common import load_json, create_floor_plans_dict
 
 def create_tag_keys_dict(tagKeysJSON):
     """Create a dictionary of tag keys."""
