@@ -1,16 +1,30 @@
 # project_IK.py
 
-from root_common import model_antenna_split
-from root_common import ekahau_color_dict
-from root_common import note_text_processor
+from common import model_antenna_split
+from common import ekahau_color_dict
+from common import note_text_processor
 
-# CONSTANTS
-UNKNOWN = 'Unknown'
-FIVE_GHZ = 'FIVE'
+from common import UNKNOWN, FIVE_GHZ
 
 requiredTagKeys = ("ap-bracket", "antenna-bracket", "rf-group")
 optionalTagKeys = ()
 
+acceptableAntennaTiltAngles = (-10, -20, -30, -40, -45, -50, -60, -70, -80, -90)
+
+project_specific_conventions = {
+    "AP-514": {
+        "color": "red",
+        "mounting": "CEILING",
+        "antennaHeightGreater than": 5
+    },
+    "AP-655": {
+        "color": "orange",
+        "mounting": "CEILING",
+        "antennaHeightGreater than": 2
+    }
+}
+
+# Custom AP List Constructor
 def create_custom_AP_list(accessPointsJSON, floorPlansDict, tagKeysDict, simulatedRadioDict, notesDict):
     """Process access points to a structured list."""
     custom_AP_list = []

@@ -1,12 +1,10 @@
 # project_IK.py
 
-from root_common import model_antenna_split
-from root_common import ekahau_color_dict
-from root_common import note_text_processor
+from common import model_antenna_split
+from common import ekahau_color_dict
+from common import note_text_processor
 
-# CONSTANTS
-UNKNOWN = 'Unknown'
-FIVE_GHZ = 'FIVE'
+from common import UNKNOWN, FIVE_GHZ
 
 requiredTagKeys = ("ap-bracket", "UNIT", "EX", "ind/out", "power", "backhaul")
 optionalTagKeys = ("building-group", 'sequence-override')

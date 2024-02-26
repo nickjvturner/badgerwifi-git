@@ -2,13 +2,13 @@
 
 from pathlib import Path
 
-from root_common import load_json
-from root_common import create_floor_plans_dict
-from root_common import create_floor_plans_height_dict
+from common import load_json
+from common import create_floor_plans_dict
+from common import create_floor_plans_height_dict
 
 # from common import rename_access_points
-from rename_aps.common import save_and_move_json
-from rename_aps.common import re_bundle_project
+from common import save_and_move_json
+from common import re_bundle_project
 
 nl = '\n'
 VERTICAL_DIVISION_FACTOR = 40
@@ -96,6 +96,9 @@ def run(working_directory, project_name, message_callback):
 
     y_coordinate_group = 1
     current_floor = 0
+    current_y = None
+    y_coordinate_threshold = None
+
 
     for ap in accessPointsListSorted:
         if current_floor != ap['location']['floorPlanId']:
@@ -132,9 +135,6 @@ def run(working_directory, project_name, message_callback):
 
         ap['name'] = new_AP_name
         apSeqNum += 1
-
-    # Convert modified list back into dictionary
-    accessPointsSortedDict = {'accessPoints': accessPointsListSorted}
 
     # Save and Move the Updated JSON
     updatedAccessPointsJSON = {'accessPoints': accessPointsListSorted}

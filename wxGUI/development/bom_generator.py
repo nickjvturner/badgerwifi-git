@@ -3,17 +3,17 @@
 import pandas as pd
 from pathlib import Path
 
-from root_common import load_json
-from root_common import create_floor_plans_dict
-from root_common import create_tag_keys_dict
-from root_common import create_simulated_radios_dict
-from root_common import create_notes_dict
+from common import load_json
+from common import create_floor_plans_dict
+from common import create_tag_keys_dict
+from common import create_simulated_radios_dict
+from common import create_notes_dict
 
-from root_common import FIVE_GHZ, UNKNOWN
+from common import FIVE_GHZ, UNKNOWN
 
-from root_common import ekahau_color_dict
-from root_common import model_antenna_split
-from root_common import note_text_processor
+from common import ekahau_color_dict
+from common import model_antenna_split
+from common import note_text_processor
 
 # from bom_generators.common import adjust_column_widths
 # from bom_generators.common import format_headers
