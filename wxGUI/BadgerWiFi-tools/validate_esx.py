@@ -28,7 +28,7 @@ def validate_height_manipulation(offenders, message_callback):
         for ap in offenders['antennaHeight']:
             message_callback(ap)
         return False
-    message_callback(f"{nl}Height assignment test: PASSED")
+    message_callback(f"{nl}antennaHeight assignment test: PASSED")
     return True
 
 
