@@ -294,9 +294,9 @@ class MyFrame(wx.Frame):
         if not self.esx_project_unpacked:
             self.unpack_esx()
 
-        if hasattr(self, 'current_profile_module'):
+        if hasattr(self, 'current_profile_bom_module'):
             generate_bom(self.working_directory, self.esx_project_name, self.append_message,
-                         self.current_profile_module.create_custom_AP_list)
+                         self.current_profile_bom_module.create_custom_AP_list)
 
     def on_copy_log(self, event):
         if wx.TheClipboard.Open():
@@ -372,7 +372,7 @@ class MyFrame(wx.Frame):
         if not self.esx_project_unpacked:
             self.unpack_esx()
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
-        script_path = str(Path(__file__).resolve().parent / "rename_aps" / (selected_script + ".py"))
+        script_path = str(Path(__file__).resolve().parent / RENAME_APS_FOLDER / (selected_script + ".py"))
 
         # Load and execute the selected script
         script_module = SourceFileLoader(selected_script, script_path).load_module()

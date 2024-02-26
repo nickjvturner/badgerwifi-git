@@ -72,7 +72,8 @@ def run(working_directory, project_name, message_callback):
         # Define the pattern to rename your APs
         new_AP_name = f'AP-{apSeqNum:03}'
 
-        message_callback(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlansDict.get(ap['location']['floorPlanId'])} ] renamed to {new_AP_name}")
+        message_callback(
+            f"[[ {ap['name']} [{ap['model']}]] from: {floorPlansDict.get(ap['location']['floorPlanId'])} ] renamed to {new_AP_name}")
 
         ap['name'] = new_AP_name
         apSeqNum += 1

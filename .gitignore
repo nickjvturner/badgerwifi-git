@@ -9,3 +9,4 @@ example_AP_images/
 development/
 *.esx
 *.docx
+app_state.json

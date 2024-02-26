@@ -42,6 +42,12 @@ def create_floor_plans_dict(floorPlansJSON):
         floorPlansDict[floor['id']] = floor['name']
     return floorPlansDict
 
+def create_floor_plans_height_dict(floorPlansJSON):
+    """Create a dictionary of floor plans."""
+    floorPlansDict = {}
+    for floor in floorPlansJSON['floorPlans']:
+        floorPlansDict[floor['id']] = floor['height']
+    return floorPlansDict
 
 def create_notes_dict(notesJSON):
     """Create a dictionary of notes."""

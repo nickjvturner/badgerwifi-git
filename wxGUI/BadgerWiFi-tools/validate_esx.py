@@ -18,6 +18,7 @@ def validate_color_assignment(offenders, message_callback):
         for ap in offenders['color']:
             message_callback(ap)
         return False
+    message_callback(f"{nl}Colour assignment test: PASSED")
     return True
 
 
@@ -27,6 +28,7 @@ def validate_height_manipulation(offenders, message_callback):
         for ap in offenders['antennaHeight']:
             message_callback(ap)
         return False
+    message_callback(f"{nl}Height assignment test: PASSED")
     return True
 
 
@@ -44,6 +46,7 @@ def validate_tags(offenders, message_callback):
         pass_required_tag_validation.append(True)
 
     if all(pass_required_tag_validation):
+        message_callback(f"{nl}Required tags assignment test: PASSED")
         return True
     return False
 
