@@ -1,4 +1,4 @@
-# generate_bom_xlsx.py
+# project_IK.py
 
 import json
 import pandas as pd
