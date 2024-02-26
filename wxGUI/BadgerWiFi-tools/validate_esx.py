@@ -9,7 +9,11 @@ from root_common import create_simulated_radios_dict
 from root_common import model_antenna_split
 from root_common import offender_constructor
 
+from root_common import FIVE_GHZ, UNKNOWN
+
+
 nl = '\n'
+
 
 
 def validate_color_assignment(offenders, message_callback):
@@ -77,9 +81,9 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
         'model': ap_model,
         'antenna': external_antenna,
         'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
-        'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get('antennaTilt', ''),
-        'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get('antennaMounting', ''),
-        'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get('antennaHeight', ''),
+        'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaTilt', ''),
+        'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaMounting', ''),
+        'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaHeight', ''),
         'remarks': '',
         'ap bracket': '',
         'antenna bracket': '',

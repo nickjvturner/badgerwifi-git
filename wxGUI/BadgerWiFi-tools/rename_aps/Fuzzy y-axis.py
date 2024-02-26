@@ -8,7 +8,11 @@ from root_common import load_json
 from root_common import create_floor_plans_dict
 from root_common import create_floor_plans_height_dict
 
-# CONSTANTS
+# from common import rename_access_points
+from rename_aps.common import save_and_move_json
+from rename_aps.common import re_bundle_project
+
+from root_common import FIVE_GHZ, UNKNOWN
 
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 
@@ -135,20 +139,11 @@ def run(working_directory, project_name, message_callback):
     # Convert modified list back into dictionary
     accessPointsSortedDict = {'accessPoints': accessPointsListSorted}
 
-    # save the modified dictionary as accessPoints.json
-    with open("accessPoints.json", "w") as outfile:
-        json.dump(accessPointsSortedDict, outfile, indent=4)
+    # Save and Move the Updated JSON
+    updatedAccessPointsJSON = {'accessPoints': accessPointsListSorted}
+    save_and_move_json(updatedAccessPointsJSON, working_directory / project_name / 'accessPoints.json')
 
-    # move file into unpacked folder OVERWRITING ORIGINAL
-    shutil.move('accessPoints.json', working_directory / project_name / 'accessPoints.json')
+    # Re-bundle into .esx File
+    re_bundle_project(Path(working_directory / project_name), f"{project_name}_re-zip")
+    message_callback(f"\nProcess complete\n{project_name}_re-zip re-bundled into .esx file")
 
-    output_esx = Path(project_name + '_re-zip')
-
-    try:
-        shutil.make_archive(str(output_esx), 'zip', project_name)
-        shutil.move(output_esx.with_suffix('.zip'), output_esx.with_suffix('.esx'))
-        message_callback(f'{nl}** Process complete **{nl}{output_esx} re-bundled into .esx file{nl}')
-        shutil.rmtree(project_name)
-        message_callback(f'Temporary project contents directory removed{nl}')
-    except Exception as e:
-        print(e)

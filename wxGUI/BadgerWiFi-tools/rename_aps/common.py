@@ -1,5 +1,11 @@
 # rename_aps.common
 
+import json
+import shutil
+
+from root_common import FIVE_GHZ, UNKNOWN
+
+
 def create_tag_keys_dict(tagKeysJSON):
     """Create a dictionary of tag keys."""
     tagKeysDict = {}
