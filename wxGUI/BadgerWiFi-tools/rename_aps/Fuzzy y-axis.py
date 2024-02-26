@@ -1,7 +1,5 @@
 # Fuzzy y-axis.py
 
-import json
-import shutil
 from pathlib import Path
 
 from root_common import load_json
@@ -12,7 +10,8 @@ from root_common import create_floor_plans_height_dict
 from rename_aps.common import save_and_move_json
 from rename_aps.common import re_bundle_project
 
-from root_common import FIVE_GHZ, UNKNOWN
+nl = '\n'
+VERTICAL_DIVISION_FACTOR = 40
 
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 
@@ -73,9 +72,6 @@ AP Naming pattern is defined by:
     If apSeqNum is less than 100, it will be padded with leading zeros to ensure the resulting string has a total of 5 characters
 """
 
-nl = '\n'
-
-VERTICAL_DIVISION_FACTOR = 20
 
 
 def run(working_directory, project_name, message_callback):
@@ -108,7 +104,7 @@ def run(working_directory, project_name, message_callback):
             y_coordinate_threshold = int(
                 floorPlansHeightDict.get(ap['location']['floorPlanId'])) / VERTICAL_DIVISION_FACTOR
 
-        if abs(ap['location']['coord']['x'] - current_y) <= y_coordinate_threshold:
+        if abs(ap['location']['coord']['y'] - current_y) <= y_coordinate_threshold:
             ap['location']['coord']['y_group'] = y_coordinate_group
         else:
             y_coordinate_group += 1
@@ -119,6 +115,7 @@ def run(working_directory, project_name, message_callback):
     # by floor name(floorPlanId lookup) and x coord
     accessPointsListSorted = sorted(accessPointsListSorted,
                                      key=lambda i: (floorPlansDict.get(i['location']['floorPlanId'], ''),
+                                                    i['model'],
                                                     i['location']['coord']['y_group'],
                                                     i['location']['coord']['x']))
 
