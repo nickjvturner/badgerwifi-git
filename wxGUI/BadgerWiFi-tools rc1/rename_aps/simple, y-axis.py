@@ -39,8 +39,8 @@ from pathlib import Path
 
 nl = '\n'
 
-from root_common import load_json
-from root_common import create_floor_plans_dict
+from common import load_json
+from common import create_floor_plans_dict
 
 
 def run(working_directory, project_name, message_callback):

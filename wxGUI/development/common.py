@@ -149,13 +149,6 @@ def offender_constructor(requiredTagKeys):
     return offenders
 
 
-# def create_tag_keys_dict(tagKeysJSON):
-#     """Create a dictionary of tag keys."""
-#     tagKeysDict = {}
-#     for tagKey in tagKeysJSON['tagKeys']:
-#         tagKeysDict[tagKey['key']] = tagKey['id']
-#     return tagKeysDict
-
 def create_tag_keys_dict(tagKeysJSON):
     """Create a dictionary of tag keys."""
     tagKeysDict = {}

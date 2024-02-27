@@ -12,7 +12,7 @@ from validate_esx import validate_esx
 from unpack_esx import unpack_esx_file
 from summarise_esx import summarise_esx
 from backup_esx import backup_esx
-from root_common import file_or_dir_exists
+from common import file_or_dir_exists
 from bom_generator import generate_bom
 
 # CONSTANTS

@@ -2,8 +2,8 @@
 
 import json
 from collections import defaultdict
-from root_common import ekahau_color_dict
-from root_common import offender_constructor
+from common import ekahau_color_dict
+from common import offender_constructor
 
 nl = '\n'
 
