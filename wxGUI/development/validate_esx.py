@@ -14,29 +14,27 @@ from common import FIVE_GHZ, UNKNOWN
 
 nl = '\n'
 
-
-
-def validate_color_assignment(offenders, message_callback):
+def validate_color_assignment(offenders, total_ap_count, message_callback):
     if len(offenders.get('color', [])) > 0:
         message_callback(f"{nl}There is a problem! The following {len(offenders.get('color', []))} APs have been assigned no color")
         for ap in offenders['color']:
             message_callback(ap)
         return False
-    message_callback(f"{nl}Colour assignment test: PASSED")
+    message_callback(f"{nl}Colour assignment test: PASSED{nl}All {total_ap_count} APs have a non-default colour")
     return True
 
 
-def validate_height_manipulation(offenders, message_callback):
+def validate_height_manipulation(offenders, total_ap_count, message_callback):
     if len(offenders.get('antennaHeight', [])) > 0:
-        message_callback(f"{nl}There is a problem! The following {len(offenders.get('antennaHeight', []))} APs are configured with the Ekahau default height of 2.4 meters, is that intentional?")
+        message_callback(f"{nl}Caution! The following {len(offenders.get('antennaHeight', []))} APs are configured with the Ekahau 'default' height of 2.4 meters, is this intentional?")
         for ap in offenders['antennaHeight']:
             message_callback(ap)
-        return False
-    message_callback(f"{nl}antennaHeight assignment test: PASSED")
+        return True
+    message_callback(f"{nl}antennaHeight manipulation test: PASSED{nl}All {total_ap_count} APs have an assigned height other than '2.4' metres")
     return True
 
 
-def validate_tags(offenders, message_callback):
+def validate_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback):
     # Initialize a list to store failed tag validations
     pass_required_tag_validation = []
 
@@ -50,7 +48,7 @@ def validate_tags(offenders, message_callback):
         pass_required_tag_validation.append(True)
 
     if all(pass_required_tag_validation):
-        message_callback(f"{nl}Required tags assignment test: PASSED")
+        message_callback(f"{nl}Required tag assignment test: PASSED{nl}All {total_ap_count} APs have the required {totalRequiredTagKeysCount} tag keys assigned")
         return True
     return False
 
@@ -76,19 +74,19 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
         ap_model, external_antenna, antenna_description = model_antenna_split(ap.get('model', ''))
 
         processedAPdict[ap['name']] = {
-        'name': ap['name'],
-        'color': ap.get('color', 'none'),
-        'model': ap_model,
-        'antenna': external_antenna,
-        'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
-        'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaTilt', ''),
-        'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaMounting', ''),
-        'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaHeight', ''),
-        'remarks': '',
-        'ap bracket': '',
-        'antenna bracket': '',
-        'tags': {}
-        }
+            'name': ap['name'],
+            'color': ap.get('color', 'none'),
+            'model': ap_model,
+            'antenna': external_antenna,
+            'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
+            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaTilt', ''),
+            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaMounting', ''),
+            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaHeight', ''),
+            'remarks': '',
+            'ap bracket': '',
+            'antenna bracket': '',
+            'tags': {}
+            }
 
         for tag in ap['tags']:
             processedAPdict[ap['name']]['tags'][tagKeysDict.get(tag['tagKeyId'])] = tag['value']
@@ -124,12 +122,14 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
 
         model_counts[ap['model']] += 1
 
+    total_ap_count = len(processedAPdict)
+    totalRequiredTagKeysCount = len(requiredTagKeys)
 
     # Perform all validations
     validations = [
-        validate_color_assignment(offenders, message_callback),
-        validate_height_manipulation(offenders, message_callback),
-        validate_tags(offenders, message_callback)
+        validate_color_assignment(offenders, total_ap_count, message_callback),
+        validate_height_manipulation(offenders, total_ap_count, message_callback),
+        validate_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback)
     ]
 
     # Print pass/fail states

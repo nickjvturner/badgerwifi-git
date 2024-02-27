@@ -149,11 +149,18 @@ def offender_constructor(requiredTagKeys):
     return offenders
 
 
+# def create_tag_keys_dict(tagKeysJSON):
+#     """Create a dictionary of tag keys."""
+#     tagKeysDict = {}
+#     for tagKey in tagKeysJSON['tagKeys']:
+#         tagKeysDict[tagKey['key']] = tagKey['id']
+#     return tagKeysDict
+
 def create_tag_keys_dict(tagKeysJSON):
     """Create a dictionary of tag keys."""
     tagKeysDict = {}
     for tagKey in tagKeysJSON['tagKeys']:
-        tagKeysDict[tagKey['key']] = tagKey['id']
+        tagKeysDict[tagKey['id']] = tagKey['key']
     return tagKeysDict
 
 def sort_tag_value_getter(tagsList, sortTagKey, tagKeysDict):
@@ -206,3 +213,5 @@ def re_bundle_project(projectDir, outputName):
     output_zip_path = str(output_esx_path) + '.zip'
     output_esx_path = str(output_esx_path) + '.esx'
     shutil.move(output_zip_path, output_esx_path)
+
+
