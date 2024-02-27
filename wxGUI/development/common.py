@@ -208,3 +208,24 @@ def re_bundle_project(projectDir, outputName):
     shutil.move(output_zip_path, output_esx_path)
 
 
+def create_custom_ap_dict(accessPointsJSON, floorPlansDict, simulatedRadioDict):
+    custom_ap_dict = {}
+    for ap in accessPointsJSON['accessPoints']:
+        ap_model, external_antenna, antenna_description = model_antenna_split(ap.get('model', ''))
+
+        custom_ap_dict[ap['name']] = {
+            'name': ap['name'],
+            'color': ap.get('color', 'none'),
+            'model': ap_model,
+            'antenna': external_antenna,
+            'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
+            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaTilt', ''),
+            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaMounting', ''),
+            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaHeight', ''),
+            'remarks': '',
+            'ap bracket': '',
+            'antenna bracket': '',
+            'tags': {}
+            }
+
+    return custom_ap_dict
