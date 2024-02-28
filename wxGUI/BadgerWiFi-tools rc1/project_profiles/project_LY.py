@@ -4,7 +4,7 @@ from common import model_antenna_split
 from common import ekahau_color_dict
 from common import note_text_processor
 
-from common import UNKNOWN, FIVE_GHZ
+from common import UNKNOWN, FIVE_GHZ_RADIO_ID
 
 requiredTagKeys = ("ap-bracket", "UNIT", "EX", "ind/out", "power", "backhaul")
 optionalTagKeys = ("building-group", 'sequence-override')
@@ -21,9 +21,9 @@ def create_custom_AP_list(accessPointsJSON, floorPlansDict, tagKeysDict, simulat
             'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
             'Floor': floorPlansDict.get(ap['location']['floorPlanId'], UNKNOWN),
             'Model': model + 'EX' if miniTagsDict.get('EX') == 'YES' else model,
-            'Mounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaMounting', ''),
-            'Antenna Height': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaHeight', ''),
-            'Antenna Tilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaTilt', ''),
+            'Mounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
+            'Antenna Height': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', ''),
+            'Antenna Tilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
             'UNIT': miniTagsDict.get('UNIT'),
             'EX': miniTagsDict.get('EX'),
             'Mount': miniTagsDict.get('ap-bracket'),

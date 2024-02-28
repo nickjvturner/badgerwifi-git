@@ -21,10 +21,10 @@ def summarise_esx(working_directory, project_name, message_callback, requiredTag
     project_dir = working_directory / project_name
 
     # Load JSON data
-    floorPlansJSON = load_json(project_dir, 'floorPlans.json')
-    accessPointsJSON = load_json(project_dir, 'accessPoints.json')
-    simulatedRadiosJSON = load_json(project_dir, 'simulatedRadios.json')
-    tagKeysJSON = load_json(project_dir, 'tagKeys.json')
+    floorPlansJSON = load_json(project_dir, 'floorPlans.json', message_callback)
+    accessPointsJSON = load_json(project_dir, 'accessPoints.json', message_callback)
+    simulatedRadiosJSON = load_json(project_dir, 'simulatedRadios.json', message_callback)
+    tagKeysJSON = load_json(project_dir, 'tagKeys.json', message_callback)
 
     # Process data
     floorPlansDict = create_floor_plans_dict(floorPlansJSON)
@@ -44,7 +44,7 @@ def summarise_esx(working_directory, project_name, message_callback, requiredTag
 
     model_counts = defaultdict(int)
 
-    offenders = offender_constructor(requiredTagKeys)
+    offenders = offender_constructor(requiredTagKeys, optionalTagKeys)
 
     # Count occurrences of each
     for ap in custom_ap_dict.values():
@@ -63,7 +63,7 @@ def summarise_esx(working_directory, project_name, message_callback, requiredTag
 
         for tagKey in requiredTagKeys:
             if tagKey not in ap['tags']:
-                offenders['missing_tags'][tagKey].append(ap['name'])
+                offenders['missing_required_tags'][tagKey].append(ap['name'])
 
         model_counts[ap['model']] += 1
 

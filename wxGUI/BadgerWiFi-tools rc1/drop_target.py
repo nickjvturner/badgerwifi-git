@@ -5,11 +5,13 @@ from pathlib import Path
 
 
 class DropTarget(wx.FileDropTarget):
-    def __init__(self, window, allowed_extensions, message_callback):
+    def __init__(self, window, allowed_extensions, message_callback, esx_project_unpacked, update_esx_project_unpacked_callback):
         wx.FileDropTarget.__init__(self)
         self.window = window
         self.allowed_extensions = allowed_extensions
         self.message_callback = message_callback
+        self.esx_project_unpacked = esx_project_unpacked
+        self.update_esx_project_unpacked_callback = update_esx_project_unpacked_callback
 
     def OnDropFiles(self, x, y, filenames):
         existing_files = self.window.GetStrings()  # Get currently listed files
@@ -42,6 +44,8 @@ class DropTarget(wx.FileDropTarget):
                             self.window.Delete(index)  # Remove the existing .esx file
                             self.window.Append(filepath)  # Append the new one
                             self.message_callback(f"{Path(filepath).name} added to the list.")
+                            self.esx_project_unpacked = False
+                            self.update_esx_project_unpacked_callback(False)
                         break  # Exit the loop after dealing with the first .esx file found
 
                 # If no existing .esx file was found or replacement was not approved, append the new file

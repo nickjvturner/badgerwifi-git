@@ -4,7 +4,7 @@ from common import model_antenna_split
 from common import ekahau_color_dict
 from common import note_text_processor
 
-from common import UNKNOWN, FIVE_GHZ
+from common import UNKNOWN, FIVE_GHZ_RADIO_ID
 
 requiredTagKeys = ("ap-bracket", "antenna-bracket", "rf-group")
 optionalTagKeys = ()
@@ -36,14 +36,14 @@ def create_custom_AP_list(accessPointsJSON, floorPlansDict, tagKeysDict, simulat
             'Floor': floorPlansDict.get(ap['location']['floorPlanId'], UNKNOWN),
             'Model': model,
             'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
-            'Mounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaMounting', ''),
+            'Mounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
             'AP Bracket': miniTagsDict.get('ap-bracket'),
             'Antenna': antenna,
             'Antenna Description': antenna_description,
             'Antenna Bracket': miniTagsDict.get('antenna-bracket'),
-            'Antenna Height': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaHeight', ''),
-            'Antenna Tilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaTilt', ''),
-            'Simulated Tx power (5 GHz)': round(simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('transmitPower', 0), 1),
+            'Antenna Height': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', ''),
+            'Antenna Tilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
+            'Simulated Tx power (5 GHz)': round(simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('transmitPower', 0), 1),
             'RF-Group': miniTagsDict.get('rf-group'),
             'Notes': note_text_processor(ap['noteIds'], notesDict)
         }

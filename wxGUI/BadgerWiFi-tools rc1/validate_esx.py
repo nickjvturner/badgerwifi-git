@@ -6,11 +6,10 @@ from common import load_json
 from common import create_floor_plans_dict
 from common import create_tag_keys_dict
 from common import create_simulated_radios_dict
-from common import model_antenna_split
 from common import offender_constructor
 from common import create_custom_ap_dict
 
-from common import FIVE_GHZ, UNKNOWN
+from common import FIVE_GHZ_RADIO_ID, UNKNOWN
 
 
 nl = '\n'
@@ -34,16 +33,25 @@ def validate_height_manipulation(offenders, total_ap_count, message_callback):
     message_callback(f"{nl}antennaHeight manipulation test: PASSED{nl}All {total_ap_count} APs have an assigned height other than '2.4' metres")
     return True
 
+def validate_bluetooth_radio_off(offenders, total_ap_count, message_callback):
+    if len(offenders.get('bluetooth', [])) > 0:
+        message_callback(f"{nl}Caution! The following {len(offenders.get('bluetooth', []))} APs have their Bluetooth radio enabled")
+        for ap in offenders['bluetooth']:
+            message_callback(ap)
+        return False
+    message_callback(f"{nl}Bluetooth radio test: PASSED{nl}All {total_ap_count} APs have their Bluetooth radio disabled")
+    return True
 
-def validate_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback):
+
+def validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback):
     # Initialize a list to store failed tag validations
     pass_required_tag_validation = []
 
-    for missing_tag in offenders['missing_tags']:
-        if len(offenders.get('missing_tags', {}).get(missing_tag, [])) > 0:
+    for missing_tag in offenders['missing_required_tags']:
+        if len(offenders.get('missing_required_tags', {}).get(missing_tag, [])) > 0:
             message_callback(
-                f"{nl}There is a problem! The following {len(offenders.get('missing_tags', {}).get(missing_tag, []))} APs are missing the '{missing_tag}' tag")
-            for ap in sorted(offenders['missing_tags'][missing_tag]):
+                f"{nl}There is a problem! The following {len(offenders.get('missing_required_tags', {}).get(missing_tag, []))} APs are missing the '{missing_tag}' tag")
+            for ap in sorted(offenders['missing_required_tags'][missing_tag]):
                 message_callback(ap)
             pass_required_tag_validation.append(False)
         pass_required_tag_validation.append(True)
@@ -59,10 +67,10 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
     project_dir = working_directory / project_name
 
     # Load JSON data
-    floorPlansJSON = load_json(project_dir, 'floorPlans.json')
-    accessPointsJSON = load_json(project_dir, 'accessPoints.json')
-    simulatedRadiosJSON = load_json(project_dir, 'simulatedRadios.json')
-    tagKeysJSON = load_json(project_dir, 'tagKeys.json')
+    floorPlansJSON = load_json(project_dir, 'floorPlans.json', message_callback)
+    accessPointsJSON = load_json(project_dir, 'accessPoints.json', message_callback)
+    simulatedRadiosJSON = load_json(project_dir, 'simulatedRadios.json', message_callback)
+    tagKeysJSON = load_json(project_dir, 'tagKeys.json', message_callback)
 
     # Process data
     floorPlansDict = create_floor_plans_dict(floorPlansJSON)
@@ -76,36 +84,27 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
         for tag in ap['tags']:
             custom_ap_dict[ap['name']]['tags'][tagKeysDict.get(tag['tagKeyId'])] = tag['value']
 
-    # Initialize defaultdicts to count attributes
-    color_counts = defaultdict(int)
-    antennaHeight_counts = defaultdict(int)
-
-    tag_counts = defaultdict(int)
-
-    model_counts = defaultdict(int)
-
-    offenders = offender_constructor(requiredTagKeys)
-
+    offenders = offender_constructor(requiredTagKeys, optionalTagKeys)
+    count = 0
     # Count occurrences of each
     for ap in custom_ap_dict.values():
 
-        color_counts[ap['color']] += 1
         if ap['color'] == 'none':
             offenders['color'].append(ap['name'])
 
-        antennaHeight_counts[ap['antennaHeight']] += 1
         if ap['antennaHeight'] == 2.4:
             offenders['antennaHeight'].append(ap['name'])
 
-        # Iterate through the tags dictionary within each AP
-        for tag_key, tag_value in ap['tags'].items():
-            tag_counts[(tag_key, tag_value)] += 1
+        for radio in ap['radios'].values():
+            if radio.get('radioTechnology') == 'BLUETOOTH' and radio.get('enabled', False):
+                offenders['bluetooth'].append(ap['name'])
+
 
         for tagKey in requiredTagKeys:
             if tagKey not in ap['tags']:
-                offenders['missing_tags'][tagKey].append(ap['name'])
+                offenders['missing_required_tags'][tagKey].append(ap['name'])
 
-        model_counts[ap['model']] += 1
+
 
     total_ap_count = len(custom_ap_dict)
     totalRequiredTagKeysCount = len(requiredTagKeys)
@@ -114,7 +113,8 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
     validations = [
         validate_color_assignment(offenders, total_ap_count, message_callback),
         validate_height_manipulation(offenders, total_ap_count, message_callback),
-        validate_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback)
+        validate_bluetooth_radio_off(offenders, total_ap_count, message_callback),
+        validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback)
     ]
 
     # Print pass/fail states

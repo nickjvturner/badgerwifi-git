@@ -39,7 +39,7 @@ def discover_available_scripts(directory):
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
 
-        wx.Frame.__init__(self, parent, title=title, size=(800, 600))
+        wx.Frame.__init__(self, parent, title=title, size=(1000, 900))
 
         self.panel = wx.Panel(self)
         self.list_box = wx.ListBox(self.panel, style=wx.LB_EXTENDED)
@@ -166,7 +166,7 @@ class MyFrame(wx.Frame):
         self.create_menu()
 
         allowed_extensions = (".esx", ".docx", ".xlsx")  # Define allowed file extensions
-        dt = DropTarget(self.list_box, allowed_extensions, self.append_message)
+        dt = DropTarget(self.list_box, allowed_extensions, self.append_message, self.esx_project_unpacked, self.update_esx_project_unpacked)
         self.list_box.SetDropTarget(dt)
 
         self.copy_log_button.Bind(wx.EVT_BUTTON, self.on_copy_log)
@@ -434,3 +434,6 @@ class MyFrame(wx.Frame):
 
     def on_export_ap_images(self, event):
         pass
+
+    def update_esx_project_unpacked(self, unpacked):
+        self.esx_project_unpacked = unpacked
