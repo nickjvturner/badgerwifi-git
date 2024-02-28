@@ -43,8 +43,8 @@ nl = '\n'
 def run(working_directory, project_name, message_callback):
     message_callback(f'Performing action for: {project_name}')
 
-    floorPlansJSON = load_json(working_directory / project_name, 'floorPlans.json')
-    accessPointsJSON = load_json(working_directory / project_name, 'accessPoints.json')
+    floorPlansJSON = load_json(working_directory / project_name, 'floorPlans.json', message_callback)
+    accessPointsJSON = load_json(working_directory / project_name, 'accessPoints.json', message_callback)
 
     floorPlansDict = create_floor_plans_dict(floorPlansJSON)
 

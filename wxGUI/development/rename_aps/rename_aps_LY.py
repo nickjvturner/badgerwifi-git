@@ -68,9 +68,9 @@ def rename_aps(working_directory, project_name, message_callback):
     project_dir = Path(working_directory) / project_name
 
     # Load JSON data
-    floorPlansJSON = load_json(project_dir, 'floorPlans.json')
-    accessPointsJSON = load_json(project_dir, 'accessPoints.json')
-    tagKeysJSON = load_json(project_dir, 'tagKeys.json')
+    floorPlansJSON = load_json(project_dir, 'floorPlans.json', message_callback)
+    accessPointsJSON = load_json(project_dir, 'accessPoints.json', message_callback)
+    tagKeysJSON = load_json(project_dir, 'tagKeys.json', message_callback)
 
     # Process data
     floorPlansDict = create_floor_plans_dict(floorPlansJSON)
