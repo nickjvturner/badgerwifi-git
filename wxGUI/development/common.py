@@ -3,11 +3,10 @@
 import json
 from pathlib import Path
 
-
 # Constants
 VERSION = '1.2'
 UNKNOWN = 'Unknown'
-FIVE_GHZ = 'FIVE'
+FIVE_GHZ_RADIO_ID = 1
 
 ekahau_color_dict = {
     '#00FF00': 'green',
@@ -25,12 +24,13 @@ ekahau_color_dict = {
 }
 
 
-def load_json(project_dir, filename):
+def load_json(project_dir, filename, message_callback):
     """Load JSON data from a file."""
     try:
         with open(project_dir / filename) as json_file:
             return json.load(json_file)
     except IOError as e:
+        message_callback(f'{filename} not found, this project probably does not contain this data type')
         print(f"Error loading {filename}: {e}")
         return None
 
@@ -51,6 +51,10 @@ def create_floor_plans_height_dict(floorPlansJSON):
 
 def create_notes_dict(notesJSON):
     """Create a dictionary of notes."""
+    if not notesJSON:
+        # If notesJSON contains no notes, return None
+        return None
+
     notesDict = {}
     for note in notesJSON['notes']:
         notesDict[note['id']] = note
@@ -86,17 +90,12 @@ def create_simulated_radios_dict(simulatedRadiosJSON):
 
     # Loop through each radio inside simulatedRadiosJSON['simulatedRadios']
     for radio in simulatedRadiosJSON['simulatedRadios']:
-        # Create mini dictionary to establish frequency band of each radio object
-        miniFrequencyBandDict = {} # Initialize an empty dictionary
-
-        # Populate mini dictionary with antennaTypeId to frequencyBand pairing
-        for antenna in radio['defaultAntennas']:
-            miniFrequencyBandDict[antenna['antennaTypeId']] = antenna['frequencyBand']
-
-        # Populate simulatedRadioDict with nested objects keyed by accessPointId, frequencyBand
+        # Check if the top-level key exists, if not, create it
         if radio['accessPointId'] not in simulatedRadioDict:
             simulatedRadioDict[radio['accessPointId']] = {}
-        simulatedRadioDict[radio['accessPointId']][miniFrequencyBandDict[radio['antennaTypeId']]] = radio
+
+        # Assign the radio object to the nested key
+        simulatedRadioDict[radio['accessPointId']][radio['accessPointIndex']] = radio
 
     return simulatedRadioDict
 
@@ -136,15 +135,20 @@ def file_or_dir_exists(path):
     return target_path.exists()
 
 
-def offender_constructor(requiredTagKeys):
+def offender_constructor(requiredTagKeys, optionalTagKeys):
     offenders = {
         'color': [],
         'antennaHeight': [],
-        'missing_tags': {}
+        'bluetooth': [],
+        'missing_required_tags': {},
+        'missing_optional_tags': {}
     }
 
     for tagKey in requiredTagKeys:
-        offenders['missing_tags'][tagKey] = []
+        offenders['missing_required_tags'][tagKey] = []
+
+    for tagKey in optionalTagKeys:
+        offenders['missing_required_tags'][tagKey] = []
 
     return offenders
 
@@ -219,9 +223,10 @@ def create_custom_ap_dict(accessPointsJSON, floorPlansDict, simulatedRadioDict):
             'model': ap_model,
             'antenna': external_antenna,
             'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
-            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaTilt', ''),
-            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaMounting', ''),
-            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ, {}).get('antennaHeight', ''),
+            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
+            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
+            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', 0),
+            'radios': simulatedRadioDict.get(ap['id'], {}),
             'remarks': '',
             'ap bracket': '',
             'antenna bracket': '',

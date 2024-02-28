@@ -1,101 +1,40 @@
 # summarise_esx_.py
 
-import json
 from collections import defaultdict
-from common import ekahau_color_dict
+
+from common import load_json
+from common import create_floor_plans_dict
+from common import create_tag_keys_dict
+from common import create_simulated_radios_dict
+
 from common import offender_constructor
+from common import create_custom_ap_dict
 
+# CONSTANTS
 nl = '\n'
+from common import ekahau_color_dict
 
-def validate_color_assignment(offenders, message_callback):
-    if len(offenders.get('color', [])) > 0:
-        message_callback(f"{nl}There is a problem! The following {len(offenders.get('color', []))} APs have been assigned no color")
-        for ap in offenders['color']:
-            message_callback(ap)
-        return False
-    return True
-
-
-def validate_height_manipulation(offenders, message_callback):
-    if len(offenders.get('antennaHeight', [])) > 0:
-        message_callback(f"{nl}There is a problem! The following {len(offenders.get('antennaHeight', []))} APs are configured with the Ekahau default height of 2.4 meters, is that intentional?")
-        for ap in offenders['antennaHeight']:
-            message_callback(ap)
-        return False
-    return True
-
-
-def validate_tags(offenders, message_callback):
-    # Initialize a list to store failed tag validations
-    pass_required_tag_validation = []
-
-    for missing_tag in offenders['missing_tags']:
-        if len(offenders.get('missing_tags', {}).get(missing_tag, [])) > 0:
-            message_callback(
-                f"{nl}There is a problem! The following {len(offenders.get('missing_tags', {}).get(missing_tag, []))} APs are missing the '{missing_tag}' tag")
-            for ap in offenders['missing_tags'][missing_tag]:
-                message_callback(ap)
-            pass_required_tag_validation.append(False)
-        pass_required_tag_validation.append(True)
-
-    if pass_required_tag_validation:
-        return True
-    return False
 
 def summarise_esx(working_directory, project_name, message_callback, requiredTagKeys, optionalTagKeys):
     message_callback(f'Summarising the Contents of: {project_name}{nl}')
 
-    # Load the floorPlans.json file into the floorPlansJSON Dictionary
-    with open(working_directory / project_name / 'floorPlans.json') as json_file:
-        floorPlansJSON = json.load(json_file)
+    project_dir = working_directory / project_name
 
-    # Create dictionary for the floor plans
-    floorPlansDict = {floor['id']: floor['name'] for floor in floorPlansJSON['floorPlans']}
+    # Load JSON data
+    floorPlansJSON = load_json(project_dir, 'floorPlans.json')
+    accessPointsJSON = load_json(project_dir, 'accessPoints.json')
+    simulatedRadiosJSON = load_json(project_dir, 'simulatedRadios.json')
+    tagKeysJSON = load_json(project_dir, 'tagKeys.json')
 
-    # Load the accessPoints.json file into the accessPointsJSON dictionary
-    with open(working_directory / project_name / 'accessPoints.json') as json_file:
-        accessPointsJSON = json.load(json_file)
+    # Process data
+    floorPlansDict = create_floor_plans_dict(floorPlansJSON)
+    tagKeysDict = create_tag_keys_dict(tagKeysJSON)
+    simulatedRadioDict = create_simulated_radios_dict(simulatedRadiosJSON)
+    custom_ap_dict = create_custom_ap_dict(accessPointsJSON, floorPlansDict, simulatedRadioDict)
 
-    # Load the simulatedRadios.json file into the simulatedRadios dictionary
-    with open(working_directory / project_name / 'simulatedRadios.json') as json_file:
-        simulatedRadiosJSON = json.load(json_file)
-
-    # Create dictionary for simulated radios
-    simulatedRadioDict = {radio['accessPointId']: {x: y for x, y in radio.items()} for radio in simulatedRadiosJSON['simulatedRadios']}
-
-    def externalAntSplitAnt(model_string):
-        return model_string.split(' +  ')[1] if ' +  ' in model_string else 'integrated'
-
-    def externalAntSplitModel(model_string):
-        return model_string.split(' +  ')[0] if ' +  ' in model_string else model_string
-
-    # Load takKeys JSON
-    with open(working_directory / project_name / 'tagKeys.json') as json_file:
-        tagKeysJSON = json.load(json_file)
-
-    # Create restructured dictionary for the tagKeys
-    tagKeysDict = {tagKey['id']: tagKey['key'] for tagKey in tagKeysJSON['tagKeys']}
-
-    # Process access points
-    processedAPdict = {}
     for ap in accessPointsJSON['accessPoints']:
-        processedAPdict[ap['name']] = {
-            'name': ap['name'],
-            'color': ap.get('color', 'none'),
-            'model': externalAntSplitModel(ap.get('model', '')),
-            'antenna': externalAntSplitAnt(ap.get('model', '')),
-            'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
-            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get('antennaTilt', ''),
-            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get('antennaMounting', ''),
-            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get('antennaHeight', ''),
-            'remarks': '',
-            'ap bracket': '',
-            'antenna bracket': '',
-            'tags': {}
-        }
-
         for tag in ap['tags']:
-            processedAPdict[ap['name']]['tags'][tagKeysDict.get(tag['tagKeyId'])] = tag['value']
+            custom_ap_dict[ap['name']]['tags'][tagKeysDict.get(tag['tagKeyId'])] = tag['value']
 
     # Initialize defaultdict to count attributes
     color_counts = defaultdict(int)
@@ -108,7 +47,7 @@ def summarise_esx(working_directory, project_name, message_callback, requiredTag
     offenders = offender_constructor(requiredTagKeys)
 
     # Count occurrences of each
-    for ap in processedAPdict.values():
+    for ap in custom_ap_dict.values():
 
         color_counts[ap['color']] += 1
         if ap['color'] == 'none':

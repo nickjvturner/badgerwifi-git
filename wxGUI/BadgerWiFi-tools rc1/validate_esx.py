@@ -8,6 +8,7 @@ from common import create_tag_keys_dict
 from common import create_simulated_radios_dict
 from common import model_antenna_split
 from common import offender_constructor
+from common import create_custom_ap_dict
 
 from common import FIVE_GHZ, UNKNOWN
 
@@ -69,27 +70,11 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
     simulatedRadioDict = create_simulated_radios_dict(simulatedRadiosJSON)
 
     # Process access points
-    processedAPdict = {}
+    custom_ap_dict = create_custom_ap_dict(accessPointsJSON, floorPlansDict, simulatedRadioDict)
+
     for ap in accessPointsJSON['accessPoints']:
-        ap_model, external_antenna, antenna_description = model_antenna_split(ap.get('model', ''))
-
-        processedAPdict[ap['name']] = {
-            'name': ap['name'],
-            'color': ap.get('color', 'none'),
-            'model': ap_model,
-            'antenna': external_antenna,
-            'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
-            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaTilt', ''),
-            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaMounting', ''),
-            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ).get('antennaHeight', ''),
-            'remarks': '',
-            'ap bracket': '',
-            'antenna bracket': '',
-            'tags': {}
-            }
-
         for tag in ap['tags']:
-            processedAPdict[ap['name']]['tags'][tagKeysDict.get(tag['tagKeyId'])] = tag['value']
+            custom_ap_dict[ap['name']]['tags'][tagKeysDict.get(tag['tagKeyId'])] = tag['value']
 
     # Initialize defaultdicts to count attributes
     color_counts = defaultdict(int)
@@ -102,7 +87,7 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
     offenders = offender_constructor(requiredTagKeys)
 
     # Count occurrences of each
-    for ap in processedAPdict.values():
+    for ap in custom_ap_dict.values():
 
         color_counts[ap['color']] += 1
         if ap['color'] == 'none':
@@ -122,7 +107,7 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
 
         model_counts[ap['model']] += 1
 
-    total_ap_count = len(processedAPdict)
+    total_ap_count = len(custom_ap_dict)
     totalRequiredTagKeysCount = len(requiredTagKeys)
 
     # Perform all validations
