@@ -43,7 +43,7 @@ def validate_bluetooth_radio_off(offenders, total_ap_count, message_callback):
     return True
 
 
-def validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback):
+def validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount, requiredTagKeys, message_callback):
     # Initialize a list to store failed tag validations
     pass_required_tag_validation = []
 
@@ -57,7 +57,10 @@ def validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount,
         pass_required_tag_validation.append(True)
 
     if all(pass_required_tag_validation):
-        message_callback(f"{nl}Required tag assignment test: PASSED{nl}All {total_ap_count} APs have the required {totalRequiredTagKeysCount} tag keys assigned")
+        message_callback(f"{nl}Required tag key assignment test: PASSED{nl}")
+        for tagKey in requiredTagKeys:
+            message_callback(f"{tagKey}")
+        message_callback(f"{nl}All {total_ap_count} APs have the required {totalRequiredTagKeysCount} tag keys assigned:")
         return True
     return False
 
@@ -114,7 +117,7 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
         validate_color_assignment(offenders, total_ap_count, message_callback),
         validate_height_manipulation(offenders, total_ap_count, message_callback),
         # validate_bluetooth_radio_off(offenders, total_ap_count, message_callback),
-        validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback)
+        validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount, requiredTagKeys, message_callback)
     ]
 
     # Print pass/fail states

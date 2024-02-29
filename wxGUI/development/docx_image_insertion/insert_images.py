@@ -114,4 +114,11 @@ def insert_images(working_directory, docx_files, message_callback):
 		document.save(working_directory / Path(file.stem + '-OUTPUT-IMAGES_ADDED.docx'))
 
 		print(f'{nl}* {images_inserted} images inserted *')
+		message_callback(f'{nl}* {images_inserted} images inserted *')
+
 		print(f'* {len(text_replacements)} text strings replaced *')
+		message_callback(f'* {len(text_replacements)} text strings replaced *')
+
+		message_callback(f'image insertion COMPLETE')
+
+
