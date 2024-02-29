@@ -14,7 +14,7 @@ setup(
     install_requires=[
         'wxPython>=4.1.1',
         'openpyxl>=3.1.2',
-        'pandas>=2.2.0'
+        'pandas>=2.2.0',
         'xlsxwriter>=3.1.9'
 
         # Add other dependencies as needed
