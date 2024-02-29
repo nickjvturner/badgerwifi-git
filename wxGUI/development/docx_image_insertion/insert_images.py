@@ -42,7 +42,6 @@ def pretty_time_delta(seconds, lang=inflect.engine()):
 		[f'{count} {lang.plural(noun, count)}' for (count, noun) in measures if count]
 	)
 
-
 def insert_images(working_directory, docx_files, message_callback):
 	message_callback(f'Image Insertion process started')
 
@@ -59,7 +58,7 @@ def insert_images(working_directory, docx_files, message_callback):
 		# Keep track
 		image_insertion_points = 0
 
-		message_callback(f'{nl}Searching file for image insertion points')
+		print(f'{nl}Searching file for image insertion points')
 
 		# count image insertions to be conducted
 		for table in document.tables:
@@ -78,7 +77,7 @@ def insert_images(working_directory, docx_files, message_callback):
 
 		total_image_insertion_points = int(image_insertion_points)
 
-		message_callback(f'{nl}* {total_image_insertion_points} image insertion points identified *{nl}')
+		print(f'{nl}* {total_image_insertion_points} image insertion points identified *{nl}')
 
 		# progress counter
 		images_inserted = 0
@@ -94,11 +93,11 @@ def insert_images(working_directory, docx_files, message_callback):
 								paragraph.add_run().add_picture(str(picture_path), height=Mm(image_search[key]['height']))
 								images_inserted += 1
 								message = f"{key} image inserted, with height: {image_search[key]['height']} mm  ({images_inserted}/{total_image_insertion_points})"
-								message_callback(f'{message :>75}{nl}')
+								print(f'{message :>75}{nl}')
 
 		text_replacements = []
 
-		message_callback(f'{nl}Searching file for text replacements')
+		print(f'{nl}Searching file for text replacements')
 
 		for table in document.tables:
 			for row in table.rows:
@@ -111,8 +110,8 @@ def insert_images(working_directory, docx_files, message_callback):
 								print('*', len(text_replacements), 'text replacements', end='\r')
 								time.sleep(0.01)
 
-		message_callback(f'{nl}------------{nl}Please wait while file is saved')
+		print(f'{nl}------------{nl}Please wait while file is saved')
 		document.save(working_directory / Path(file.stem + '-OUTPUT-IMAGES_ADDED.docx'))
 
-		message_callback(f'{nl}* {images_inserted} images inserted *')
-		message_callback(f'* {len(text_replacements)} text strings replaced *')
+		print(f'{nl}* {images_inserted} images inserted *')
+		print(f'* {len(text_replacements)} text strings replaced *')
