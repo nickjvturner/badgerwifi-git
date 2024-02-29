@@ -9,6 +9,8 @@ from common import create_floor_plans_height_dict
 from common import save_and_move_json
 from common import re_bundle_project
 
+from common import model_sort_order
+
 nl = '\n'
 VERTICAL_DIVISION_FACTOR = 40
 
@@ -105,7 +107,7 @@ def run(working_directory, project_name, message_callback):
     # by floor name(floorPlanId lookup) and x coord
     accessPointsListSorted = sorted(accessPointsListSorted,
                                      key=lambda i: (floorPlansDict.get(i['location']['floorPlanId'], ''),
-                                                    i['model'],
+                                                    model_sort_order.get(i['model'], i['model']),
                                                     i['location']['coord']['y_group'],
                                                     i['location']['coord']['x']))
 

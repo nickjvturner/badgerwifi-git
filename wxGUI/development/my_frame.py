@@ -124,7 +124,6 @@ class MyFrame(wx.Frame):
         self.insert_images_button = wx.Button(self.panel, label="Insert Images to .docx")
         self.convert_docx_to_pdf_button = wx.Button(self.panel, label="Convert .docx to PDF")
 
-        self.save_state_button = wx.Button(self.panel, label="Save State")
         self.exit_button = wx.Button(self.panel, label="Exit")
 
         # Load application state from the defined path
@@ -167,7 +166,6 @@ class MyFrame(wx.Frame):
 
         button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_exit_row_sizer.AddStretchSpacer(1)
-        button_exit_row_sizer.Add(self.save_state_button, 0, wx.ALL, 5)
         button_exit_row_sizer.Add(self.exit_button, 0, wx.ALL, 5)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -207,7 +205,6 @@ class MyFrame(wx.Frame):
         self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
         self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
 
-        self.save_state_button.Bind(wx.EVT_BUTTON, self.save_application_state)
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
 
         self.list_box.Bind(wx.EVT_KEY_DOWN, self.on_delete_key)
@@ -236,7 +233,6 @@ class MyFrame(wx.Frame):
         # Save the state to the defined path
         with open(self.app_state_file_path, 'w') as f:
             json.dump(state, f)
-        self.append_message(f'Application state saved, file list and dropdown options should be the same next time you launch the application')
 
     def load_application_state(self):
         try:
@@ -374,14 +370,6 @@ class MyFrame(wx.Frame):
                 self.esx_project_unpacked = True
         pass
 
-    def save_file_paths(self):
-        try:
-            with open('file_paths.txt', 'w') as file:
-                for filepath in self.list_box.GetStrings():
-                    file.write(filepath + '\n')
-        except Exception as e:
-            wx.MessageBox(f"Error saving file paths: {e}", "Error", wx.OK | wx.ICON_ERROR)
-
     def load_project_profile(self, profile_name):
         profile_path = Path(__file__).resolve().parent / "project_profiles" / f"{profile_name}.py"
         spec = importlib.util.spec_from_file_location(profile_name, str(profile_path))
@@ -397,6 +385,7 @@ class MyFrame(wx.Frame):
         # Update the object variables with the configuration from the selected module
         self.esx_requiredTagKeys = getattr(profile_bom_module, 'requiredTagKeys', None)
         self.esx_optionalTagKeys = getattr(profile_bom_module, 'optionalTagKeys', None)
+        self.save_application_state(None)
 
     def on_rename_aps(self, event):
         if not self.esx_project_unpacked:
@@ -412,6 +401,7 @@ class MyFrame(wx.Frame):
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
         short_description, _ = self.get_ap_rename_script_descriptions(selected_script)  # Ignore long_description
         self.ap_rename_script_dropdown.SetToolTip(wx.ToolTip(short_description))
+        self.save_application_state(None)
 
     def get_ap_rename_script_descriptions(self, script_name):
         script_path = str(Path(__file__).resolve().parent / "rename_aps" / f"{script_name}.py")

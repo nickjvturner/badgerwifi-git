@@ -24,6 +24,12 @@ ekahau_color_dict = {
     'None': 'default'
 }
 
+# Define your custom model sort order here
+model_sort_order = {
+    'AP-655': '1',
+    'AP-514': '2'
+}
+
 
 def load_json(project_dir, filename, message_callback):
     """Load JSON data from a file."""
