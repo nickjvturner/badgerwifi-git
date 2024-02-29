@@ -19,8 +19,8 @@ import sys
 from docx import Document
 from docx.shared import Mm
 
-from docx_image_insertion.common import image_search
-from docx_image_insertion.common import text_search
+from docx_manipulation.common import image_search
+from docx_manipulation.common import text_search
 
 nl = '\n'
 
@@ -42,7 +42,7 @@ def pretty_time_delta(seconds, lang=inflect.engine()):
 		[f'{count} {lang.plural(noun, count)}' for (count, noun) in measures if count]
 	)
 
-def insert_images(working_directory, docx_files, message_callback):
+def insert_images(docx_files, message_callback):
 	message_callback(f'Image Insertion process started')
 
 	for file in docx_files:

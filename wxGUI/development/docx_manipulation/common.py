@@ -29,11 +29,22 @@ image_search = {
     'AP-270-MNT-H3': {
         'image': 'AP-270-MNT-H3.png',
         'height': 23},
+
     'V1A': {
         'image': 'AP-OUT-MNT-V1A.png',
         'height': 23},
     'V2': {
         'image': 'AP-270-MNT-V2.png',
+        'height': 23},
+
+    'H1': {
+        'image': 'AP-270-MNT-H1.png',
+        'height': 23},
+    'H2': {
+        'image': 'AP-270-MNT-H2.png',
+        'height': 23},
+    'H3': {
+        'image': 'AP-270-MNT-H3.png',
         'height': 23},
 
     # Antennas

@@ -16,7 +16,8 @@ from common import file_or_dir_exists
 from bom_generator import generate_bom
 
 from exports import export_ap_images
-from docx_image_insertion.insert_images import insert_images
+from docx_manipulation.insert_images import insert_images
+from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
 
 
 # CONSTANTS
@@ -44,7 +45,7 @@ def discover_available_scripts(directory):
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
 
-        wx.Frame.__init__(self, parent, title=title, size=(1000, 900))
+        wx.Frame.__init__(self, parent, title=title, size=(1000, 800))
 
         self.panel = wx.Panel(self)
         self.list_box = wx.ListBox(self.panel, style=wx.LB_EXTENDED)
@@ -121,8 +122,9 @@ class MyFrame(wx.Frame):
         self.export_pds_maps_button = wx.Button(self.panel, label="Export PDS Maps")
 
         self.insert_images_button = wx.Button(self.panel, label="Insert Images to .docx")
+        self.convert_docx_to_pdf_button = wx.Button(self.panel, label="Convert .docx to PDF")
 
-        # Create exit button
+        self.save_state_button = wx.Button(self.panel, label="Save State")
         self.exit_button = wx.Button(self.panel, label="Exit")
 
         # Load application state from the defined path
@@ -161,9 +163,11 @@ class MyFrame(wx.Frame):
         button_row5_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_row5_sizer.AddStretchSpacer(1)
         button_row5_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
+        button_row5_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
 
         button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_exit_row_sizer.AddStretchSpacer(1)
+        button_exit_row_sizer.Add(self.save_state_button, 0, wx.ALL, 5)
         button_exit_row_sizer.Add(self.exit_button, 0, wx.ALL, 5)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -201,8 +205,9 @@ class MyFrame(wx.Frame):
         self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
 
         self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
+        self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
 
-
+        self.save_state_button.Bind(wx.EVT_BUTTON, self.save_application_state)
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
 
         self.list_box.Bind(wx.EVT_KEY_DOWN, self.on_delete_key)
@@ -222,7 +227,7 @@ class MyFrame(wx.Frame):
         # Append a message to the message display area.
         self.display_log.AppendText(message + '\n')
 
-    def save_application_state(self):
+    def save_application_state(self, event):
         state = {
             'list_box_contents': [self.list_box.GetString(i) for i in range(self.list_box.GetCount())],
             'selected_ap_rename_script_index': self.ap_rename_script_dropdown.GetSelection(),
@@ -231,6 +236,7 @@ class MyFrame(wx.Frame):
         # Save the state to the defined path
         with open(self.app_state_file_path, 'w') as f:
             json.dump(state, f)
+        self.append_message(f'Application state saved, file list and dropdown options should be the same next time you launch the application')
 
     def load_application_state(self):
         try:
@@ -331,7 +337,8 @@ class MyFrame(wx.Frame):
 
     def on_exit(self, event):
         # Save the application state before exiting
-        self.save_application_state()
+        self.save_application_state(None)
+        print(f'Application state saved on exit, file list and dropdown options should be the same next time you launch the application')
         self.Close()
 
     def get_multiple_specific_file_type(self, extension):
@@ -467,4 +474,8 @@ class MyFrame(wx.Frame):
 
     def on_insert_images(self, event):
         self.docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        insert_images(self.working_directory, self.docx_files, self.append_message)
+        insert_images(self.docx_files, self.append_message)
+
+    def on_convert_docx_to_pdf(self, event):
+        self.docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
+        convert_docx_to_pdf(self.docx_files, self.append_message)
