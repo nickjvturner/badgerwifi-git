@@ -15,9 +15,14 @@ from backup_esx import backup_esx
 from common import file_or_dir_exists
 from bom_generator import generate_bom
 
+from exports import export_ap_images
+from docx_image_insertion.insert_images import insert_images
+
+
 # CONSTANTS
 nl = '\n'
 ESX_EXTENSION = '.esx'
+DOCX_EXTENSION = '.docx'
 CONFIGURATION_FOLDER = 'configuration'
 PROJECT_PROFILES_FOLDER = 'project_profiles'
 RENAME_APS_FOLDER = 'rename_aps'
@@ -52,6 +57,8 @@ class MyFrame(wx.Frame):
         self.current_profile_bom_module = None
         self.esx_requiredTagKeys = None
         self.esx_optionalTagKeys = None
+
+        self.docx_files = []
 
         # Define the configuration directory path
         self.config_dir = Path(__file__).resolve().parent / CONFIGURATION_FOLDER
@@ -109,8 +116,11 @@ class MyFrame(wx.Frame):
         self.validate_button = wx.Button(self.panel, label="Validate")
         self.summarise_button = wx.Button(self.panel, label="Summarise")
 
-        self.export_ap_images = wx.Button(self.panel, label="Export AP images")
-        self.export_note_images = wx.Button(self.panel, label="Export Note images")
+        self.export_ap_images_button = wx.Button(self.panel, label="Export AP images")
+        self.export_note_images_button = wx.Button(self.panel, label="Export Note images")
+        self.export_pds_maps_button = wx.Button(self.panel, label="Export PDS Maps")
+
+        self.insert_images_button = wx.Button(self.panel, label="Insert Images to .docx")
 
         # Create exit button
         self.exit_button = wx.Button(self.panel, label="Exit")
@@ -144,8 +154,13 @@ class MyFrame(wx.Frame):
 
         button_row4_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_row4_sizer.AddStretchSpacer(1)
-        button_row4_sizer.Add(self.export_ap_images, 0, wx.ALL, 5)
-        button_row4_sizer.Add(self.export_note_images, 0, wx.ALL, 5)
+        button_row4_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
+        button_row4_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
+        button_row4_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
+
+        button_row5_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        button_row5_sizer.AddStretchSpacer(1)
+        button_row5_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
 
         button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_exit_row_sizer.AddStretchSpacer(1)
@@ -159,6 +174,7 @@ class MyFrame(wx.Frame):
         main_sizer.Add(button_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(button_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(button_row4_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(button_row5_sizer, 0, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.panel.SetSizer(main_sizer)
@@ -180,8 +196,12 @@ class MyFrame(wx.Frame):
         self.validate_button.Bind(wx.EVT_BUTTON, self.on_validate)
         self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
 
-        self.export_ap_images.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
-        self.export_note_images.Bind(wx.EVT_BUTTON, self.on_export_note_images)
+        self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
+        self.export_note_images_button.Bind(wx.EVT_BUTTON, self.on_export_note_images)
+        self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
+
+        self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
+
 
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
 
@@ -429,11 +449,22 @@ class MyFrame(wx.Frame):
         dialog.ShowModal()
         dialog.Destroy()
 
+    def update_esx_project_unpacked(self, unpacked):
+        self.esx_project_unpacked = unpacked
+
     def on_export_note_images(self, event):
         pass
 
     def on_export_ap_images(self, event):
-        pass
+        if not self.esx_project_unpacked:
+            self.unpack_esx()
+        export_ap_images.export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
 
-    def update_esx_project_unpacked(self, unpacked):
-        self.esx_project_unpacked = unpacked
+    def on_export_pds_maps(self, event):
+        if not self.esx_project_unpacked:
+            self.unpack_esx()
+        # export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
+
+    def on_insert_images(self, event):
+        self.docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
+        insert_images(self.working_directory, self.docx_files, self.append_message)

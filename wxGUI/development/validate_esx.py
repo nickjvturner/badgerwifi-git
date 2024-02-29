@@ -113,7 +113,7 @@ def validate_esx(working_directory, project_name, message_callback, requiredTagK
     validations = [
         validate_color_assignment(offenders, total_ap_count, message_callback),
         validate_height_manipulation(offenders, total_ap_count, message_callback),
-        validate_bluetooth_radio_off(offenders, total_ap_count, message_callback),
+        # validate_bluetooth_radio_off(offenders, total_ap_count, message_callback),
         validate_required_tags(offenders, total_ap_count, totalRequiredTagKeysCount, message_callback)
     ]
 

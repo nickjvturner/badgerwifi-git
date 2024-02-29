@@ -44,26 +44,16 @@ def summarise_esx(working_directory, project_name, message_callback, requiredTag
 
     model_counts = defaultdict(int)
 
-    offenders = offender_constructor(requiredTagKeys, optionalTagKeys)
-
     # Count occurrences of each
     for ap in custom_ap_dict.values():
 
         color_counts[ap['color']] += 1
-        if ap['color'] == 'none':
-            offenders['color'].append(ap['name'])
 
         antennaHeight_counts[ap['antennaHeight']] += 1
-        if ap['antennaHeight'] == 2.4:
-            offenders['antennaHeight'].append(ap['name'])
 
         # Iterate through the tags dictionary within each AP
         for tag_key, tag_value in ap['tags'].items():
             tag_counts[(tag_key, tag_value)] += 1
-
-        for tagKey in requiredTagKeys:
-            if tagKey not in ap['tags']:
-                offenders['missing_required_tags'][tagKey].append(ap['name'])
 
         model_counts[ap['model']] += 1
 

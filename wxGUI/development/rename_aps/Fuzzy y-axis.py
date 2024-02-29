@@ -6,7 +6,6 @@ from common import load_json
 from common import create_floor_plans_dict
 from common import create_floor_plans_height_dict
 
-# from common import rename_access_points
 from common import save_and_move_json
 from common import re_bundle_project
 
@@ -60,18 +59,7 @@ the list is re-sorted by:
     specifically in this order
 having been grouped into '20' (horizontal) rows
 the APs are now sorted by their x-axis value within each row
-the sorted list is iterated through and a new AP Name is assigned
-AP numbering starts at 1, with:
-    apSeqNum = 1
-    this is an integer
-AP Naming pattern is defined by:
-    new_AP_name = f'AP-{{apSeqNum:03}}'
-    this is an f-string
-    {{apSeqNum:03}} is a formatted expression that represents the variable apSeqNum with specific formatting
-    :03 specifies the formatting of this integer should be with leading zeros to have a width of 3 characters
-    If apSeqNum is less than 100, it will be padded with leading zeros to ensure the resulting string has a total of 5 characters
-"""
-
+the sorted list is iterated through and a new AP Name is assigned"""
 
 
 def run(working_directory, project_name, message_callback):
@@ -98,7 +86,6 @@ def run(working_directory, project_name, message_callback):
     current_floor = 0
     current_y = None
     y_coordinate_threshold = None
-
 
     for ap in accessPointsListSorted:
         if current_floor != ap['location']['floorPlanId']:
@@ -131,7 +118,7 @@ def run(working_directory, project_name, message_callback):
         new_AP_name = f'AP-{apSeqNum:03}'
 
         message_callback(
-            f"[[ {ap['name']} [{ap['model']}]] from: {floorPlansDict.get(ap['location']['floorPlanId'])} ] renamed to {new_AP_name}")
+            f"{ap['name']} {ap['model']} from: {floorPlansDict.get(ap['location']['floorPlanId'])} renamed to {new_AP_name}")
 
         ap['name'] = new_AP_name
         apSeqNum += 1
@@ -143,4 +130,3 @@ def run(working_directory, project_name, message_callback):
     # Re-bundle into .esx File
     re_bundle_project(Path(working_directory / project_name), f"{project_name}_re-zip")
     message_callback(f"\nProcess complete\n{project_name}_re-zip re-bundled into .esx file")
-

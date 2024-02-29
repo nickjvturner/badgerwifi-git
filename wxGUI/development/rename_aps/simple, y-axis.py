@@ -1,46 +1,38 @@
 # simple, y-axis.py
 
-"""
-Created with [SIMULATED APs] as the targets...
+from pathlib import Path
 
-description
----
-script unpacks Ekahau project file
-loads accessPoints.json
+from common import load_json
+from common import create_floor_plans_dict
+
+from common import save_and_move_json
+from common import re_bundle_project
+
+SHORT_DESCRIPTION = f"""Intended for simulated APs
+Re-sorts APs by:
+    floor name,
+    y-axis value
+    
+AP-001, AP-002, AP-003..."""
+
+LONG_DESCRIPTION = f"""Created with [SIMULATED APs] as the targets...
+
+script loads accessPoints.json
 places all APs into a list
 
 sorts the list by:
     floor name
-    x-axis value
+    y-axis value
 
 the sorted list is iterated through and a new AP Name is assigned
-AP numbering starts at 1, with:
-    apSeqNum = 1
-    this is an integer
 
 AP Naming pattern is defined by:
-    new_AP_name = f'AP-{apSeqNum:03}'
-    this is an f-string
-    {apSeqNum:03} is a formatted expression that represents the variable apSeqNum with specific formatting
-    :03 specifies the formatting of this integer should be with leading zeros to have a width of 3 characters
-    If apSeqNum is less than 100, it will be padded with leading zeros to ensure the resulting string has a total of 5 characters
-
-Nick Turner
-nickjvturner.com
-
-@nickjvturner@mastodon.social
-
-"""
-
-import json
-import shutil
-from pathlib import Path
-
+    new_AP_name = f'AP-{{apSeqNum:03}}'
+    
+resulting AP names should look like:
+    AP-001, AP-002, AP-003..."""
 
 nl = '\n'
-
-from common import load_json
-from common import create_floor_plans_dict
 
 
 def run(working_directory, project_name, message_callback):
@@ -69,28 +61,16 @@ def run(working_directory, project_name, message_callback):
         # Define the pattern to rename your APs
         new_AP_name = f'AP-{apSeqNum:03}'
 
-        message_callback(f"[[ {ap['name']} [{ap['model']}]] from: {floorPlansDict.get(ap['location']['floorPlanId'])} ] renamed to {new_AP_name}")
+        message_callback(
+            f"{ap['name']} {ap['model']} from: {floorPlansDict.get(ap['location']['floorPlanId'])} renamed to {new_AP_name}")
 
         ap['name'] = new_AP_name
         apSeqNum += 1
 
-    # Convert modified list back into dictionary
-    accessPointsSortedDict = {'accessPoints': accessPointsListSorted}
+    # Save and Move the Updated JSON
+    updatedAccessPointsJSON = {'accessPoints': accessPointsListSorted}
+    save_and_move_json(updatedAccessPointsJSON, working_directory / project_name / 'accessPoints.json')
 
-    # save the modified dictionary as accessPoints.json
-    with open("accessPoints.json", "w") as outfile:
-        json.dump(accessPointsSortedDict, outfile, indent=4)
-
-    # move file into unpacked folder OVERWRITING ORIGINAL
-    shutil.move('accessPoints.json', working_directory / project_name / 'accessPoints.json')
-
-    output_esx = Path(project_name + '_re-zip')
-
-    try:
-        shutil.make_archive(str(output_esx), 'zip', project_name)
-        shutil.move(output_esx.with_suffix('.zip'), output_esx.with_suffix('.esx'))
-        message_callback(f'{nl}** Process complete **{nl}{output_esx} re-bundled into .esx file{nl}')
-        shutil.rmtree(project_name)
-        message_callback(f'Temporary project contents directory removed{nl}')
-    except Exception as e:
-        print(e)
+    # Re-bundle into .esx File
+    re_bundle_project(Path(working_directory / project_name), f"{project_name}_re-zip")
+    message_callback(f"\nProcess complete\n{project_name}_re-zip re-bundled into .esx file")

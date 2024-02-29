@@ -53,6 +53,10 @@ class DropTarget(wx.FileDropTarget):
                     self.window.Append(filepath)
                     self.message_callback(f"{Path(filepath).name} added to the list.")
 
+            if filepath.lower().endswith('.docx'):
+                self.window.Append(filepath)
+                self.message_callback(f"{Path(filepath).name} added to the list.")
+
         return True
 
     def show_replace_dialog(self, filepath):
