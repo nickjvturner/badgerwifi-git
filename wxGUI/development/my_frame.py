@@ -252,7 +252,6 @@ class MyFrame(wx.Frame):
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
             self.on_project_profile_dropdown_selection(None)
-
             pass  # It's okay if the state file doesn't exist on first run
 
     def on_reset(self, event):
@@ -306,16 +305,19 @@ class MyFrame(wx.Frame):
         backup_esx(self.working_directory, self.esx_project_name, self.esx_filepath, self.append_message)
 
     def on_validate(self, event):
+        self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
         validate_esx(self.working_directory, self.esx_project_name, self.append_message, self.esx_requiredTagKeys, self.esx_optionalTagKeys)
 
     def on_summarise(self, event):
+        self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
         summarise_esx(self.working_directory, self.esx_project_name, self.append_message, self.esx_requiredTagKeys, self.esx_optionalTagKeys)
 
     def on_generate_bom(self, event):
+        self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
 
@@ -388,6 +390,7 @@ class MyFrame(wx.Frame):
         self.save_application_state(None)
 
     def on_rename_aps(self, event):
+        self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
@@ -453,6 +456,7 @@ class MyFrame(wx.Frame):
         pass
 
     def on_export_ap_images(self, event):
+        self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
         export_ap_images.export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
