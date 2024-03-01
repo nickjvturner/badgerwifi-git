@@ -15,9 +15,10 @@ setup(
         'wxPython>=4.1.1',
         'openpyxl>=3.1.2',
         'pandas>=2.2.0',
-        'xlsxwriter>=3.1.9'
-
-        # Add other dependencies as needed
+        'xlsxwriter>=3.1.9',
+        'inflect>=7.0.0',
+        'python-docx>=1.1.0',
+        'docx2pdf>=0.1.8'
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
