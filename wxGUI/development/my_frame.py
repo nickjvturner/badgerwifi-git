@@ -44,44 +44,60 @@ def discover_available_scripts(directory):
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
-
         wx.Frame.__init__(self, parent, title=title, size=(1000, 800))
-
         self.panel = wx.Panel(self)
-        self.list_box = wx.ListBox(self.panel, style=wx.LB_EXTENDED)
+        self.initialize_variables()
+        self.setup_list_box()
+        self.setup_display_log()
+        # self.setupTabs()
+        self.setup_buttons()
+        self.setup_dropdowns()
+        self.setup_main_sizer()
+        self.create_menu()
+        self.setup_drop_target()
+        self.load_application_state()
+        self.Center()
+        self.Show()
 
+    def initialize_variables(self):
+        self.esx_project_unpacked = False
+        self.working_directory = None
         self.esx_project_unpacked = False  # Initialize the state variable
         self.working_directory = None
         self.esx_project_name = None
         self.esx_filepath = None
-
         self.current_profile_bom_module = None
         self.esx_requiredTagKeys = None
         self.esx_optionalTagKeys = None
-
         self.docx_files = []
 
         # Define the configuration directory path
         self.config_dir = Path(__file__).resolve().parent / CONFIGURATION_FOLDER
+
         # Ensure the configuration directory exists
         self.config_dir.mkdir(parents=True, exist_ok=True)
 
         # Define the path for the application state file
         self.app_state_file_path = self.config_dir / 'app_state.json'
 
-        self.display_log = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
+    def setup_list_box(self):
+        # Set up your list box here
+        self.list_box = wx.ListBox(self.panel, style=wx.LB_EXTENDED)
 
-        # Create reset button
-        self.reset_button = wx.Button(self.panel, label="Reset")
+        self.list_box.Bind(wx.EVT_KEY_DOWN, self.on_delete_key)
+
+    def setup_display_log(self):
+        # Setup display log here
+        self.display_log = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
 
         # Set a monospaced font for display_log
         monospace_font = wx.Font(14, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.display_log.SetFont(monospace_font)
 
-        # Create log action buttons
-        self.copy_log_button = wx.Button(self.panel, label="Copy Log")
-        self.clear_log_button = wx.Button(self.panel, label="Clear Log")
-
+    def setup_dropdowns(self):
+        """
+        Setup all dropdown elements
+        """
         # Discover available AP renaming scripts in 'rename_aps' directory
         self.available_ap_rename_scripts = discover_available_scripts(RENAME_APS_FOLDER)
 
@@ -89,14 +105,6 @@ class MyFrame(wx.Frame):
         self.ap_rename_script_dropdown = wx.Choice(self.panel, choices=self.available_ap_rename_scripts)
         self.ap_rename_script_dropdown.SetSelection(0)  # Set default selection
         self.ap_rename_script_dropdown.Bind(wx.EVT_CHOICE, self.on_ap_rename_script_dropdown_selection)
-
-        # Create a button to execute the selected AP renaming script
-        self.rename_aps_button = wx.Button(self.panel, label="Rename APs")
-        self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
-
-        # Create a button for showing long descriptions with a specified narrow size
-        self.description_button = wx.Button(self.panel, label="?", size=(20, -1))  # Width of 40, default height
-        self.description_button.Bind(wx.EVT_BUTTON, self.on_description_button_click)
 
         # Discover available project Profiles 'project_profiles' directory
         self.available_project_profiles = discover_available_scripts(PROJECT_PROFILES_FOLDER)
@@ -106,29 +114,65 @@ class MyFrame(wx.Frame):
         self.project_profile_dropdown.SetSelection(0)  # Set default selection
         self.project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_project_profile_dropdown_selection)
 
+    def setup_buttons(self):
+        # Create reset button
+        self.reset_button = wx.Button(self.panel, label="Reset")
+        self.reset_button.Bind(wx.EVT_BUTTON, self.on_reset)
+
+        # Create copy log button
+        self.copy_log_button = wx.Button(self.panel, label="Copy Log")
+        self.copy_log_button.Bind(wx.EVT_BUTTON, self.on_copy_log)
+
+        # Create clear log button
+        self.clear_log_button = wx.Button(self.panel, label="Clear Log")
+        self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
+
+        # Create unpack esx file button
+        self.unpack_button = wx.Button(self.panel, label="Unpack .esx")
+        self.unpack_button.Bind(wx.EVT_BUTTON, self.on_unpack)
+
+        # Create backup esx file button
+        self.backup_button = wx.Button(self.panel, label="Backup .esx")
+        self.backup_button.Bind(wx.EVT_BUTTON, self.on_backup)
+
+        # Create a button to execute the selected AP renaming script
+        self.rename_aps_button = wx.Button(self.panel, label="Rename APs")
+        self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
+
+        # Create a button for showing long descriptions with a specified narrow size
+        self.description_button = wx.Button(self.panel, label="?", size=(20, -1))  # Width of 40, default height
+        self.description_button.Bind(wx.EVT_BUTTON, self.on_description_button_click)
+
         # Create a button to execute the selected BoM generator
         self.generate_bom = wx.Button(self.panel, label="Generate BoM")
         self.generate_bom.Bind(wx.EVT_BUTTON, self.on_generate_bom)
 
-        # Create esx file interaction buttons
-        self.unpack_button = wx.Button(self.panel, label="Unpack .esx")
-        self.backup_button = wx.Button(self.panel, label="Backup .esx")
-
         self.validate_button = wx.Button(self.panel, label="Validate")
+        self.validate_button.Bind(wx.EVT_BUTTON, self.on_validate)
+
         self.summarise_button = wx.Button(self.panel, label="Summarise")
+        self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
 
         self.export_ap_images_button = wx.Button(self.panel, label="Export AP images")
+        self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
+
         self.export_note_images_button = wx.Button(self.panel, label="Export Note images")
+        self.export_note_images_button.Bind(wx.EVT_BUTTON, self.on_export_note_images)
+
         self.export_pds_maps_button = wx.Button(self.panel, label="Export PDS Maps")
+        self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
 
         self.insert_images_button = wx.Button(self.panel, label="Insert Images to .docx")
+        self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
+
         self.convert_docx_to_pdf_button = wx.Button(self.panel, label="Convert .docx to PDF")
+        self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
 
+        # Create exit button
         self.exit_button = wx.Button(self.panel, label="Exit")
+        self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
 
-        # Load application state from the defined path
-        self.load_application_state()
-
+    def setup_main_sizer(self):
         button_row0_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_row0_sizer.AddStretchSpacer(1)
         button_row0_sizer.Add(self.reset_button, 0, wx.ALL, 5)
@@ -181,37 +225,6 @@ class MyFrame(wx.Frame):
 
         self.panel.SetSizer(main_sizer)
 
-        self.create_menu()
-
-        allowed_extensions = (".esx", ".docx", ".xlsx")  # Define allowed file extensions
-        dt = DropTarget(self.list_box, allowed_extensions, self.append_message, self.esx_project_unpacked, self.update_esx_project_unpacked)
-        self.list_box.SetDropTarget(dt)
-
-        self.copy_log_button.Bind(wx.EVT_BUTTON, self.on_copy_log)
-        self.reset_button.Bind(wx.EVT_BUTTON, self.on_reset)
-
-        self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
-
-        self.unpack_button.Bind(wx.EVT_BUTTON, self.on_unpack)
-        self.backup_button.Bind(wx.EVT_BUTTON, self.on_backup)
-
-        self.validate_button.Bind(wx.EVT_BUTTON, self.on_validate)
-        self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
-
-        self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
-        self.export_note_images_button.Bind(wx.EVT_BUTTON, self.on_export_note_images)
-        self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
-
-        self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
-        self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
-
-        self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
-
-        self.list_box.Bind(wx.EVT_KEY_DOWN, self.on_delete_key)
-
-        self.Center()
-        self.Show()
-
     def create_menu(self):
         menubar = wx.MenuBar()
         file_menu = wx.Menu()
@@ -219,6 +232,11 @@ class MyFrame(wx.Frame):
         menubar.Append(file_menu, "&File")
         self.SetMenuBar(menubar)
         self.Bind(wx.EVT_MENU, self.on_add_file, id=wx.ID_ADD)
+
+    def setup_drop_target(self):
+        allowed_extensions = (".esx", ".docx", ".xlsx")  # Define allowed file extensions
+        drop_target = DropTarget(self.list_box, allowed_extensions, self.append_message, self.esx_project_unpacked, self.update_esx_project_unpacked)
+        self.list_box.SetDropTarget(drop_target)
 
     def append_message(self, message):
         # Append a message to the message display area.
