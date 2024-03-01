@@ -5,7 +5,7 @@ setup(
     version='0.1.0',
     author='Nick Turner',
     author_email='nick@badgerwifi.co.uk',
-    description='A brief description of your app',
+    description='A collection of scripts for automating various reporting tasks',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='http://badgerwifi.co.uk',
