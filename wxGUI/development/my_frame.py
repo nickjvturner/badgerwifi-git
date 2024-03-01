@@ -402,7 +402,7 @@ class MyFrame(wx.Frame):
 
     def on_ap_rename_script_dropdown_selection(self, event):
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
-        short_description, _ = self.get_ap_rename_script_descriptions(selected_script)  # Ignore long_description
+        _, short_description, _ = self.get_ap_rename_script_descriptions(selected_script)  # Ignore script_name and long_description
         self.ap_rename_script_dropdown.SetToolTip(wx.ToolTip(short_description))
         self.save_application_state(None)
 
@@ -413,16 +413,16 @@ class MyFrame(wx.Frame):
         spec.loader.exec_module(module)
         short_description = getattr(module, 'SHORT_DESCRIPTION', "No short description available.")
         long_description = getattr(module, 'LONG_DESCRIPTION', "No long description available.")
-        return short_description, long_description
+        return script_name, short_description, long_description
 
     def on_description_button_click(self, event):
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
-        short_description, long_description = self.get_ap_rename_script_descriptions(selected_script)
-        self.show_long_description_dialog(long_description)
+        script_name, short_description, long_description = self.get_ap_rename_script_descriptions(selected_script)
+        self.show_long_description_dialog(script_name, long_description)
 
-    def show_long_description_dialog(self, long_description):
+    def show_long_description_dialog(self, script_name, long_description):
         # Create a dialog with a resize border
-        dialog = wx.Dialog(self, title="Long Description", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        dialog = wx.Dialog(self, title=f"{script_name} Long Description", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 
         # Create a sizer for the dialog content
         dialog_sizer = wx.BoxSizer(wx.VERTICAL)
