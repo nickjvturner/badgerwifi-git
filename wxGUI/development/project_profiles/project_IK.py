@@ -37,7 +37,7 @@ def create_custom_AP_list(accessPointsJSON, floorPlansDict, tagKeysDict, simulat
             'Model': model,
             'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
             'Mounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
-            'AP Bracket': miniTagsDict.get('ap-bracket'),
+            'AP Bracket': 'not-required' if miniTagsDict.get('ap-bracket') else miniTagsDict.get('ap-bracket'),
             'Antenna': antenna,
             'Antenna Description': antenna_description,
             'Antenna Bracket': miniTagsDict.get('antenna-bracket'),
