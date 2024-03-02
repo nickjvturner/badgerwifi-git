@@ -58,7 +58,6 @@ class MyFrame(wx.Frame):
         self.setup_tab1()
         self.setup_tab2()
         self.setup_tab3()
-        self.setup_tab4()
         self.setup_main_sizer()
         self.create_menu()
         self.setup_drop_target()
@@ -181,9 +180,6 @@ class MyFrame(wx.Frame):
         self.convert_docx_to_pdf_button = wx.Button(self.tab3, label="Convert .docx to PDF")
         self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
 
-        self.visualiser_button = wx.Button(self.tab4, label="Visualiser")
-        self.visualiser_button.Bind(wx.EVT_BUTTON, self.on_visualiser)
-
         # Create exit button
         self.exit_button = wx.Button(self.panel, label="Exit")
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
@@ -219,17 +215,14 @@ class MyFrame(wx.Frame):
         self.tab1 = wx.Panel(self.notebook)
         self.tab2 = wx.Panel(self.notebook)
         self.tab3 = wx.Panel(self.notebook)
-        self.tab4 = wx.Panel(self.notebook)
 
         self.notebook.AddPage(self.tab1, "Simulation")
         self.notebook.AddPage(self.tab2, "Survey")
         self.notebook.AddPage(self.tab3, "DOCX")
-        self.notebook.AddPage(self.tab4, "Skunkworks")
 
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
 
     def setup_tab1(self):
 
@@ -278,14 +271,6 @@ class MyFrame(wx.Frame):
         self.tab3_sizer.Add(self.tab3_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab3.SetSizer(self.tab3_sizer)
-
-    def setup_tab4(self):
-        self.tab4_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab4_row1_sizer.AddStretchSpacer(1)
-        self.tab4_row1_sizer.Add(self.visualiser_button, 0, wx.ALL, 5)
-        self.tab4_sizer.Add(self.tab4_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
-
-        self.tab4.SetSizer(self.tab4_sizer)
 
     def create_menu(self):
         menubar = wx.MenuBar()
@@ -569,7 +554,3 @@ class MyFrame(wx.Frame):
         if not self.esx_project_unpacked:
             self.unpack_esx()
         export_blank_maps(self.working_directory, self.esx_project_name, self.append_message)
-
-    def on_visualiser(self, event):
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
