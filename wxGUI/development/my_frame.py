@@ -19,6 +19,8 @@ from exports import export_ap_images
 from docx_manipulation.insert_images import insert_images
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
 
+from map_creator.create_ap_location_map import create_ap_location_map
+
 
 # CONSTANTS
 nl = '\n'
@@ -156,6 +158,9 @@ class MyFrame(wx.Frame):
         self.summarise_button = wx.Button(self.tab1, label="Summarise")
         self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
 
+        self.create_ap_location_maps_button = wx.Button(self.tab1, label="Create AP Maps")
+        self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
+
         self.export_ap_images_button = wx.Button(self.tab2, label="Export AP images")
         self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
 
@@ -236,6 +241,11 @@ class MyFrame(wx.Frame):
         self.tab1_row3_sizer.AddStretchSpacer(1)
         self.tab1_row3_sizer.Add(self.generate_bom, 0, wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1_row4_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row4_sizer.AddStretchSpacer(1)
+        self.tab1_row4_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
+        self.tab1_sizer.Add(self.tab1_row4_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1.SetSizer(self.tab1_sizer)
 
@@ -359,6 +369,7 @@ class MyFrame(wx.Frame):
         self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
+
         validate_esx(self.working_directory, self.esx_project_name, self.append_message, self.esx_requiredTagKeys, self.esx_optionalTagKeys)
 
     def on_summarise(self, event):
@@ -503,7 +514,7 @@ class MyFrame(wx.Frame):
     def update_esx_project_unpacked(self, unpacked):
         self.esx_project_unpacked = unpacked
 
-    def on_export_note_images(self, event):
+    def placeholder(self, event):
         self.append_message(f'No action implemented yet')
 
     def on_export_ap_images(self, event):
@@ -512,15 +523,24 @@ class MyFrame(wx.Frame):
             self.unpack_esx()
         export_ap_images.export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
 
-    def on_export_pds_maps(self, event):
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
-        # export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
-
     def on_insert_images(self, event):
         self.docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        insert_images(self.docx_files, self.append_message)
+        if self.docx_files:
+            insert_images(self.docx_files, self.append_message)
 
     def on_convert_docx_to_pdf(self, event):
         self.docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        convert_docx_to_pdf(self.docx_files, self.append_message)
+        if self.docx_files:
+            convert_docx_to_pdf(self.docx_files, self.append_message)
+
+    def on_export_note_images(self, event):
+        self.placeholder(None)
+
+    def on_export_pds_maps(self, event):
+        self.placeholder(None)
+
+    def on_create_ap_location_maps(self, event):
+        self.on_clear_log(None)
+        if not self.esx_project_unpacked:
+            self.unpack_esx()
+        create_ap_location_map(self.working_directory, self.esx_project_name, self.append_message)
