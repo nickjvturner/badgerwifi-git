@@ -14,7 +14,6 @@ Latest meaningful update: 2023-10-07
 from pathlib import Path
 import inflect
 import time
-import sys
 
 from docx import Document
 from docx.shared import Mm
@@ -36,11 +35,9 @@ def pretty_time_delta(seconds, lang=inflect.engine()):
 		(days, 'day'),
 		(hours, 'hour'),
 		(minutes, 'minute'),
-		(seconds, 'second'),
-	)
-	return lang.join(
-		[f'{count} {lang.plural(noun, count)}' for (count, noun) in measures if count]
-	)
+		(seconds, 'second'))
+	return lang.join([f'{count} {lang.plural(noun, count)}' for (count, noun) in measures if count])
+
 
 def insert_images(docx_files, message_callback):
 	message_callback(f'Image Insertion process started')
@@ -50,7 +47,7 @@ def insert_images(docx_files, message_callback):
 		working_directory = file.parent
 		print(f'{nl}filename: {file.name}')
 
-		document = Document(file)
+		document = Document(str(file))
 
 		# Search terms are prefixed with string 'REPLACE-WITH-IMAGE='
 		str_prefix = 'REPLACE-WITH-IMAGE='
@@ -120,5 +117,3 @@ def insert_images(docx_files, message_callback):
 		message_callback(f'* {len(text_replacements)} text strings replaced *')
 
 		message_callback(f'image insertion COMPLETE')
-
-

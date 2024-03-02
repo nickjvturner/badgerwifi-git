@@ -11,14 +11,6 @@ from common import create_notes_dict
 
 
 def adjust_column_widths(df, writer):
-    """Adjust column widths in the Excel sheet."""
-    worksheet = writer.sheets['AP List']
-    for idx, col in enumerate(df.columns):
-        column_len = max(df[col].astype(str).map(len).max(), len(col)) + 5
-        worksheet.set_column(idx, idx, column_len * 1.2)
-
-
-def adjust_column_widths(df, writer):
     """Adjust column widths in the Excel sheet and apply text wrap to the 'Notes' column."""
     worksheet = writer.sheets['AP List']
     # Create a format for wrapping text
@@ -49,20 +41,19 @@ def generate_bom(working_directory, project_name, message_callback, create_custo
     project_dir = Path(working_directory) / project_name
 
     # Load JSON data
-    floorPlansJSON = load_json(project_dir, 'floorPlans.json', message_callback)
-    accessPointsJSON = load_json(project_dir, 'accessPoints.json', message_callback)
-    simulatedRadiosJSON = load_json(project_dir, 'simulatedRadios.json', message_callback)
-    tagKeysJSON = load_json(project_dir, 'tagKeys.json', message_callback)
-    notesJSON = load_json(project_dir, 'notes.json', message_callback)
-
+    floor_plans_json = load_json(project_dir, 'floorPlans.json', message_callback)
+    access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
+    simulated_radios_json = load_json(project_dir, 'simulatedRadios.json', message_callback)
+    tag_keys_json = load_json(project_dir, 'tagKeys.json', message_callback)
+    notes_json = load_json(project_dir, 'notes.json', message_callback)
 
     # Process data
-    floorPlansDict = create_floor_plans_dict(floorPlansJSON)
-    tagKeysDict = create_tag_keys_dict(tagKeysJSON)
-    simulatedRadioDict = create_simulated_radios_dict(simulatedRadiosJSON)
-    notesDict = create_notes_dict(notesJSON)
+    floor_plans_dict = create_floor_plans_dict(floor_plans_json)
+    tag_keys_dict = create_tag_keys_dict(tag_keys_json)
+    simulated_radio_dict = create_simulated_radios_dict(simulated_radios_json)
+    notes_dict = create_notes_dict(notes_json)
 
-    custom_ap_list = create_custom_ap_list(accessPointsJSON, floorPlansDict, tagKeysDict, simulatedRadioDict, notesDict)
+    custom_ap_list = create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, notes_dict)
 
     # Create a pandas dataframe and export to Excel
     df = pd.DataFrame(custom_ap_list)

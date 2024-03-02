@@ -1,4 +1,4 @@
-# rename_aps_LY.py
+# tag, tag, floor, tag, x-axis (LY).py
 
 import json
 from pathlib import Path

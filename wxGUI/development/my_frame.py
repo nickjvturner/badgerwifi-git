@@ -365,7 +365,7 @@ class MyFrame(wx.Frame):
         self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
-        summarise_esx(self.working_directory, self.esx_project_name, self.append_message, self.esx_requiredTagKeys, self.esx_optionalTagKeys)
+        summarise_esx(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_generate_bom(self, event):
         self.on_clear_log(None)
@@ -374,7 +374,7 @@ class MyFrame(wx.Frame):
 
         if hasattr(self, 'current_profile_bom_module'):
             generate_bom(self.working_directory, self.esx_project_name, self.append_message,
-                         self.current_profile_bom_module.create_custom_AP_list)
+                         self.current_profile_bom_module.create_custom_ap_list)
 
     def on_copy_log(self, event):
         if wx.TheClipboard.Open():

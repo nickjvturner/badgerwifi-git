@@ -67,21 +67,21 @@ the sorted list is iterated through and a new AP Name is assigned"""
 def run(working_directory, project_name, message_callback):
     message_callback(f'Performing action for: {project_name}')
 
-    floorPlansJSON = load_json(working_directory / project_name, 'floorPlans.json', message_callback)
-    accessPointsJSON = load_json(working_directory / project_name, 'accessPoints.json', message_callback)
+    floor_plans_json = load_json(working_directory / project_name, 'floorPlans.json', message_callback)
+    access_points_json = load_json(working_directory / project_name, 'accessPoints.json', message_callback)
 
-    floorPlansDict = create_floor_plans_dict(floorPlansJSON)
-    floorPlansHeightDict = create_floor_plans_height_dict(floorPlansJSON)
+    floor_plans_dict = create_floor_plans_dict(floor_plans_json)
+    floor_plans_height_dict = create_floor_plans_height_dict(floor_plans_json)
 
-    # Convert accessPointsJSON from dictionary to list
+    # Convert access_points_json from dictionary to list
     # We do this to make the sorting procedure more simple
-    accessPointsList = []
-    for ap in accessPointsJSON['accessPoints']:
-        accessPointsList.append(ap)
+    access_points_list = []
+    for ap in access_points_json['accessPoints']:
+        access_points_list.append(ap)
 
     # Sort the list of APs, by the floor name(floorPlanId lookup) and x coord
-    accessPointsListSorted = sorted(accessPointsList,
-                                     key=lambda i: (floorPlansDict.get(i['location']['floorPlanId'], ''),
+    access_points_list_sorted = sorted(access_points_list,
+                                     key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
                                                     i['location']['coord']['y']))
 
     y_coordinate_group = 1
@@ -89,12 +89,12 @@ def run(working_directory, project_name, message_callback):
     current_y = None
     y_coordinate_threshold = None
 
-    for ap in accessPointsListSorted:
+    for ap in access_points_list_sorted:
         if current_floor != ap['location']['floorPlanId']:
             current_y = ap['location']['coord']['y']
             # Set a threshold for the maximum x-coordinate difference to be in the same group
             y_coordinate_threshold = int(
-                floorPlansHeightDict.get(ap['location']['floorPlanId'])) / VERTICAL_DIVISION_FACTOR
+                floor_plans_height_dict.get(ap['location']['floorPlanId'])) / VERTICAL_DIVISION_FACTOR
 
         if abs(ap['location']['coord']['y'] - current_y) <= y_coordinate_threshold:
             ap['location']['coord']['y_group'] = y_coordinate_group
@@ -105,28 +105,28 @@ def run(working_directory, project_name, message_callback):
         current_floor = ap['location']['floorPlanId']
 
     # by floor name(floorPlanId lookup) and x coord
-    accessPointsListSorted = sorted(accessPointsListSorted,
-                                     key=lambda i: (floorPlansDict.get(i['location']['floorPlanId'], ''),
+    access_points_list_sorted = sorted(access_points_list_sorted,
+                                     key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
                                                     model_sort_order.get(i['model'], i['model']),
                                                     i['location']['coord']['y_group'],
                                                     i['location']['coord']['x']))
 
     # Start numbering APs from... 1
-    apSeqNum = 1
+    ap_sequence_number = 1
 
-    for ap in accessPointsListSorted:
+    for ap in access_points_list_sorted:
         # Define new AP naming scheme
         # Define the pattern to rename your APs
-        new_AP_name = f'AP-{apSeqNum:03}'
+        new_ap_name = f'AP-{ap_sequence_number:03}'
 
         message_callback(
-            f"{ap['name']} {ap['model']} from: {floorPlansDict.get(ap['location']['floorPlanId'])} renamed to {new_AP_name}")
+            f"{ap['name']} {ap['model']} from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed to {new_ap_name}")
 
-        ap['name'] = new_AP_name
-        apSeqNum += 1
+        ap['name'] = new_ap_name
+        ap_sequence_number += 1
 
     # Save and Move the Updated JSON
-    updatedAccessPointsJSON = {'accessPoints': accessPointsListSorted}
+    updatedAccessPointsJSON = {'accessPoints': access_points_list_sorted}
     save_and_move_json(updatedAccessPointsJSON, working_directory / project_name / 'accessPoints.json')
 
     # Re-bundle into .esx File

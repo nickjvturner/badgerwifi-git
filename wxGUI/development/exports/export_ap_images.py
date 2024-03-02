@@ -18,6 +18,7 @@ import shutil
 
 nl = '\n'
 
+
 def export_ap_images(working_directory, project_name, message_callback):
 	message_callback(f'Extracting AP Images from: {project_name}')
 
@@ -27,16 +28,16 @@ def export_ap_images(working_directory, project_name, message_callback):
 	ap_image_dir = working_directory / "AP Images"
 	ap_image_dir.mkdir(parents=True, exist_ok=True)
 
-	accessPointsJSON = load_json(project_dir, 'accessPoints.json', message_callback)
-	notesJSON = load_json(project_dir, 'notes.json', message_callback)
+	access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
+	notes_json = load_json(project_dir, 'notes.json', message_callback)
 
 	image_extraction_counter = []
 
-	for ap in accessPointsJSON['accessPoints']:
+	for ap in access_points_json['accessPoints']:
 		if 'noteIds' in ap.keys():
 			if 'location' in ap.keys():
 				if 'noteIds' in ap.keys():
-					for note in notesJSON['notes']:
+					for note in notes_json['notes']:
 						if len(ap['noteIds']) > 0:
 							if note['id'] == ap['noteIds'][0] and len(note['imageIds']) > 0:
 								image_count = 1

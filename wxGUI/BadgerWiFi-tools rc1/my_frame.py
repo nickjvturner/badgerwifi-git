@@ -299,7 +299,7 @@ class MyFrame(wx.Frame):
 
         if hasattr(self, 'current_profile_bom_module'):
             generate_bom(self.working_directory, self.esx_project_name, self.append_message,
-                         self.current_profile_bom_module.create_custom_AP_list)
+                         self.current_profile_bom_module.create_custom_ap_list)
 
     def on_copy_log(self, event):
         if wx.TheClipboard.Open():

@@ -14,6 +14,7 @@ from docx2pdf import convert
 
 nl = '\n'
 
+
 def convert_docx_to_pdf(docx_files, message_callback):
     message_callback(f'.docx conversion process started')
 

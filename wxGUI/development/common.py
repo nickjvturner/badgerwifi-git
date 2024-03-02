@@ -42,40 +42,40 @@ def load_json(project_dir, filename, message_callback):
         return None
 
 
-def create_floor_plans_dict(floorPlansJSON):
+def create_floor_plans_dict(floor_plans_json):
     """Create a dictionary of floor plans."""
-    floorPlansDict = {}
-    for floor in floorPlansJSON['floorPlans']:
-        floorPlansDict[floor['id']] = floor['name']
-    return floorPlansDict
+    floor_plans_dict = {}
+    for floor in floor_plans_json['floorPlans']:
+        floor_plans_dict[floor['id']] = floor['name']
+    return floor_plans_dict
 
 
-def create_floor_plans_height_dict(floorPlansJSON):
+def create_floor_plans_height_dict(floor_plans_json):
     """Create a dictionary of floor plans."""
-    floorPlansDict = {}
-    for floor in floorPlansJSON['floorPlans']:
-        floorPlansDict[floor['id']] = floor['height']
-    return floorPlansDict
+    floor_plans_dict = {}
+    for floor in floor_plans_json['floorPlans']:
+        floor_plans_dict[floor['id']] = floor['height']
+    return floor_plans_dict
 
 
-def create_notes_dict(notesJSON):
+def create_notes_dict(notes_json):
     """Create a dictionary of notes."""
-    if not notesJSON:
+    if not notes_json:
         # If notesJSON contains no notes, return None
         return None
 
-    notesDict = {}
-    for note in notesJSON['notes']:
-        notesDict[note['id']] = note
-    return notesDict
+    notes_dict = {}
+    for note in notes_json['notes']:
+        notes_dict[note['id']] = note
+    return notes_dict
 
 
-def note_text_processor(noteIds, notesDict):
+def note_text_processor(note_ids, notes_dict):
     notes_text = []
-    if noteIds:
-        for noteId in noteIds:
+    if note_ids:
+        for noteId in note_ids:
             # Attempt to retrieve the note by ID and its 'text' field
-            note = notesDict.get(noteId, {})
+            note = notes_dict.get(noteId, {})
             text = note.get('text', None)  # Use None as the default
 
             # Append the text to notes_text only if it exists and is not empty
@@ -86,27 +86,27 @@ def note_text_processor(noteIds, notesDict):
     return ''
 
 
-def create_tag_keys_dict(tagKeysJSON):
+def create_tag_keys_dict(tag_keys_json):
     """Create a dictionary of tag keys."""
-    tagKeysDict = {}
-    for tagKey in tagKeysJSON['tagKeys']:
-        tagKeysDict[tagKey['id']] = tagKey['key']
-    return tagKeysDict
+    tag_keys_dict = {}
+    for tagKey in tag_keys_json['tagKeys']:
+        tag_keys_dict[tagKey['id']] = tagKey['key']
+    return tag_keys_dict
 
 
-def create_simulated_radios_dict(simulatedRadiosJSON):
-    simulatedRadioDict = {}  # Initialize an empty dictionary
+def create_simulated_radios_dict(simulated_radios_json):
+    simulated_radio_dict = {}  # Initialize an empty dictionary
 
     # Loop through each radio inside simulatedRadiosJSON['simulatedRadios']
-    for radio in simulatedRadiosJSON['simulatedRadios']:
+    for radio in simulated_radios_json['simulatedRadios']:
         # Check if the top-level key exists, if not, create it
-        if radio['accessPointId'] not in simulatedRadioDict:
-            simulatedRadioDict[radio['accessPointId']] = {}
+        if radio['accessPointId'] not in simulated_radio_dict:
+            simulated_radio_dict[radio['accessPointId']] = {}
 
         # Assign the radio object to the nested key
-        simulatedRadioDict[radio['accessPointId']][radio['accessPointIndex']] = radio
+        simulated_radio_dict[radio['accessPointId']][radio['accessPointIndex']] = radio
 
-    return simulatedRadioDict
+    return simulated_radio_dict
 
 
 def model_antenna_split(string):
@@ -145,7 +145,7 @@ def file_or_dir_exists(path):
     return target_path.exists()
 
 
-def offender_constructor(requiredTagKeys, optionalTagKeys):
+def offender_constructor(required_tag_keys, optional_tag_keys):
     offenders = {
         'color': [],
         'antennaHeight': [],
@@ -154,33 +154,33 @@ def offender_constructor(requiredTagKeys, optionalTagKeys):
         'missing_optional_tags': {}
     }
 
-    for tagKey in requiredTagKeys:
+    for tagKey in required_tag_keys:
         offenders['missing_required_tags'][tagKey] = []
 
-    for tagKey in optionalTagKeys:
+    for tagKey in optional_tag_keys:
         offenders['missing_required_tags'][tagKey] = []
 
     return offenders
 
 
-def save_and_move_json(data, filePath):
+def save_and_move_json(data, file_path):
     """Save the updated access points to a JSON file."""
-    with open(filePath, "w") as outfile:
+    with open(file_path, "w") as outfile:
         json.dump(data, outfile, indent=4)
 
 
-def re_bundle_project(projectDir, outputName):
+def re_bundle_project(project_dir, output_name):
     """Re-bundle the project directory into an .esx file."""
-    output_esx_path = projectDir.parent / outputName
-    shutil.make_archive(str(output_esx_path), 'zip', str(projectDir))
+    output_esx_path = project_dir.parent / output_name
+    shutil.make_archive(str(output_esx_path), 'zip', str(project_dir))
     output_zip_path = str(output_esx_path) + '.zip'
     output_esx_path = str(output_esx_path) + '.esx'
     shutil.move(output_zip_path, output_esx_path)
 
 
-def create_custom_ap_dict(accessPointsJSON, floorPlansDict, simulatedRadioDict):
+def create_custom_ap_dict(access_points_json, floor_plans_dict, simulated_radio_dict):
     custom_ap_dict = {}
-    for ap in accessPointsJSON['accessPoints']:
+    for ap in access_points_json['accessPoints']:
         ap_model, external_antenna, antenna_description = model_antenna_split(ap.get('model', ''))
 
         custom_ap_dict[ap['name']] = {
@@ -188,11 +188,11 @@ def create_custom_ap_dict(accessPointsJSON, floorPlansDict, simulatedRadioDict):
             'color': ap.get('color', 'none'),
             'model': ap_model,
             'antenna': external_antenna,
-            'floor': floorPlansDict.get(ap['location']['floorPlanId'], ''),
-            'antennaTilt': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
-            'antennaMounting': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
-            'antennaHeight': simulatedRadioDict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', 0),
-            'radios': simulatedRadioDict.get(ap['id'], {}),
+            'floor': floor_plans_dict.get(ap['location']['floorPlanId'], ''),
+            'antennaTilt': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
+            'antennaMounting': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
+            'antennaHeight': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', 0),
+            'radios': simulated_radio_dict.get(ap['id'], {}),
             'remarks': '',
             'ap bracket': '',
             'antenna bracket': '',
