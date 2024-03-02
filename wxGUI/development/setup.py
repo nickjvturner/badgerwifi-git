@@ -18,7 +18,8 @@ setup(
         'xlsxwriter>=3.1.9',
         'inflect>=7.0.0',
         'python-docx>=1.1.0',
-        'docx2pdf>=0.1.8'
+        'docx2pdf>=0.1.8',
+        'pillow>=10.2.0'
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
