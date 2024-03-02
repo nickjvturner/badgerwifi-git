@@ -49,9 +49,12 @@ class MyFrame(wx.Frame):
         self.initialize_variables()
         self.setup_list_box()
         self.setup_display_log()
-        # self.setupTabs()
+        self.setup_tabs()
         self.setup_buttons()
         self.setup_dropdowns()
+        self.setup_tab1()
+        self.setup_tab2()
+        self.setup_tab3()
         self.setup_main_sizer()
         self.create_menu()
         self.setup_drop_target()
@@ -102,7 +105,7 @@ class MyFrame(wx.Frame):
         self.available_ap_rename_scripts = discover_available_scripts(RENAME_APS_FOLDER)
 
         # Create a dropdown to select an AP renaming script
-        self.ap_rename_script_dropdown = wx.Choice(self.panel, choices=self.available_ap_rename_scripts)
+        self.ap_rename_script_dropdown = wx.Choice(self.tab1, choices=self.available_ap_rename_scripts)
         self.ap_rename_script_dropdown.SetSelection(0)  # Set default selection
         self.ap_rename_script_dropdown.Bind(wx.EVT_CHOICE, self.on_ap_rename_script_dropdown_selection)
 
@@ -110,7 +113,7 @@ class MyFrame(wx.Frame):
         self.available_project_profiles = discover_available_scripts(PROJECT_PROFILES_FOLDER)
 
         # Create a dropdown to select a Project Profile
-        self.project_profile_dropdown = wx.Choice(self.panel, choices=self.available_project_profiles)
+        self.project_profile_dropdown = wx.Choice(self.tab1, choices=self.available_project_profiles)
         self.project_profile_dropdown.SetSelection(0)  # Set default selection
         self.project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_project_profile_dropdown_selection)
 
@@ -136,36 +139,36 @@ class MyFrame(wx.Frame):
         self.backup_button.Bind(wx.EVT_BUTTON, self.on_backup)
 
         # Create a button to execute the selected AP renaming script
-        self.rename_aps_button = wx.Button(self.panel, label="Rename APs")
+        self.rename_aps_button = wx.Button(self.tab1, label="Rename APs")
         self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
 
         # Create a button for showing long descriptions with a specified narrow size
-        self.description_button = wx.Button(self.panel, label="?", size=(20, -1))  # Width of 40, default height
+        self.description_button = wx.Button(self.tab1, label="?", size=(20, -1))  # Width of 40, default height
         self.description_button.Bind(wx.EVT_BUTTON, self.on_description_button_click)
 
         # Create a button to execute the selected BoM generator
-        self.generate_bom = wx.Button(self.panel, label="Generate BoM")
+        self.generate_bom = wx.Button(self.tab1, label="Generate BoM")
         self.generate_bom.Bind(wx.EVT_BUTTON, self.on_generate_bom)
 
-        self.validate_button = wx.Button(self.panel, label="Validate")
+        self.validate_button = wx.Button(self.tab1, label="Validate")
         self.validate_button.Bind(wx.EVT_BUTTON, self.on_validate)
 
-        self.summarise_button = wx.Button(self.panel, label="Summarise")
+        self.summarise_button = wx.Button(self.tab1, label="Summarise")
         self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
 
-        self.export_ap_images_button = wx.Button(self.panel, label="Export AP images")
+        self.export_ap_images_button = wx.Button(self.tab2, label="Export AP images")
         self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
 
-        self.export_note_images_button = wx.Button(self.panel, label="Export Note images")
+        self.export_note_images_button = wx.Button(self.tab2, label="Export Note images")
         self.export_note_images_button.Bind(wx.EVT_BUTTON, self.on_export_note_images)
 
-        self.export_pds_maps_button = wx.Button(self.panel, label="Export PDS Maps")
+        self.export_pds_maps_button = wx.Button(self.tab2, label="Export PDS Maps")
         self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
 
-        self.insert_images_button = wx.Button(self.panel, label="Insert Images to .docx")
+        self.insert_images_button = wx.Button(self.tab3, label="Insert Images to .docx")
         self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
 
-        self.convert_docx_to_pdf_button = wx.Button(self.panel, label="Convert .docx to PDF")
+        self.convert_docx_to_pdf_button = wx.Button(self.tab3, label="Convert .docx to PDF")
         self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
 
         # Create exit button
@@ -184,30 +187,6 @@ class MyFrame(wx.Frame):
         button_row1_sizer.Add(self.unpack_button, 0, wx.ALL, 5)
         button_row1_sizer.Add(self.backup_button, 0, wx.ALL, 5)
 
-        button_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_row2_sizer.AddStretchSpacer(1)
-        button_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        button_row2_sizer.Add(self.description_button, 0, wx.EXPAND | wx.ALL, 5)
-        button_row2_sizer.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, 5)
-
-        button_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_row3_sizer.AddStretchSpacer(1)
-        button_row3_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        button_row3_sizer.Add(self.validate_button, 0, wx.ALL, 5)
-        button_row3_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
-        button_row3_sizer.Add(self.generate_bom, 0, wx.ALL, 5)
-
-        button_row4_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_row4_sizer.AddStretchSpacer(1)
-        button_row4_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
-        button_row4_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
-        button_row4_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
-
-        button_row5_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_row5_sizer.AddStretchSpacer(1)
-        button_row5_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
-        button_row5_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
-
         button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_exit_row_sizer.AddStretchSpacer(1)
         button_exit_row_sizer.Add(self.exit_button, 0, wx.ALL, 5)
@@ -215,15 +194,69 @@ class MyFrame(wx.Frame):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT, 10)
         main_sizer.Add(button_row0_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, 10)
+        main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(button_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(button_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(button_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(button_row4_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(button_row5_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.panel.SetSizer(main_sizer)
+
+    def setup_tabs(self):
+        self.notebook = wx.Notebook(self.panel)
+        self.tab1 = wx.Panel(self.notebook)
+        self.tab2 = wx.Panel(self.notebook)
+        self.tab3 = wx.Panel(self.notebook)
+
+        self.notebook.AddPage(self.tab1, "Simulation")
+        self.notebook.AddPage(self.tab2, "Survey")
+        self.notebook.AddPage(self.tab3, "DOCX")
+
+        # Set up tab1
+        self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
+
+    def setup_tab1(self):
+
+        self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row1_sizer.AddStretchSpacer(1)
+        self.tab1_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
+        self.tab1_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
+        self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row2_sizer.AddStretchSpacer(1)
+        self.tab1_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row2_sizer.Add(self.description_button, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row2_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
+        self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row3_sizer.AddStretchSpacer(1)
+        self.tab1_row3_sizer.Add(self.generate_bom, 0, wx.ALL, 5)
+        self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1.SetSizer(self.tab1_sizer)
+
+    def setup_tab2(self):
+        self.tab2_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab2_row1_sizer.AddStretchSpacer(1)
+        self.tab2_row1_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
+        self.tab2_row1_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
+        self.tab2_row1_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
+        self.tab2_sizer.Add(self.tab2_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab2.SetSizer(self.tab2_sizer)
+
+    def setup_tab3(self):
+        self.tab3_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab3_row1_sizer.AddStretchSpacer(1)
+        self.tab3_row1_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
+        self.tab3_row1_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
+        self.tab3_sizer.Add(self.tab3_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab3.SetSizer(self.tab3_sizer)
 
     def create_menu(self):
         menubar = wx.MenuBar()
