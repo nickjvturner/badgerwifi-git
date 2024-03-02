@@ -21,9 +21,7 @@ import math
 from common import ekahau_color_dict
 from common import load_json
 from common import create_floor_plans_dict
-from common import create_tag_keys_dict
 from common import create_simulated_radios_dict
-from common import create_notes_dict
 
 from common import FIVE_GHZ_RADIO_ID
 
@@ -42,7 +40,7 @@ OPACITY = 0.5  # Value from 0 -> 1, defines the opacity of the 'other' APs on zo
 nl = '\n'
 
 
-def setFont():
+def set_font():
     # Define text, font and size
     if platform.system() == "Windows":
         font_path = os.path.join(os.environ["SystemRoot"], "Fonts", "Consola.ttf")
@@ -51,7 +49,7 @@ def setFont():
         return ImageFont.truetype("Menlo.ttc", 30)
 
 
-def vectorSourceCheck(floor):
+def vector_source_check(floor):
     if 'bitmapImageId' in floor:
         print(f'bitmapImageId detected, floor plan source probably vector')
         return floor['bitmapImageId']
@@ -60,16 +58,10 @@ def vectorSourceCheck(floor):
         return floor['imageId']
 
 
-def get_AP_Color(ap):
-    if 'color' in ap:
-        return ap['color']
+def get_ap_icon(ap, icon_resize, assets_dir):
+    ap_color_hex = ap['color'] if 'color' in ap else '#FFFFFF'
 
-    else:
-        return '#FFFFFF'
-
-
-def get_AP_Icon(ap_color_hex, icon_resize, assets_dir):
-    ap_color = ekahau_color_dict[ap_color_hex]
+    ap_color = ekahau_color_dict.get(ap_color_hex)
 
     # Import ekahau style custom
     spot = Image.open(assets_dir / f'ekahau-AP-{ap_color}.png')
@@ -77,7 +69,7 @@ def get_AP_Icon(ap_color_hex, icon_resize, assets_dir):
     return spot.resize((icon_resize, icon_resize))
 
 
-def get_y_Offset(arrow, angle):
+def get_y_offset(arrow, angle):
     arrow_length = arrow.height / 2
     default_y_offset = arrow.height / 4
 
@@ -96,13 +88,13 @@ def create_ap_location_map(working_directory, project_name, message_callback):
     message_callback(f'performing action for: {project_name}\n')
     project_dir = Path(working_directory) / project_name
 
-    font = setFont()
+    font = set_font()
 
-    def floorPlanGetter(floorPlanId):
+    def floor_plan_getter(floor_plan_id):
         # print(floorPlansDict.get(floorPlanId))
-        return floor_plans_dict.get(floorPlanId)
+        return floor_plans_dict.get(floor_plan_id)
 
-    def textWidthAndHeightGetter(text):
+    def text_width_and_height_getter(text):
         # Create a working space image and draw object
         working_space = Image.new("RGB", (500, 500), color="white")
         draw = ImageDraw.Draw(working_space)
@@ -116,14 +108,14 @@ def create_ap_location_map(working_directory, project_name, message_callback):
 
         return width, height
 
-    def cropAssesment():
+    def crop_assesment():
         # Check if the floorplan has been cropped within Ekahau?
         crop_bitmap = (floor['cropMinX'], floor['cropMinY'], floor['cropMaxX'], floor['cropMaxY'])
 
         if crop_bitmap[0] != 0.0 or crop_bitmap[1] != 0.0:
 
             # Calculate scaling ratio
-            scaling_ratio = all_APs.width / floor['width']
+            scaling_ratio = all_aps.width / floor['width']
 
             # Calculate x,y coordinates of the crop within Ekahau
             crop_bitmap = (crop_bitmap[0] * scaling_ratio,
@@ -132,41 +124,36 @@ def create_ap_location_map(working_directory, project_name, message_callback):
                            crop_bitmap[3] * scaling_ratio)
 
             # set boolean value
-            map_cropped_within_Ekahau = True
+            map_cropped_within_ekahau = True
 
             # save a blank copy of the cropped floorplan
-            cropped_blank_map = source_floorPlan_image.copy()
+            cropped_blank_map = source_floor_plan_image.copy()
             cropped_blank_map = cropped_blank_map.crop(crop_bitmap)
             cropped_blank_map.save(Path(blank_plan_dir / floor['name']).with_suffix('.png'))
 
-            return map_cropped_within_Ekahau, scaling_ratio, crop_bitmap
+            return map_cropped_within_ekahau, scaling_ratio, crop_bitmap
 
         else:
             # There is no crop
             scaling_ratio = 1
 
             # set boolean value
-            map_cropped_within_Ekahau = False
+            map_cropped_within_ekahau = False
 
             # save a blank copy of the floorplan
             shutil.copy(project_dir / ('image-' + floor_id),
                         Path(blank_plan_dir / floor['name']).with_suffix('.png'))
 
-            return map_cropped_within_Ekahau, scaling_ratio, None
+            return map_cropped_within_ekahau, scaling_ratio, None
 
     # Load JSON data
     floor_plans_json = load_json(project_dir, 'floorPlans.json', message_callback)
     access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
     simulated_radios_json = load_json(project_dir, 'simulatedRadios.json', message_callback)
-    tag_keys_json = load_json(project_dir, 'tagKeys.json', message_callback)
-    notes_json = load_json(project_dir, 'notes.json', message_callback)
 
     # Process data
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
-    tag_keys_dict = create_tag_keys_dict(tag_keys_json)
     simulated_radio_dict = create_simulated_radios_dict(simulated_radios_json)
-    notes_dict = create_notes_dict(notes_json)
-
 
     # Create directory to hold output directories
     output_dir = working_directory / "OUTPUT"
@@ -191,20 +178,20 @@ def create_ap_location_map(working_directory, project_name, message_callback):
     # Define assets directory path
     assets_dir = Path(__file__).parent / 'assets' / 'ekahau_style'
 
-    def annotateMap(map_image, ap):
-        font = setFont()
+    def annotate_map(map_image, ap):
+        font = set_font()
 
-        ap_color = get_AP_Color(ap)
+        ap_color = ap['color'] if 'color' in ap else 'FFFFFF'
 
         # establish x and y
         x, y = (ap['location']['coord']['x'] * scaling_ratio,
                 ap['location']['coord']['y'] * scaling_ratio)
 
         print(
-            f"{nl}[[ {ap['name']} [{ap['model']}]] from: {floorPlanGetter(ap['location']['floorPlanId'])} ] "
-            f"has color '{ekahau_color_dict[ap_color]}' ({ap_color}) and coordinates {x}, {y}")
+            f"{nl}[[ {ap['name']} [{ap['model']}]] from: {floor_plan_getter(ap['location']['floorPlanId'])} ] "
+            f"has color '{ekahau_color_dict.get(ap_color)}' ({ap_color}) and coordinates {x}, {y}")
 
-        spot = get_AP_Icon(get_AP_Color(ap), ICON_RESIZE, assets_dir)
+        spot = get_ap_icon(ap, ICON_RESIZE, assets_dir)
 
         angle = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaDirection']
 
@@ -212,7 +199,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         arrow = arrow.resize((ICON_RESIZE, ICON_RESIZE))
 
         # Calculate AP icon rounded rectangle offset value for text below the AP icon
-        y_offset = get_y_Offset(arrow, angle)
+        y_offset = get_y_offset(arrow, angle)
 
         # Define the centre point of the spot
         spot_centre_point = (spot.width // 2, spot.height // 2)
@@ -240,7 +227,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
             map_image.paste(rotated_arrow, top_left, mask=rotated_arrow)
 
         # Calculate the height and width of the AP Name rounded rectangle
-        text_width, text_height = textWidthAndHeightGetter(ap['name'])
+        text_width, text_height = text_width_and_height_getter(ap['name'])
 
         # Establish coordinates for the rounded rectangle
         x1 = x - (text_width / 2) - RECT_TEXT_OFFSET
@@ -263,7 +250,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         return map_image
 
     def crop_map(map_image, ap):
-        map_image = annotateMap(map_image, ap)  # Re-annotate the map_image
+        map_image = annotate_map(map_image, ap)  # Re-annotate the map_image
 
         # establish x and y
         x, y = (ap['location']['coord']['x'] * scaling_ratio,
@@ -278,50 +265,49 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         # Save the cropped image with a new filename
         cropped_map_image.save(Path(zoom_faded_dir / (ap['name'] + '-zoomed')).with_suffix('.png'))
 
-
     for floor in floor_plans_json['floorPlans']:
 
-        floor_id = vectorSourceCheck(floor)
+        floor_id = vector_source_check(floor)
 
         # Extract floor plan
         shutil.copy(project_dir / ('image-' + floor_id), temp_dir / floor_id)
 
         # Open the floor plan to be used for AP placement activities
-        source_floorPlan_image = Image.open(temp_dir / floor_id)
+        source_floor_plan_image = Image.open(temp_dir / floor_id)
 
-        map_cropped_within_Ekahau, scaling_ratio, crop_bitmap = cropAssesment()
+        map_cropped_within_ekahau, scaling_ratio, crop_bitmap = crop_assesment()
 
-        APs_on_this_floor = []
+        aps_on_this_floor = []
 
         for ap in sorted(access_points_json['accessPoints'], key=lambda i: i['name']):
             # print(ap)
             # print(ap['location']['floorPlanId'])
             if ap['location']['floorPlanId'] == floor['id']:
-                APs_on_this_floor.append(ap)
+                aps_on_this_floor.append(ap)
 
-        current_map_image = source_floorPlan_image.copy()
+        current_map_image = source_floor_plan_image.copy()
 
-        # Generate the all_APs map
-        for ap in APs_on_this_floor:
-            all_APs = annotateMap(current_map_image, ap)
+        # Generate the all_aps map
+        for ap in aps_on_this_floor:
+            all_aps = annotate_map(current_map_image, ap)
 
         # Zoom faded AP map generation
-        all_APs_faded = all_APs.copy().convert('RGBA')
-        faded_AP_background_map_image = source_floorPlan_image.convert('RGBA')
+        all_aps_faded = all_aps.copy().convert('RGBA')
+        faded_ap_background_map_image = source_floor_plan_image.convert('RGBA')
 
-        all_APs_faded = Image.alpha_composite(faded_AP_background_map_image, Image.blend(faded_AP_background_map_image, all_APs_faded, OPACITY))
+        all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
 
-        for ap in APs_on_this_floor:
-            crop_map(all_APs_faded.copy(), ap)
+        for ap in aps_on_this_floor:
+            crop_map(all_aps_faded.copy(), ap)
 
         # If map was cropped within Ekahau, crop the all_AP map
-        if map_cropped_within_Ekahau:
-            all_APs = all_APs.crop(crop_bitmap)
+        if map_cropped_within_ekahau:
+            all_aps = all_aps.crop(crop_bitmap)
 
         # Save the output images
-        all_APs.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
+        all_aps.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
         # all_APs_faded_map_name = f"{floor['name']}_FADED"
-        # all_APs_faded.save(Path(annotated_floorplan_destination / all_APs_faded_map_name).with_suffix('.png'))
+        # all_aps_faded.save(Path(annotated_floorplan_destination / all_APs_faded_map_name).with_suffix('.png'))
 
     try:
         # shutil.rmtree(project_name)
