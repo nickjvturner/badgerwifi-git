@@ -504,7 +504,7 @@ class MyFrame(wx.Frame):
         self.esx_project_unpacked = unpacked
 
     def on_export_note_images(self, event):
-        pass
+        self.append_message(f'No action implemented yet')
 
     def on_export_ap_images(self, event):
         self.on_clear_log(None)

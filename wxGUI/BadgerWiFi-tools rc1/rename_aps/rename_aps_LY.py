@@ -1,4 +1,4 @@
-# tag, tag, floor, tag, x-axis (LY).py
+# LY renamer.py
 
 import json
 from pathlib import Path
