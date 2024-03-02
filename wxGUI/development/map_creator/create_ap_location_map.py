@@ -310,8 +310,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         # all_aps_faded.save(Path(annotated_floorplan_destination / all_APs_faded_map_name).with_suffix('.png'))
 
     try:
-        # shutil.rmtree(project_name)
-        # shutil.rmtree(tempfile_destination)
+        shutil.rmtree(temp_dir)
         print(f'Temporary project contents directory removed{nl}')
     except Exception as e:
         print(e)
