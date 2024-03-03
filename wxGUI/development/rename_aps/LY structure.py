@@ -1,4 +1,4 @@
-# LY renamer.py
+# LY structure.py
 
 from pathlib import Path
 
@@ -45,7 +45,7 @@ def sort_access_points(access_points, tag_keys_dict, floor_plans_dict):
                   ))
 
 
-def rename_access_points(access_points, tag_keys_dict, floor_plans_dict, message_callback):
+def rename_aps(access_points, tag_keys_dict, floor_plans_dict, message_callback):
     """Rename access points based on sorting and specific naming conventions."""
     ap_sequence_number = 1
     for ap in access_points:
@@ -59,6 +59,8 @@ def rename_access_points(access_points, tag_keys_dict, floor_plans_dict, message
 
 
 def run(working_directory, project_name, message_callback):
+    message_callback(f'Renaming APs within project: {project_name}')
+
     project_dir = Path(working_directory) / project_name
 
     # Load JSON data
@@ -74,7 +76,7 @@ def run(working_directory, project_name, message_callback):
     sorted_access_points = sort_access_points(access_points_json['accessPoints'], tag_keys_dict, floor_plans_dict)
 
     # Rename Access Points
-    rename_access_points(sorted_access_points, tag_keys_dict, floor_plans_dict, message_callback)
+    rename_aps(sorted_access_points, tag_keys_dict, floor_plans_dict, message_callback)
 
     # Save and Move the Updated JSON
     updated_access_points_json = {'accessPoints': sorted_access_points}

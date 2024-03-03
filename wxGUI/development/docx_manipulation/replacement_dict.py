@@ -1,5 +1,5 @@
 image_search = {
-    # AP Brackets
+    # AP Brackets, indoor APs
     'AP-MNT-A': {
         'image': 'AP-MNT-A.png',
         'height': 23},
@@ -19,7 +19,7 @@ image_search = {
         'image': 'AP-MNT-U.png',
         'height': 16},
 
-    # Antenna Brackets
+    # Antenna Brackets outdoor APs, full names
     'AP-270-MNT-H1': {
         'image': 'AP-270-MNT-H1.png',
         'height': 23},
@@ -29,14 +29,20 @@ image_search = {
     'AP-270-MNT-H3': {
         'image': 'AP-270-MNT-H3.png',
         'height': 23},
+    'AP-OUT-MNT-V1A': {
+        'image': 'AP-OUT-MNT-V1A.png',
+        'height': 23},
+    'AP-270-MNT-V2': {
+        'image': 'AP-270-MNT-V2.png',
+        'height': 23},
 
+    # Antenna Brackets outdoor APs, short names
     'V1A': {
         'image': 'AP-OUT-MNT-V1A.png',
         'height': 23},
     'V2': {
         'image': 'AP-270-MNT-V2.png',
         'height': 23},
-
     'H1': {
         'image': 'AP-270-MNT-H1.png',
         'height': 23},

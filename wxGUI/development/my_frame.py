@@ -273,6 +273,7 @@ class MyFrame(wx.Frame):
         self.tab3.SetSizer(self.tab3_sizer)
 
     def create_menu(self):
+        """Create a menu bar."""
         menubar = wx.MenuBar()
         file_menu = wx.Menu()
         file_menu.Append(wx.ID_ADD, "&Add File", "Add a file to the list")
@@ -281,6 +282,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_add_file, id=wx.ID_ADD)
 
     def setup_drop_target(self):
+        """Set up the drop target for the list box."""
         allowed_extensions = (".esx", ".docx", ".xlsx")  # Define allowed file extensions
         drop_target = DropTarget(self.list_box, allowed_extensions, self.append_message, self.esx_project_unpacked, self.update_esx_project_unpacked)
         self.list_box.SetDropTarget(drop_target)
@@ -290,6 +292,7 @@ class MyFrame(wx.Frame):
         self.display_log.AppendText(message + '\n')
 
     def save_application_state(self, event):
+        """Save the application state to the defined path."""
         state = {
             'list_box_contents': [self.list_box.GetString(i) for i in range(self.list_box.GetCount())],
             'selected_ap_rename_script_index': self.ap_rename_script_dropdown.GetSelection(),
@@ -300,6 +303,7 @@ class MyFrame(wx.Frame):
             json.dump(state, f)
 
     def load_application_state(self):
+        """Load the application state from the defined path."""
         try:
             with open(self.app_state_file_path, 'r') as f:
                 state = json.load(f)
@@ -313,7 +317,6 @@ class MyFrame(wx.Frame):
                 self.on_ap_rename_script_dropdown_selection(None)
                 # Restore selected bom generator index
                 self.project_profile_dropdown.SetSelection(state.get('selected_project_profile_index', 0))
-                self.on_project_profile_dropdown_selection(None)
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
             self.on_project_profile_dropdown_selection(None)
@@ -528,13 +531,14 @@ class MyFrame(wx.Frame):
         export_ap_images.export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_insert_images(self, event):
-        self.docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        if self.docx_files:
-            insert_images(self.docx_files, self.append_message)
+        docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
+        if docx_files:
+            for file in docx_files:
+                insert_images(file, self.append_message)
 
     def on_convert_docx_to_pdf(self, event):
-        self.docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        if self.docx_files:
+        docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
+        if docx_files:
             convert_docx_to_pdf(self.docx_files, self.append_message)
 
     def on_export_note_images(self, event):

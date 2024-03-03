@@ -7,6 +7,7 @@ from common import create_floor_plans_dict
 
 from common import save_and_move_json
 from common import re_bundle_project
+from common import rename_aps
 
 # CONSTANTS
 
@@ -63,18 +64,7 @@ def run(working_directory, project_name, message_callback):
                                                     i['model'],
                                                     i['location']['coord']['x']))
 
-    ap_sequence_number = 1
-
-    for ap in access_points_list_sorted:
-        # Define new AP naming scheme
-        # Define the pattern to rename your APs
-        new_ap_name = f'AP-{ap_sequence_number:03}'
-
-        message_callback(
-            f"{ap['name']} {ap['model']} from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed to {new_ap_name}")
-
-        ap['name'] = new_ap_name
-        ap_sequence_number += 1
+    access_points_list_sorted = rename_aps(access_points_list_sorted, message_callback, floor_plans_dict)
 
     # Save and Move the Updated JSON
     updated_access_points_json = {'accessPoints': access_points_list_sorted}

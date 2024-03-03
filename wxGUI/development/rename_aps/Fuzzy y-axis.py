@@ -10,6 +10,7 @@ from common import save_and_move_json
 from common import re_bundle_project
 
 from common import model_sort_order
+from common import rename_aps
 
 nl = '\n'
 VERTICAL_DIVISION_FACTOR = 40
@@ -65,7 +66,7 @@ the sorted list is iterated through and a new AP Name is assigned"""
 
 
 def run(working_directory, project_name, message_callback):
-    message_callback(f'Performing action for: {project_name}')
+    message_callback(f'Renaming APs within project: {project_name}')
 
     floor_plans_json = load_json(working_directory / project_name, 'floorPlans.json', message_callback)
     access_points_json = load_json(working_directory / project_name, 'accessPoints.json', message_callback)
@@ -105,29 +106,17 @@ def run(working_directory, project_name, message_callback):
         current_floor = ap['location']['floorPlanId']
 
     # by floor name(floorPlanId lookup) and x coord
-    access_points_list_sorted = sorted(access_points_list_sorted,
+    sorted_ap_list = sorted(access_points_list_sorted,
                                      key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
                                                     model_sort_order.get(i['model'], i['model']),
                                                     i['location']['coord']['y_group'],
                                                     i['location']['coord']['x']))
 
-    # Start numbering APs from... 1
-    ap_sequence_number = 1
-
-    for ap in access_points_list_sorted:
-        # Define new AP naming scheme
-        # Define the pattern to rename your APs
-        new_ap_name = f'AP-{ap_sequence_number:03}'
-
-        message_callback(
-            f"{ap['name']} {ap['model']} from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed to {new_ap_name}")
-
-        ap['name'] = new_ap_name
-        ap_sequence_number += 1
+    sorted_ap_list = rename_aps(sorted_ap_list, message_callback, floor_plans_dict)
 
     # Save and Move the Updated JSON
-    updatedAccessPointsJSON = {'accessPoints': access_points_list_sorted}
-    save_and_move_json(updatedAccessPointsJSON, working_directory / project_name / 'accessPoints.json')
+    updated_access_points_json = {'accessPoints': sorted_ap_list}
+    save_and_move_json(updated_access_points_json, working_directory / project_name / 'accessPoints.json')
 
     # Re-bundle into .esx File
     re_bundle_project(Path(working_directory / project_name), f"{project_name}_re-zip")

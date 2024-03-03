@@ -1,4 +1,4 @@
-# common.py
+# replacement_dict.py
 
 import json
 import shutil
@@ -200,3 +200,19 @@ def create_custom_ap_dict(access_points_json, floor_plans_dict, simulated_radio_
             }
 
     return custom_ap_dict
+
+
+def rename_aps(sorted_ap_list, message_callback, floor_plans_dict):
+    ap_sequence_number = 1
+
+    for ap in sorted_ap_list:
+        # Define new AP naming scheme
+        new_ap_name = f'AP-{ap_sequence_number:03}'
+
+        message_callback(
+            f"{ap['name']} [ {model_antenna_split(ap['model'])[0]} ] from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed: {new_ap_name}")
+
+        ap['name'] = new_ap_name
+        ap_sequence_number += 1
+
+    return sorted_ap_list

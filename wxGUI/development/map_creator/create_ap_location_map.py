@@ -1,14 +1,4 @@
-#!/usr/bin/env python3
-
-"""
-Creates an Ekahau style AP placement map
-    + Allows you the user to adjust the size in pixels of the AP icon
-    + AP icon is slightly transparent allowing installers to see more of the underlying map image
-    + Directional arrows will only appear on APs that have been rotated or are "pole" mounted
-    + AP name text labels will keep out of the way of directional arrows
-
-Created by Nick Turner (@nickjvturner)
-"""
+# create_ap_location_map.py
 
 import os
 import shutil
@@ -108,7 +98,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
 
         return width, height
 
-    def crop_assesment():
+    def crop_assessment():
         # Check if the floorplan has been cropped within Ekahau?
         crop_bitmap = (floor['cropMinX'], floor['cropMinY'], floor['cropMaxX'], floor['cropMaxY'])
 
@@ -275,7 +265,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         # Open the floor plan to be used for AP placement activities
         source_floor_plan_image = Image.open(temp_dir / floor_id)
 
-        map_cropped_within_ekahau, scaling_ratio, crop_bitmap = crop_assesment()
+        map_cropped_within_ekahau, scaling_ratio, crop_bitmap = crop_assessment()
 
         aps_on_this_floor = []
 
