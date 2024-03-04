@@ -17,8 +17,6 @@ def insert_images_threaded(docx_file, message_callback, progress_callback):
 	# Wrapper function to run insert_images in a separate thread
 	def run_in_thread():
 		insert_images(docx_file, message_callback, progress_callback)
-	# Update the UI or notify the user when done, if necessary
-	# message_callback(f'Image Insertion process started')
 
 	# Start the long-running task in a separate thread
 	threading.Thread(target=run_in_thread).start()

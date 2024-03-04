@@ -4,6 +4,8 @@ import json
 import shutil
 from pathlib import Path
 
+import wx
+
 # Constants
 VERSION = '1.2'
 UNKNOWN = 'Unknown'
@@ -209,8 +211,8 @@ def rename_aps(sorted_ap_list, message_callback, floor_plans_dict):
         # Define new AP naming scheme
         new_ap_name = f'AP-{ap_sequence_number:03}'
 
-        message_callback(
-            f"{ap['name']} [ {model_antenna_split(ap['model'])[0]} ] from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed: {new_ap_name}")
+        # message_callback(f"{ap['name']} [ {model_antenna_split(ap['model'])[0]} ] from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed: {new_ap_name}")
+        wx.CallAfter(message_callback, f"{ap['name']} [ {model_antenna_split(ap['model'])[0]} ] from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed: {new_ap_name}")
 
         ap['name'] = new_ap_name
         ap_sequence_number += 1

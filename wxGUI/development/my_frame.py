@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
 import importlib.util
+import threading
 
 from drop_target import DropTarget
 from validate_esx import validate_esx
