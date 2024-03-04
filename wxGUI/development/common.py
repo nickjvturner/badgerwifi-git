@@ -32,6 +32,8 @@ model_sort_order = {
     'AP-514': '2'
 }
 
+acceptable_antenna_tilt_angles = (0, -10, -20, -30, -40, -45, -50, -60, -70, -80, -90)
+
 
 def load_json(project_dir, filename, message_callback):
     """Load JSON data from a file."""
@@ -153,7 +155,10 @@ def offender_constructor(required_tag_keys, optional_tag_keys):
         'antennaHeight': [],
         'bluetooth': [],
         'missing_required_tags': {},
-        'missing_optional_tags': {}
+        'missing_optional_tags': {},
+        'antennaTilt': [],
+        'antennaMounting_and_antennaTilt_mismatch': [],
+
     }
 
     for tagKey in required_tag_keys:

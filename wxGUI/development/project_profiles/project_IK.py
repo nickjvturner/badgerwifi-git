@@ -9,8 +9,6 @@ from common import UNKNOWN, FIVE_GHZ_RADIO_ID
 requiredTagKeys = ("ap-bracket", "antenna-bracket", "rf-group")
 optionalTagKeys = ()
 
-acceptableAntennaTiltAngles = (-10, -20, -30, -40, -45, -50, -60, -70, -80, -90)
-
 project_specific_conventions = {
     "AP-514": {
         "color": "red",

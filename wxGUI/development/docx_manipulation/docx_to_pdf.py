@@ -10,25 +10,32 @@ Latest meaningful update: 2023-08-10
 """
 
 from pathlib import Path
+
+import wx
 from docx2pdf import convert
+import threading
 
 nl = '\n'
 
 
-def convert_docx_to_pdf(docx_files, message_callback):
-    message_callback(f'.docx conversion process started')
+def convert_docx_to_pdf_threaded(docx_file, message_callback):
+    # Wrapper function to run convert_docx_to_pdf in a separate thread
+    def run_in_thread():
+        convert_docx_to_pdf(docx_file, message_callback)
 
-    for docx_path in docx_files:
-        docx_path = Path(docx_path).resolve()  # Ensure it's an absolute path
+    # Start the long-running task in a separate thread
+    threading.Thread(target=run_in_thread).start()
 
-        if not docx_path.is_file():
-            message_callback(f"File not found: {docx_path}")
-            continue
 
-        output_pdf_path = docx_path.with_suffix('.pdf')
+def convert_docx_to_pdf(docx_file, message_callback):
+    wx.CallAfter(message_callback, '.docx conversion process started')
 
-        try:
-            convert(str(docx_path), str(output_pdf_path.parent))
-            message_callback(f"Converted: {docx_path.name} to PDF")
-        except Exception as e:
-            message_callback(f"Error converting {docx_path.name}: {e}")
+    docx_path = Path(docx_file).resolve()  # Ensure it's an absolute path
+
+    output_pdf_path = docx_path.with_suffix('.pdf')
+
+    try:
+        convert(str(docx_path), str(output_pdf_path.parent))
+        message_callback(f"Converted: {docx_path.name} to PDF")
+    except Exception as e:
+        message_callback(f"Error converting {docx_path.name}: {e}")

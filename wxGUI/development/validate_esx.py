@@ -6,6 +6,9 @@ from common import create_tag_keys_dict
 from common import create_simulated_radios_dict
 from common import offender_constructor
 from common import create_custom_ap_dict
+from common import acceptable_antenna_tilt_angles
+
+from common import FIVE_GHZ_RADIO_ID
 
 nl = '\n'
 
@@ -61,6 +64,24 @@ def validate_required_tags(offenders, total_ap_count, total_required_tag_keys_co
         return True
     return False
 
+def validate_antenna_tilt(offenders, total_ap_count, message_callback):
+    if len(offenders.get('antennaTilt', [])) > 0:
+        message_callback(f"{nl}Caution! The following {len(offenders.get('antennaTilt', []))} APs have an antenna tilt that will cause problems when generating per AP installer documentation")
+        for ap in offenders['antennaTilt']:
+            message_callback(ap)
+        return False
+    message_callback(f"{nl}Antenna Tilt test: PASSED{nl}All {total_ap_count} APs have a conforming antenna tilt")
+    return True
+
+def validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, message_callback):
+    if len(offenders.get('antennaMounting_and_antennaTilt_mismatch', [])) > 0:
+        message_callback(f"{nl}Caution! The following {len(offenders.get('antennaMounting_and_antennaTilt_mismatch', []))} APs may be configured incorrectly, Wall mounted with 0 degrees of tilt, is this intentional?")
+        for ap in offenders['antennaMounting_and_antennaTilt_mismatch']:
+            message_callback(ap)
+        return False
+    message_callback(f"{nl}Antenna Mounting and Tilt Mismatch test: PASSED{nl}All {total_ap_count} APs have a conforming antenna mounting and tilt")
+    return True
+
 
 def validate_esx(working_directory, project_name, message_callback, required_tag_keys, optional_tag_keys):
     message_callback(f'Performing Validation for: {project_name}')
@@ -100,6 +121,12 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
             if radio.get('radioTechnology') == 'BLUETOOTH' and radio.get('enabled', False):
                 offenders['bluetooth'].append(ap['name'])
 
+        if ap.get('radios', {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt') not in acceptable_antenna_tilt_angles:
+            offenders['antennaTilt'].append(ap['name'])
+
+        if ap.get('antennaMounting') == 'WALL' and ap.get('radios', {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt') == 0:
+            offenders['antennaMounting_and_antennaTilt_mismatch'].append(ap['name'])
+
         for tagKey in required_tag_keys:
             if tagKey not in ap['tags']:
                 offenders['missing_required_tags'][tagKey].append(ap['name'])
@@ -112,7 +139,9 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
         validate_color_assignment(offenders, total_ap_count, message_callback),
         validate_height_manipulation(offenders, total_ap_count, message_callback),
         # validate_bluetooth_radio_off(offenders, total_ap_count, message_callback),
-        validate_required_tags(offenders, total_ap_count, total_required_tag_keys_count, required_tag_keys, message_callback)
+        validate_required_tags(offenders, total_ap_count, total_required_tag_keys_count, required_tag_keys, message_callback),
+        validate_antenna_tilt(offenders, total_ap_count, message_callback),
+        validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, message_callback)
     ]
 
     # Print pass/fail states

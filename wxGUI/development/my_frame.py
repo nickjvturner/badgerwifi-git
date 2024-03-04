@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
 import importlib.util
-import threading
 
 from drop_target import DropTarget
 from validate_esx import validate_esx
@@ -19,7 +18,7 @@ from bom_generator import generate_bom
 from exports import export_ap_images
 from exports.export_blank_maps import export_blank_maps
 from docx_manipulation.insert_images import insert_images_threaded
-from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
+from docx_manipulation.docx_to_pdf import convert_docx_to_pdf_threaded
 
 from map_creator.create_ap_location_map import create_ap_location_map
 
@@ -74,8 +73,8 @@ class MyFrame(wx.Frame):
         self.esx_project_name = None
         self.esx_filepath = None
         self.current_profile_bom_module = None
-        self.esx_required_tag_keys = None
-        self.esx_optional_tag_keys = None
+        self.esx_required_tag_keys = {}
+        self.esx_optional_tag_keys = {}
         self.docx_files = []
 
         # Define the configuration directory path
@@ -557,7 +556,8 @@ class MyFrame(wx.Frame):
     def on_convert_docx_to_pdf(self, event):
         docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
         if docx_files:
-            convert_docx_to_pdf(self.docx_files, self.append_message)
+            for file in docx_files:
+                convert_docx_to_pdf_threaded(file, self.append_message)
 
     def on_export_note_images(self, event):
         self.placeholder(None)
