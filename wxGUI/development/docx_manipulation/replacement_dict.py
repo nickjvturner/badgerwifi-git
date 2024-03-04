@@ -35,6 +35,9 @@ image_search = {
     'AP-270-MNT-V2': {
         'image': 'AP-270-MNT-V2.png',
         'height': 23},
+    'AP-ANT-MNT-U': {
+        'image': 'AP-ANT-MNT-U.png',
+        'height': 23},
 
     # Antenna Brackets outdoor APs, short names
     'V1A': {
