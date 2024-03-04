@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-import time
+import threading
 
+import wx
 from docx import Document
 from docx.shared import Mm
 
@@ -12,8 +13,19 @@ from docx_manipulation.replacement_dict import text_search
 nl = '\n'
 
 
-def insert_images(docx_file, message_callback):
-	message_callback(f'Image Insertion process started')
+def insert_images_threaded(docx_file, message_callback, progress_callback):
+	# Wrapper function to run insert_images in a separate thread
+	def run_in_thread():
+		insert_images(docx_file, message_callback, progress_callback)
+	# Update the UI or notify the user when done, if necessary
+	# message_callback(f'Image Insertion process started')
+
+	# Start the long-running task in a separate thread
+	threading.Thread(target=run_in_thread).start()
+
+
+def insert_images(docx_file, message_callback, progress_callback):
+	wx.CallAfter(message_callback, f'Image Insertion process started')
 
 	file = Path(docx_file)
 	working_directory = file.parent
@@ -28,7 +40,7 @@ def insert_images(docx_file, message_callback):
 	image_insertion_points = 0
 
 	print(f'{nl}Searching file for image insertion points')
-	message_callback(f'Searching file for image insertion points')
+	wx.CallAfter(message_callback, f'Searching file for image insertion points')
 
 	# count image insertions to be conducted
 	for table in document.tables:
@@ -43,12 +55,11 @@ def insert_images(docx_file, message_callback):
 						if str_prefix + key in paragraph.text:
 							if count_image_insertion_point:
 								image_insertion_points += 1
-								print('*', 'counting image insertion strings:', image_insertion_points, end='\r')
+								wx.CallAfter(message_callback, f'counting image insertion strings: {image_insertion_points}')
 
 	total_image_insertion_points = int(image_insertion_points)
 
-	print(f'{nl}* {total_image_insertion_points} image insertion points identified *{nl}')
-	message_callback(f'* {total_image_insertion_points} image insertion points identified *')
+	wx.CallAfter(message_callback, f'* {total_image_insertion_points} image insertion points identified *{nl}')
 
 	# progress counter
 	images_inserted = 0
@@ -64,13 +75,13 @@ def insert_images(docx_file, message_callback):
 							paragraph.add_run().add_picture(str(picture_path), height=Mm(image_search[key]['height']))
 							images_inserted += 1
 							message = f"{key} image inserted, with height: {image_search[key]['height']} mm  ({images_inserted}/{total_image_insertion_points})"
-							print(f'{message :>75}{nl}')
-							message_callback(message)
+							wx.CallAfter(message_callback, message)
+							wx.CallAfter(message_callback, f'images inserted: {images_inserted}/{total_image_insertion_points}')
+
 
 	text_replacements = []
 
-	print(f'{nl}Searching file for text replacements')
-	message_callback(f'Searching file for text replacements')
+	wx.CallAfter(message_callback, f'{nl}Searching file for text replacements')
 
 	for table in document.tables:
 		for row in table.rows:
@@ -80,17 +91,11 @@ def insert_images(docx_file, message_callback):
 						if key in paragraph.text:
 							text_replacements.append(key)
 							paragraph.text = paragraph.text.replace(key, text_search[key])
-							print('*', len(text_replacements), 'text replacements', end='\r')
-							time.sleep(0.01)
+							wx.CallAfter(message_callback, f'text replacements: {len(text_replacements)}')
 
-	print(f'{nl}------------{nl}Please wait while file is saved')
-	message_callback(f'Please wait while file is saved')
+	wx.CallAfter(message_callback, f'{nl}Please wait while file is saved{nl}')
 	document.save(working_directory / Path(file.stem + '-OUTPUT-IMAGES_ADDED.docx'))
 
-	print(f'{nl}* {images_inserted} images inserted *')
-	message_callback(f'{nl}* {images_inserted} images inserted *')
-
-	print(f'* {len(text_replacements)} text strings replaced *')
+	message_callback(f'* {images_inserted} images inserted')
 	message_callback(f'* {len(text_replacements)} text strings replaced *')
-
-	message_callback(f'image insertion COMPLETE')
+	message_callback(f'{nl}image insertion COMPLETE')

@@ -17,7 +17,7 @@ from bom_generator import generate_bom
 
 from exports import export_ap_images
 from exports.export_blank_maps import export_blank_maps
-from docx_manipulation.insert_images import insert_images
+from docx_manipulation.insert_images import insert_images_threaded
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
 
 from map_creator.create_ap_location_map import create_ap_location_map
@@ -73,8 +73,8 @@ class MyFrame(wx.Frame):
         self.esx_project_name = None
         self.esx_filepath = None
         self.current_profile_bom_module = None
-        self.esx_requiredTagKeys = None
-        self.esx_optionalTagKeys = None
+        self.esx_required_tag_keys = None
+        self.esx_optional_tag_keys = None
         self.docx_files = []
 
         # Define the configuration directory path
@@ -291,6 +291,23 @@ class MyFrame(wx.Frame):
         # Append a message to the message display area.
         self.display_log.AppendText(message + '\n')
 
+    def rewrite_last_message(self, message):
+        pass
+    #     content = self.display_log.GetValue()
+    #     if content:
+    #         lines = content.split('\n')
+    #         lines[-1] = message  # Update the most recent line
+    #         updated_content = '\n'.join(lines)
+    #         self.display_log.SetValue(updated_content)
+    #         self.display_log.ShowPosition(self.display_log.GetLastPosition())  # Scroll to the bottom
+    #     else:
+    #         self.display_log.SetValue(message)  # First message being added
+    #
+    #     # # Remove last line and append new line.
+    #     # self.display_log.Remove(self.display_log.GetLastPosition() - len(message) - 1, self.display_log.GetLastPosition())
+    #     # # Append a message to the message display area.
+    #     # self.display_log.AppendText(message + '\n')
+
     def save_application_state(self, event):
         """Save the application state to the defined path."""
         state = {
@@ -377,7 +394,7 @@ class MyFrame(wx.Frame):
         if not self.esx_project_unpacked:
             self.unpack_esx()
 
-        validate_esx(self.working_directory, self.esx_project_name, self.append_message, self.esx_requiredTagKeys, self.esx_optionalTagKeys)
+        validate_esx(self.working_directory, self.esx_project_name, self.append_message, self.esx_required_tag_keys, self.esx_optional_tag_keys)
 
     def on_summarise(self, event):
         self.on_clear_log(None)
@@ -454,8 +471,8 @@ class MyFrame(wx.Frame):
         self.current_profile_bom_module = profile_bom_module  # Store for later use
 
         # Update the object variables with the configuration from the selected module
-        self.esx_requiredTagKeys = getattr(profile_bom_module, 'requiredTagKeys', None)
-        self.esx_optionalTagKeys = getattr(profile_bom_module, 'optionalTagKeys', None)
+        self.esx_required_tag_keys = getattr(profile_bom_module, 'requiredTagKeys', None)
+        self.esx_optional_tag_keys = getattr(profile_bom_module, 'optionalTagKeys', None)
         self.save_application_state(None)
 
     def on_rename_aps(self, event):
@@ -534,7 +551,7 @@ class MyFrame(wx.Frame):
         docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
         if docx_files:
             for file in docx_files:
-                insert_images(file, self.append_message)
+                insert_images_threaded(file, self.append_message, self.rewrite_last_message)
 
     def on_convert_docx_to_pdf(self, event):
         docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
