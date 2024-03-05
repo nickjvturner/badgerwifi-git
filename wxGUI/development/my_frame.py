@@ -334,6 +334,7 @@ class MyFrame(wx.Frame):
                 self.on_ap_rename_script_dropdown_selection(None)
                 # Restore selected bom generator index
                 self.project_profile_dropdown.SetSelection(state.get('selected_project_profile_index', 0))
+                self.on_project_profile_dropdown_selection(None)
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
             self.on_project_profile_dropdown_selection(None)

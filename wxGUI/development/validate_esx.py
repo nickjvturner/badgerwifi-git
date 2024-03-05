@@ -15,7 +15,7 @@ nl = '\n'
 
 def validate_color_assignment(offenders, total_ap_count, message_callback):
     if len(offenders.get('color', [])) > 0:
-        message_callback(f"{nl}There is a problem! The following {len(offenders.get('color', []))} APs have been assigned no color")
+        message_callback(f"{nl}Colour assignment test FAILED{nl}The following {len(offenders.get('color', []))} APs have been assigned no color")
         for ap in offenders['color']:
             message_callback(ap)
         return False
@@ -30,16 +30,6 @@ def validate_height_manipulation(offenders, total_ap_count, message_callback):
             message_callback(ap)
         return True
     message_callback(f"{nl}antennaHeight manipulation test: PASSED{nl}All {total_ap_count} APs have an assigned height other than '2.4' metres")
-    return True
-
-
-def validate_bluetooth_radio_off(offenders, total_ap_count, message_callback):
-    if len(offenders.get('bluetooth', [])) > 0:
-        message_callback(f"{nl}Caution! The following {len(offenders.get('bluetooth', []))} APs have their Bluetooth radio enabled")
-        for ap in offenders['bluetooth']:
-            message_callback(ap)
-        return False
-    message_callback(f"{nl}Bluetooth radio test: PASSED{nl}All {total_ap_count} APs have their Bluetooth radio disabled")
     return True
 
 
@@ -64,21 +54,23 @@ def validate_required_tags(offenders, total_ap_count, total_required_tag_keys_co
         return True
     return False
 
+
 def validate_antenna_tilt(offenders, total_ap_count, message_callback):
     if len(offenders.get('antennaTilt', [])) > 0:
-        message_callback(f"{nl}Caution! The following {len(offenders.get('antennaTilt', []))} APs have an antenna tilt that will cause problems when generating per AP installer documentation")
+        message_callback(f"{nl}Antenna Tilt test: FAILED!{nl}The following {len(offenders.get('antennaTilt', []))} APs have an antenna tilt that will cause problems when generating per AP installer documentation")
         for ap in offenders['antennaTilt']:
             message_callback(ap)
         return False
     message_callback(f"{nl}Antenna Tilt test: PASSED{nl}All {total_ap_count} APs have a conforming antenna tilt")
     return True
 
+
 def validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, message_callback):
     if len(offenders.get('antennaMounting_and_antennaTilt_mismatch', [])) > 0:
-        message_callback(f"{nl}Caution! The following {len(offenders.get('antennaMounting_and_antennaTilt_mismatch', []))} APs may be configured incorrectly, Wall mounted with 0 degrees of tilt, is this intentional?")
+        message_callback(f"{nl}Caution! The following {len(offenders.get('antennaMounting_and_antennaTilt_mismatch', []))} APs may be configured incorrectly{nl}These APs are WALL mounted with 0 degrees of tilt, is this intentional?")
         for ap in offenders['antennaMounting_and_antennaTilt_mismatch']:
             message_callback(ap)
-        return False
+        return True
     message_callback(f"{nl}Antenna Mounting and Tilt Mismatch test: PASSED{nl}All {total_ap_count} APs have a conforming antenna mounting and tilt")
     return True
 
@@ -138,7 +130,6 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
     validations = [
         validate_color_assignment(offenders, total_ap_count, message_callback),
         validate_height_manipulation(offenders, total_ap_count, message_callback),
-        # validate_bluetooth_radio_off(offenders, total_ap_count, message_callback),
         validate_required_tags(offenders, total_ap_count, total_required_tag_keys_count, required_tag_keys, message_callback),
         validate_antenna_tilt(offenders, total_ap_count, message_callback),
         validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, message_callback)
