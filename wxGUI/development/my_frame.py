@@ -224,6 +224,9 @@ class MyFrame(wx.Frame):
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
 
+        # Bind the tab change event
+        self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
+
     def setup_tab1(self):
 
         self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -291,29 +294,30 @@ class MyFrame(wx.Frame):
         # Append a message to the message display area.
         self.display_log.AppendText(message + '\n')
 
-    def rewrite_last_message(self, message):
-        pass
-    #     content = self.display_log.GetValue()
-    #     if content:
-    #         lines = content.split('\n')
-    #         lines[-1] = message  # Update the most recent line
-    #         updated_content = '\n'.join(lines)
-    #         self.display_log.SetValue(updated_content)
-    #         self.display_log.ShowPosition(self.display_log.GetLastPosition())  # Scroll to the bottom
-    #     else:
-    #         self.display_log.SetValue(message)  # First message being added
-    #
-    #     # # Remove last line and append new line.
-    #     # self.display_log.Remove(self.display_log.GetLastPosition() - len(message) - 1, self.display_log.GetLastPosition())
-    #     # # Append a message to the message display area.
-    #     # self.display_log.AppendText(message + '\n')
+    def update_last_message(self, message):
+        content = self.display_log.GetValue()
+
+        # Find the last occurrence of a newline character
+        last_newline_index = content.rfind('\n')
+
+        # If there's at least one newline, replace the text after the last newline
+        if last_newline_index != -1:
+            # Calculate the start position for replacement (after the newline character)
+            start_pos = last_newline_index + 1  # Start replacing after the newline
+
+            # Use Replace method to replace the last line
+            self.display_log.Replace(start_pos, self.display_log.GetLastPosition(), message)
+        else:
+            # If there's no newline, this means there's only one line, so we can directly set the value
+            self.display_log.SetValue(message)
 
     def save_application_state(self, event):
         """Save the application state to the defined path."""
         state = {
             'list_box_contents': [self.list_box.GetString(i) for i in range(self.list_box.GetCount())],
             'selected_ap_rename_script_index': self.ap_rename_script_dropdown.GetSelection(),
-            'selected_project_profile_index': self.project_profile_dropdown.GetSelection()
+            'selected_project_profile_index': self.project_profile_dropdown.GetSelection(),
+            'selected_tab_index': self.notebook.GetSelection()
         }
         # Save the state to the defined path
         with open(self.app_state_file_path, 'w') as f:
@@ -335,6 +339,8 @@ class MyFrame(wx.Frame):
                 # Restore selected bom generator index
                 self.project_profile_dropdown.SetSelection(state.get('selected_project_profile_index', 0))
                 self.on_project_profile_dropdown_selection(None)
+                # Restore selected tab index
+                self.notebook.SetSelection(state.get('selected_tab_index', 0))
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
             self.on_project_profile_dropdown_selection(None)
@@ -552,7 +558,7 @@ class MyFrame(wx.Frame):
         docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
         if docx_files:
             for file in docx_files:
-                insert_images_threaded(file, self.append_message, self.rewrite_last_message)
+                insert_images_threaded(file, self.append_message, self.update_last_message)
 
     def on_convert_docx_to_pdf(self, event):
         docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
@@ -577,3 +583,12 @@ class MyFrame(wx.Frame):
         if not self.esx_project_unpacked:
             self.unpack_esx()
         export_blank_maps(self.working_directory, self.esx_project_name, self.append_message)
+
+    def on_tab_changed(self, event):
+        # Get the index of the newly selected tab
+        self.save_application_state(None)
+        # new_tab_index = event.GetSelection()
+        # print(f"Tab changed to index {new_tab_index}")
+
+        # It's important to call event.Skip() to ensure the event is not blocked
+        event.Skip()
