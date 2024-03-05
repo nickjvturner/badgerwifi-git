@@ -1,17 +1,21 @@
-# create_ap_location_map.py
+# create_custom_ap_location_maps.py
 
 import os
 import shutil
 import platform
 from pathlib import Path
+
+import wx
 from PIL import Image, ImageDraw, ImageFont
 import math
+import threading
 
 
 from common import ekahau_color_dict
 from common import load_json
 from common import create_floor_plans_dict
 from common import create_simulated_radios_dict
+from common import model_antenna_split
 
 from common import FIVE_GHZ_RADIO_ID
 
@@ -73,15 +77,22 @@ def get_y_offset(arrow, angle):
         return abs(adjacent) + (arrow_length / 40)
 
 
-def create_ap_location_map(working_directory, project_name, message_callback):
+def create_custom_ap_location_maps_threaded(working_directory, project_name, message_callback):
+    # Wrapper function to run insert_images in a separate thread
+    def run_in_thread():
+        create_custom_ap_location_maps(working_directory, project_name, message_callback)
+    # Start the long-running task in a separate thread
+    threading.Thread(target=run_in_thread).start()
 
-    message_callback(f'performing action for: {project_name}\n')
+
+def create_custom_ap_location_maps(working_directory, project_name, message_callback):
+
+    wx.CallAfter(message_callback, f'performing action for: {project_name}')
     project_dir = Path(working_directory) / project_name
 
     font = set_font()
 
     def floor_plan_getter(floor_plan_id):
-        # print(floorPlansDict.get(floorPlanId))
         return floor_plans_dict.get(floor_plan_id)
 
     def text_width_and_height_getter(text):
@@ -92,7 +103,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         # Draw the text onto the image and get its bounding box
         text_box = draw.textbbox((0, 0), text, font=font, spacing=4, align="center")
 
-        # Print the width and height of the bounding box
+        # width and height of the bounding box
         width = text_box[2] - text_box[0]
         height = text_box[3] - text_box[1]
 
@@ -153,10 +164,6 @@ def create_ap_location_map(working_directory, project_name, message_callback):
     blank_plan_dir = output_dir / 'blank'
     blank_plan_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create subdirectory for 'faded zoomed AP' images
-    zoom_faded_dir = output_dir / 'zoom_faded_dir'
-    zoom_faded_dir.mkdir(parents=True, exist_ok=True)
-
     # Create subdirectory for Annotated floorplans
     annotated_plan_dir = output_dir / 'annotated'
     annotated_plan_dir.mkdir(parents=True, exist_ok=True)
@@ -177,9 +184,8 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         x, y = (ap['location']['coord']['x'] * scaling_ratio,
                 ap['location']['coord']['y'] * scaling_ratio)
 
-        print(
-            f"{nl}[[ {ap['name']} [{ap['model']}]] from: {floor_plan_getter(ap['location']['floorPlanId'])} ] "
-            f"has color '{ekahau_color_dict.get(ap_color)}' ({ap_color}) and coordinates {x}, {y}")
+        wx.CallAfter(message_callback,
+                     f"{ap['name']} [ {model_antenna_split(ap['model'])[0]} ] from: {floor_plans_dict.get(ap['location']['floorPlanId'])} color: '{ekahau_color_dict.get(ap_color)}' and coordinates {round(x)}, {round(y)}")
 
         spot = get_ap_icon(ap, ICON_RESIZE, assets_dir)
 
@@ -203,7 +209,7 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         antenna_mounting = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaMounting']
 
         if angle != 0.0 or antenna_mounting == 'WALL':
-            print(f'AP has rotational angle of: {angle}')
+            wx.CallAfter(message_callback,f"{ap['name']} has rotational angle of: {round(angle)}{nl}")
 
             rotated_arrow = arrow.rotate(-angle, expand=True)
 
@@ -252,9 +258,6 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         # Crop the image
         cropped_map_image = map_image.crop(crop_box)
 
-        # Save the cropped image with a new filename
-        cropped_map_image.save(Path(zoom_faded_dir / (ap['name'] + '-zoomed')).with_suffix('.png'))
-
     for floor in floor_plans_json['floorPlans']:
 
         floor_id = vector_source_check(floor)
@@ -269,9 +272,9 @@ def create_ap_location_map(working_directory, project_name, message_callback):
 
         aps_on_this_floor = []
 
+        wx.CallAfter(message_callback, f'{nl}Processing floor: {floor["name"]}{nl}')
+
         for ap in sorted(access_points_json['accessPoints'], key=lambda i: i['name']):
-            # print(ap)
-            # print(ap['location']['floorPlanId'])
             if ap['location']['floorPlanId'] == floor['id']:
                 aps_on_this_floor.append(ap)
 
@@ -281,26 +284,16 @@ def create_ap_location_map(working_directory, project_name, message_callback):
         for ap in aps_on_this_floor:
             all_aps = annotate_map(current_map_image, ap)
 
-        # Zoom faded AP map generation
-        all_aps_faded = all_aps.copy().convert('RGBA')
-        faded_ap_background_map_image = source_floor_plan_image.convert('RGBA')
-
-        all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
-
-        for ap in aps_on_this_floor:
-            crop_map(all_aps_faded.copy(), ap)
-
         # If map was cropped within Ekahau, crop the all_AP map
         if map_cropped_within_ekahau:
             all_aps = all_aps.crop(crop_bitmap)
 
         # Save the output images
         all_aps.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
-        # all_APs_faded_map_name = f"{floor['name']}_FADED"
-        # all_aps_faded.save(Path(annotated_floorplan_destination / all_APs_faded_map_name).with_suffix('.png'))
 
     try:
         shutil.rmtree(temp_dir)
-        print(f'Temporary project contents directory removed{nl}')
+        wx.CallAfter(message_callback, f'{nl}temp directory removed{nl}')
+        wx.CallAfter(message_callback, f'{nl}### Process Complete ###{nl}')
     except Exception as e:
-        print(e)
+        wx.CallAfter(message_callback, e)

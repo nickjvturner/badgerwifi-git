@@ -20,7 +20,8 @@ from exports.export_blank_maps import export_blank_maps
 from docx_manipulation.insert_images import insert_images_threaded
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf_threaded
 
-from map_creator.create_ap_location_map import create_ap_location_map
+from map_creator.create_custom_ap_location_maps import create_custom_ap_location_maps_threaded
+from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_maps
 
 
 # CONSTANTS
@@ -159,11 +160,14 @@ class MyFrame(wx.Frame):
         self.summarise_button = wx.Button(self.tab1, label="Summarise")
         self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
 
-        self.create_ap_location_maps_button = wx.Button(self.tab1, label="Create Custom AP Maps")
-        self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
-
         self.export_plain_maps_button = wx.Button(self.tab1, label="Export Blank Maps")
         self.export_plain_maps_button.Bind(wx.EVT_BUTTON, self.on_export_blank_maps)
+
+        self.create_ap_location_maps_button = wx.Button(self.tab1, label="Custom AP Location Maps")
+        self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
+
+        self.create_zoomed_ap_maps_button = wx.Button(self.tab1, label="Zoomed AP Maps")
+        self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
 
         self.export_ap_images_button = wx.Button(self.tab2, label="Export AP images")
         self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
@@ -252,6 +256,7 @@ class MyFrame(wx.Frame):
         self.tab1_row4_sizer.Add(self.export_plain_maps_button, 0, wx.ALL, 5)
         self.tab1_row4_sizer.AddStretchSpacer(1)
         self.tab1_row4_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
+        self.tab1_row4_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row4_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1.SetSizer(self.tab1_sizer)
@@ -576,7 +581,14 @@ class MyFrame(wx.Frame):
         self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
-        create_ap_location_map(self.working_directory, self.esx_project_name, self.append_message)
+        create_custom_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message)
+
+    def on_create_zoomed_ap_maps(self, event):
+        self.on_clear_log(None)
+        if not self.esx_project_unpacked:
+            self.unpack_esx()
+        create_zoomed_ap_maps(self.working_directory, self.esx_project_name, self.append_message)
+
 
     def on_export_blank_maps(self, event):
         self.on_clear_log(None)
