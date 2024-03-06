@@ -8,15 +8,20 @@ from importlib.machinery import SourceFileLoader
 import importlib.util
 
 from drop_target import DropTarget
-from validate_esx import validate_esx
-from unpack_esx import unpack_esx_file
-from summarise_esx import summarise_esx
-from backup_esx import backup_esx
+
+from esx_actions.validate_esx import validate_esx
+from esx_actions.unpack_esx import unpack_esx_file
+from esx_actions.summarise_esx import summarise_esx
+from esx_actions.backup_esx import backup_esx
+from esx_actions.bom_generator import generate_bom
+from esx_actions.display_project_details import display_floor_plans_dict
+from esx_actions.rebundle_esx import rebundle_project
+
 from common import file_or_dir_exists
-from bom_generator import generate_bom
 
 from exports import export_ap_images
 from exports.export_blank_maps import export_blank_maps
+
 from docx_manipulation.insert_images import insert_images_threaded
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf_threaded
 
@@ -138,6 +143,10 @@ class MyFrame(wx.Frame):
         self.unpack_button = wx.Button(self.panel, label="Unpack .esx")
         self.unpack_button.Bind(wx.EVT_BUTTON, self.on_unpack)
 
+        # Create re-bundle esx file button
+        self.rebundle_button = wx.Button(self.panel, label="Re-bundle .esx")
+        self.rebundle_button.Bind(wx.EVT_BUTTON, self.on_rebundle_esx)
+
         # Create backup esx file button
         self.backup_button = wx.Button(self.panel, label="Backup .esx")
         self.backup_button.Bind(wx.EVT_BUTTON, self.on_backup)
@@ -169,6 +178,9 @@ class MyFrame(wx.Frame):
         self.create_zoomed_ap_maps_button = wx.Button(self.tab1, label="Zoomed AP Maps")
         self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
 
+        self.display_floor_plan_dict = wx.Button(self.tab1, label="Floor Plan Info")
+        self.display_floor_plan_dict.Bind(wx.EVT_BUTTON, self.on_display_floor_plan_dict)
+
         self.export_ap_images_button = wx.Button(self.tab2, label="Export AP images")
         self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
 
@@ -198,6 +210,7 @@ class MyFrame(wx.Frame):
         button_row1_sizer.Add(self.clear_log_button, 0, wx.ALL, 5)
         button_row1_sizer.AddStretchSpacer(1)
         button_row1_sizer.Add(self.unpack_button, 0, wx.ALL, 5)
+        button_row1_sizer.Add(self.rebundle_button, 0, wx.ALL, 5)
         button_row1_sizer.Add(self.backup_button, 0, wx.ALL, 5)
 
         button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -258,6 +271,11 @@ class MyFrame(wx.Frame):
         self.tab1_row4_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
         self.tab1_row4_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row4_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1_row5_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row5_sizer.Add(self.display_floor_plan_dict, 0, wx.ALL, 5)
+        self.tab1_row5_sizer.AddStretchSpacer(1)
+        self.tab1_sizer.Add(self.tab1_row5_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1.SetSizer(self.tab1_sizer)
 
@@ -604,3 +622,16 @@ class MyFrame(wx.Frame):
 
         # It's important to call event.Skip() to ensure the event is not blocked
         event.Skip()
+
+    def on_display_floor_plan_dict(self, event):
+        self.on_clear_log(None)
+        if not self.esx_project_unpacked:
+            self.unpack_esx()
+        display_floor_plans_dict(self.working_directory, self.esx_project_name, self.append_message)
+
+    def on_rebundle_esx(self, event):
+        if not self.esx_project_unpacked:
+            self.get_single_specific_file_type('.esx')
+        # Check that working directory and project name directories exist
+        if self.working_directory and (self.working_directory / self.esx_project_name).exists():
+            rebundle_project(self.working_directory, self.esx_project_name, self.append_message)
