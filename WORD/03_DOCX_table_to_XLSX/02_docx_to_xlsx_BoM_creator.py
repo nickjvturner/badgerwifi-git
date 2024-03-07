@@ -20,7 +20,7 @@ from openpyxl.utils import get_column_letter
 
 sys.path.append(str(Path.cwd().parent))
 
-from common.text_replacement import text_search
+from badgerwifitools.common import text_search
 
 
 def main():

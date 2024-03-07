@@ -26,7 +26,7 @@ from docx_manipulation.insert_images import insert_images_threaded
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf_threaded
 
 from map_creator.create_custom_ap_location_maps import create_custom_ap_location_maps_threaded
-from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_maps
+from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_location_maps_threaded
 
 
 # CONSTANTS
@@ -176,7 +176,7 @@ class MyFrame(wx.Frame):
         self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
 
         self.create_zoomed_ap_maps_button = wx.Button(self.tab1, label="Zoomed AP Maps")
-        self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
+        self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_zoomed_ap_maps
 
         self.display_floor_plan_dict = wx.Button(self.tab1, label="Floor Plan Info")
         self.display_floor_plan_dict.Bind(wx.EVT_BUTTON, self.on_display_floor_plan_dict)
@@ -605,7 +605,7 @@ class MyFrame(wx.Frame):
         self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
-        create_zoomed_ap_maps(self.working_directory, self.esx_project_name, self.append_message)
+        create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message)
 
 
     def on_export_blank_maps(self, event):

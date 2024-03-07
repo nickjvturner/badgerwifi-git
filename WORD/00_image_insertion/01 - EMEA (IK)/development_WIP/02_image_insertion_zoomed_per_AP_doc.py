@@ -32,7 +32,7 @@ for parent in cwd.parents:
 		common_dir = str(parent) # Convert the path to a string and add the directory to sys.path
 		sys.path.append(common_dir)
 
-from common import image_search, text_search
+from badgerwifitools.common import image_search, text_search
 
 nl = '\n'
 
