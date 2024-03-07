@@ -176,7 +176,7 @@ class MyFrame(wx.Frame):
         self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
 
         self.create_zoomed_ap_maps_button = wx.Button(self.tab1, label="Zoomed AP Maps")
-        self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_zoomed_ap_maps
+        self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_zoomed_ap_maps)
 
         self.display_floor_plan_dict = wx.Button(self.tab1, label="Floor Plan Info")
         self.display_floor_plan_dict.Bind(wx.EVT_BUTTON, self.on_display_floor_plan_dict)
