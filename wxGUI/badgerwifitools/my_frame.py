@@ -14,7 +14,7 @@ from esx_actions.unpack_esx import unpack_esx_file
 from esx_actions.summarise_esx import summarise_esx
 from esx_actions.backup_esx import backup_esx
 from esx_actions.bom_generator import generate_bom
-from esx_actions.display_project_details import display_floor_plans_dict
+from esx_actions.display_project_details import display_project_details
 from esx_actions.rebundle_esx import rebundle_project
 
 from common import file_or_dir_exists
@@ -59,8 +59,10 @@ class MyFrame(wx.Frame):
         self.setup_list_box()
         self.setup_display_log()
         self.setup_tabs()
+        self.setup_text_labels()
         self.setup_buttons()
         self.setup_dropdowns()
+        self.setup_text_input_boxes()
         self.setup_tab1()
         self.setup_tab2()
         self.setup_tab3()
@@ -178,8 +180,8 @@ class MyFrame(wx.Frame):
         self.create_zoomed_ap_maps_button = wx.Button(self.tab1, label="Zoomed AP Maps")
         self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_zoomed_ap_maps)
 
-        self.display_floor_plan_dict = wx.Button(self.tab1, label="Floor Plan Info")
-        self.display_floor_plan_dict.Bind(wx.EVT_BUTTON, self.on_display_floor_plan_dict)
+        self.display_project_detail_button = wx.Button(self.tab1, label="Display Project Detail")
+        self.display_project_detail_button.Bind(wx.EVT_BUTTON, self.on_display_project_detail)
 
         self.export_ap_images_button = wx.Button(self.tab2, label="Export AP images")
         self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
@@ -199,6 +201,26 @@ class MyFrame(wx.Frame):
         # Create exit button
         self.exit_button = wx.Button(self.panel, label="Exit")
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
+
+    def setup_text_input_boxes(self):
+        # Create a text input box for the zoomed AP image crop size
+        self.zoomed_ap_crop_text_box = wx.TextCtrl(self.tab1, value="2000", style=wx.TE_PROCESS_ENTER)
+
+        # Create a text input box for the custom AP icon size
+        self.custom_ap_icon_size_text_box = wx.TextCtrl(self.tab1, value="200", style=wx.TE_PROCESS_ENTER)
+
+    def setup_text_labels(self):
+        # Create a label for the AP renaming script dropdown
+        self.ap_rename_script_label = wx.StaticText(self.tab1, label="AP Rename Scripts:")
+
+        # Create a label for the Project Profile dropdown
+        self.project_profile_label = wx.StaticText(self.tab1, label="Project Profiles:")
+
+        # Create a label for the zoomed AP crop size text box
+        self.zoomed_ap_crop_label = wx.StaticText(self.tab1, label="Zoomed AP Crop Size:")
+
+        # Create a label for the custom AP icon size
+        self.custom_ap_icon_size_label = wx.StaticText(self.tab1, label="Custom AP Icon Size:")
 
     def setup_main_sizer(self):
         button_row0_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -248,6 +270,7 @@ class MyFrame(wx.Frame):
 
         self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row1_sizer.AddStretchSpacer(1)
+        self.tab1_row1_sizer.Add(self.project_profile_label, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
@@ -255,6 +278,7 @@ class MyFrame(wx.Frame):
 
         self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row2_sizer.AddStretchSpacer(1)
+        self.tab1_row2_sizer.Add(self.ap_rename_script_label, 0, wx.EXPAND | wx.ALL, 7)
         self.tab1_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row2_sizer.Add(self.description_button, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row2_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
@@ -273,9 +297,18 @@ class MyFrame(wx.Frame):
         self.tab1_sizer.Add(self.tab1_row4_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1_row5_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row5_sizer.Add(self.display_floor_plan_dict, 0, wx.ALL, 5)
+        self.tab1_row5_sizer.Add(self.display_project_detail_button, 0, wx.ALL, 5)
         self.tab1_row5_sizer.AddStretchSpacer(1)
+        self.tab1_row5_sizer.Add(self.custom_ap_icon_size_label, 0, wx.EXPAND | wx.ALL, 7)
+        self.tab1_row5_sizer.Add(self.custom_ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row5_sizer.AddSpacer(2)
+        self.tab1_row5_sizer.Add(self.zoomed_ap_crop_label, 0, wx.EXPAND | wx.ALL, 7)
+        self.tab1_row5_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row5_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1_row6_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row6_sizer.AddStretchSpacer(1)
+        self.tab1_sizer.Add(self.tab1_row6_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1.SetSizer(self.tab1_sizer)
 
@@ -599,14 +632,34 @@ class MyFrame(wx.Frame):
         self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
-        create_custom_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message)
+
+        # Retrieve the number from the custom AP icon size text box
+        custom_ap_icon_size = self.custom_ap_icon_size_text_box.GetValue()
+
+        try:
+            custom_ap_icon_size = int(custom_ap_icon_size)  # Convert the input to a float
+            create_custom_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, custom_ap_icon_size)
+
+        except ValueError:
+            # Handle the case where the input is not a valid number
+            wx.MessageBox("Please enter a valid number", "Error", wx.OK | wx.ICON_ERROR)
 
     def on_create_zoomed_ap_maps(self, event):
         self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
-        create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message)
 
+        # Retrieve the number from the zoomed AP crop size text box
+        zoomed_ap_crop_size = self.zoomed_ap_crop_text_box.GetValue()
+        custom_ap_icon_size = self.custom_ap_icon_size_text_box.GetValue()
+
+        try:
+            zoomed_ap_crop_size = int(zoomed_ap_crop_size)  # Convert the input to a float
+            custom_ap_icon_size = int(custom_ap_icon_size)  # Convert the input to a float
+            create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, zoomed_ap_crop_size, custom_ap_icon_size)
+        except ValueError:
+            # Handle the case where the input is not a valid number
+            wx.MessageBox("Please enter a valid number", "Error", wx.OK | wx.ICON_ERROR)
 
     def on_export_blank_maps(self, event):
         self.on_clear_log(None)
@@ -623,11 +676,11 @@ class MyFrame(wx.Frame):
         # It's important to call event.Skip() to ensure the event is not blocked
         event.Skip()
 
-    def on_display_floor_plan_dict(self, event):
+    def on_display_project_detail(self, event):
         self.on_clear_log(None)
         if not self.esx_project_unpacked:
             self.unpack_esx()
-        display_floor_plans_dict(self.working_directory, self.esx_project_name, self.append_message)
+        display_project_details(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_rebundle_esx(self, event):
         if not self.esx_project_unpacked:
