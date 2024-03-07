@@ -6,7 +6,7 @@ import platform
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import math
-
+import threading
 
 from common import ekahau_color_dict
 from common import load_json
@@ -73,7 +73,15 @@ def get_y_offset(arrow, angle):
         return abs(adjacent) + (arrow_length / 40)
 
 
-def create_zoomed_ap_maps(working_directory, project_name, message_callback):
+def create_zoomed_ap_location_maps_threaded(working_directory, project_name, message_callback):
+    # Wrapper function to run insert_images in a separate thread
+    def run_in_thread():
+        create_zoomed_ap_location_maps(working_directory, project_name, message_callback)
+    # Start the long-running task in a separate thread
+    threading.Thread(target=run_in_thread).start()
+
+
+def create_zoomed_ap_location_maps(working_directory, project_name, message_callback):
 
     message_callback(f'performing action for: {project_name}\n')
     project_dir = Path(working_directory) / project_name
