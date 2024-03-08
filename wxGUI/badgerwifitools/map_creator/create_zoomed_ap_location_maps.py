@@ -15,12 +15,9 @@ from map_creator.map_creator_comon import crop_assessment
 from map_creator.map_creator_comon import annotate_map
 from map_creator.map_creator_comon import crop_map
 
-from common import FIVE_GHZ_RADIO_ID
+from map_creator.map_creator_comon import OPACITY
 
-# Static PIL Parameters
-RECT_TEXT_OFFSET = 15  # gap between text and box edge
-EDGE_BUFFER = 80  # gap between rounded rectangle and cropped image edge
-OPACITY = 0.5  # Value from 0 -> 1, defines the opacity of the 'other' APs on zoomed AP images
+
 
 # Variables
 nl = '\n'
@@ -50,7 +47,6 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
     simulated_radio_dict = create_simulated_radios_dict(simulated_radios_json)
 
-    # Create directory to hold output directories
     output_dir = working_directory / "OUTPUT"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -94,7 +90,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
             # Generate the all_aps map
             wx.CallAfter(message_callback, f'{nl}Creating Custom AP location map for: {floor["name"]}{nl}')
             for ap in aps_on_this_floor:
-                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, floor_plans_dict)
+                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
             # Save the output images
             wx.CallAfter(message_callback, f'{nl}Saving annotated floorplan: {floor["name"]}{nl}')
@@ -107,7 +103,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
             all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
 
             for ap in aps_on_this_floor:
-                per_ap_map_image = annotate_map(all_aps_faded.copy(), ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, floor_plans_dict)
+                per_ap_map_image = annotate_map(all_aps_faded.copy(), ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
                 cropped_per_ap_map_image = crop_map(per_ap_map_image, ap, scaling_ratio, zoomed_ap_crop_size)
 

@@ -11,6 +11,13 @@ from PIL import Image, ImageDraw, ImageFont
 from common import ekahau_color_dict
 from common import model_antenna_split
 
+from common import FIVE_GHZ_RADIO_ID
+
+# Static PIL Parameters
+RECT_TEXT_OFFSET = 15  # gap between text and box edge
+EDGE_BUFFER = 80  # gap between rounded rectangle and cropped image edge
+OPACITY = 0.5  # Value from 0 -> 1, defines the opacity of the 'other' APs on zoomed AP images
+
 # Define assets directory path
 ASSETS_DIR = Path(__file__).parent / 'assets' / 'ekahau_style'
 
@@ -113,7 +120,7 @@ def crop_assessment(floor, source_floor_plan_image, project_dir, floor_id, blank
         return map_cropped_within_ekahau, scaling_ratio, None
 
 
-def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, floor_plans_dict):
+def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict):
     font = set_font()
 
     ap_color = ap['color'] if 'color' in ap else 'FFFFFF'
