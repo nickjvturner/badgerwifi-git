@@ -5,13 +5,14 @@ from pathlib import Path
 
 
 class DropTarget(wx.FileDropTarget):
-    def __init__(self, window, allowed_extensions, message_callback, esx_project_unpacked, update_esx_project_unpacked_callback):
+    def __init__(self, window, allowed_extensions, message_callback, esx_project_unpacked, update_esx_project_unpacked_callback, drop_target_label_callback):
         wx.FileDropTarget.__init__(self)
         self.window = window
         self.allowed_extensions = allowed_extensions
         self.message_callback = message_callback
         self.esx_project_unpacked = esx_project_unpacked
         self.update_esx_project_unpacked_callback = update_esx_project_unpacked_callback
+        self.drop_target_label_callback = drop_target_label_callback
 
     def OnDropFiles(self, x, y, filenames):
         existing_files = self.window.GetStrings()  # Get currently listed files
@@ -56,6 +57,9 @@ class DropTarget(wx.FileDropTarget):
             if filepath.lower().endswith('.docx'):
                 self.window.Append(filepath)
                 self.message_callback(f"{Path(filepath).name} added to the list.")
+
+            if self.window.GetCount() > 0:
+                self.drop_target_label_callback(hide=True)
 
         return True
 

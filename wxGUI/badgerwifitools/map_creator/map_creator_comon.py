@@ -78,13 +78,13 @@ def text_width_and_height_getter(text):
 
 
 def crop_assessment(floor, source_floor_plan_image, project_dir, floor_id, blank_plan_dir):
-    # Check if the floorplan has been cropped within Ekahau?
+    # Check if the floor plan has been cropped within Ekahau?
     crop_bitmap = (floor['cropMinX'], floor['cropMinY'], floor['cropMaxX'], floor['cropMaxY'])
 
     # Calculate scaling ratio
     scaling_ratio = source_floor_plan_image.width / floor['width']
 
-    if crop_bitmap[0] != 0.0 or crop_bitmap[1] != 0.0:
+    if crop_bitmap[0] != 0.0 or crop_bitmap[1] != 0.0 or crop_bitmap[2] != floor['width'] or crop_bitmap[3] != floor['height']:
         # Calculate x,y coordinates of the crop within Ekahau
         crop_bitmap = (crop_bitmap[0] * scaling_ratio,
                        crop_bitmap[1] * scaling_ratio,
@@ -147,7 +147,7 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
     antenna_mounting = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaMounting']
 
     if angle != 0.0 or antenna_mounting == 'WALL':
-        print(f'AP has rotational angle of: {angle}')
+        wx.CallAfter(message_callback, f'AP has rotational angle of: {round(angle)}')
 
         rotated_arrow = arrow.rotate(-angle, expand=True)
 
@@ -184,8 +184,7 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
     return map_image
 
 
-def crop_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, zoomed_ap_crop_size, floor_plans_dict):
-    map_image = annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, floor_plans_dict)
+def crop_map(map_image, ap, scaling_ratio, zoomed_ap_crop_size):
 
     # establish x and y
     x, y = (ap['location']['coord']['x'] * scaling_ratio,

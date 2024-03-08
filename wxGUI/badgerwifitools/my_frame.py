@@ -66,6 +66,7 @@ class MyFrame(wx.Frame):
         self.setup_tab1()
         self.setup_tab2()
         self.setup_tab3()
+        self.setup_panel_rows()
         self.setup_main_sizer()
         self.create_menu()
         self.setup_drop_target()
@@ -93,6 +94,9 @@ class MyFrame(wx.Frame):
 
         # Define the path for the application state file
         self.app_state_file_path = self.config_dir / 'app_state.json'
+
+        # Create a thread control variable
+        self.abort_thread = False
 
     def setup_list_box(self):
         # Set up your list box here
@@ -174,7 +178,7 @@ class MyFrame(wx.Frame):
         self.export_plain_maps_button = wx.Button(self.tab1, label="Export Blank Maps")
         self.export_plain_maps_button.Bind(wx.EVT_BUTTON, self.on_export_blank_maps)
 
-        self.create_ap_location_maps_button = wx.Button(self.tab1, label="Custom AP Location Maps")
+        self.create_ap_location_maps_button = wx.Button(self.tab1, label="AP Location Maps")
         self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
 
         self.create_zoomed_ap_maps_button = wx.Button(self.tab1, label="Zoomed AP Maps")
@@ -198,6 +202,10 @@ class MyFrame(wx.Frame):
         self.convert_docx_to_pdf_button = wx.Button(self.tab3, label="Convert .docx to PDF")
         self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
 
+        # Create an abort thread button
+        self.abort_thread_button = wx.Button(self.panel, label="Abort Current Process")
+        self.abort_thread_button.Bind(wx.EVT_BUTTON, self.on_abort_thread)
+
         # Create exit button
         self.exit_button = wx.Button(self.panel, label="Exit")
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
@@ -210,11 +218,17 @@ class MyFrame(wx.Frame):
         self.custom_ap_icon_size_text_box = wx.TextCtrl(self.tab1, value="200", style=wx.TE_PROCESS_ENTER)
 
     def setup_text_labels(self):
+        # Create a label for the drop target with custom position
+        self.drop_target_label = wx.StaticText(self.panel, label="Drag and Drop files here", pos=(22, 17))
+
         # Create a label for the AP renaming script dropdown
         self.ap_rename_script_label = wx.StaticText(self.tab1, label="AP Rename Scripts:")
 
         # Create a label for the Project Profile dropdown
         self.project_profile_label = wx.StaticText(self.tab1, label="Project Profiles:")
+
+        # Create a label for the Create Custom AP Map functions
+        self.create_custom_ap_map_label = wx.StaticText(self.tab1, label="Create Custom:")
 
         # Create a label for the zoomed AP crop size text box
         self.zoomed_ap_crop_label = wx.StaticText(self.tab1, label="Zoomed AP Crop Size:")
@@ -222,30 +236,33 @@ class MyFrame(wx.Frame):
         # Create a label for the custom AP icon size
         self.custom_ap_icon_size_label = wx.StaticText(self.tab1, label="Custom AP Icon Size:")
 
+
+    def setup_panel_rows(self):
+        self.button_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_row1_sizer.AddStretchSpacer(1)
+        self.button_row1_sizer.Add(self.reset_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+
+        self.button_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_row2_sizer.Add(self.copy_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row2_sizer.Add(self.clear_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row2_sizer.AddStretchSpacer(1)
+        self.button_row2_sizer.Add(self.unpack_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row2_sizer.Add(self.rebundle_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row2_sizer.Add(self.backup_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+
+        self.button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_exit_row_sizer.AddStretchSpacer(1)
+        self.button_exit_row_sizer.Add(self.abort_thread_button, 0, wx.ALL, 5)
+        self.button_exit_row_sizer.Add(self.exit_button, 0, wx.ALL, 5)
+
     def setup_main_sizer(self):
-        button_row0_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_row0_sizer.AddStretchSpacer(1)
-        button_row0_sizer.Add(self.reset_button, 0, wx.ALL, 5)
-
-        button_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_row1_sizer.Add(self.copy_log_button, 0, wx.ALL, 5)
-        button_row1_sizer.Add(self.clear_log_button, 0, wx.ALL, 5)
-        button_row1_sizer.AddStretchSpacer(1)
-        button_row1_sizer.Add(self.unpack_button, 0, wx.ALL, 5)
-        button_row1_sizer.Add(self.rebundle_button, 0, wx.ALL, 5)
-        button_row1_sizer.Add(self.backup_button, 0, wx.ALL, 5)
-
-        button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_exit_row_sizer.AddStretchSpacer(1)
-        button_exit_row_sizer.Add(self.exit_button, 0, wx.ALL, 5)
-
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.LEFT | wx.TOP | wx.RIGHT, 10)
-        main_sizer.Add(button_row0_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.button_row1_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
         main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(button_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(self.notebook, 1, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.button_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.notebook, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.panel.SetSizer(main_sizer)
 
@@ -270,7 +287,7 @@ class MyFrame(wx.Frame):
 
         self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row1_sizer.AddStretchSpacer(1)
-        self.tab1_row1_sizer.Add(self.project_profile_label, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row1_sizer.Add(self.project_profile_label, 0, wx.EXPAND | wx.TOP | wx.RIGHT, 6)
         self.tab1_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
@@ -278,7 +295,7 @@ class MyFrame(wx.Frame):
 
         self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row2_sizer.AddStretchSpacer(1)
-        self.tab1_row2_sizer.Add(self.ap_rename_script_label, 0, wx.EXPAND | wx.ALL, 7)
+        self.tab1_row2_sizer.Add(self.ap_rename_script_label, 0, wx.EXPAND | wx.TOP | wx.RIGHT, 6)
         self.tab1_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row2_sizer.Add(self.description_button, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row2_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
@@ -292,6 +309,7 @@ class MyFrame(wx.Frame):
         self.tab1_row4_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row4_sizer.Add(self.export_plain_maps_button, 0, wx.ALL, 5)
         self.tab1_row4_sizer.AddStretchSpacer(1)
+        self.tab1_row4_sizer.Add(self.create_custom_ap_map_label, 0, wx.TOP | wx.RIGHT, 6)
         self.tab1_row4_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
         self.tab1_row4_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row4_sizer, 0, wx.EXPAND | wx.ALL, 5)
@@ -305,10 +323,6 @@ class MyFrame(wx.Frame):
         self.tab1_row5_sizer.Add(self.zoomed_ap_crop_label, 0, wx.EXPAND | wx.ALL, 7)
         self.tab1_row5_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row5_sizer, 0, wx.EXPAND | wx.ALL, 5)
-
-        self.tab1_row6_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row6_sizer.AddStretchSpacer(1)
-        self.tab1_sizer.Add(self.tab1_row6_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1.SetSizer(self.tab1_sizer)
 
@@ -343,7 +357,7 @@ class MyFrame(wx.Frame):
     def setup_drop_target(self):
         """Set up the drop target for the list box."""
         allowed_extensions = (".esx", ".docx", ".xlsx")  # Define allowed file extensions
-        drop_target = DropTarget(self.list_box, allowed_extensions, self.append_message, self.esx_project_unpacked, self.update_esx_project_unpacked)
+        drop_target = DropTarget(self.list_box, allowed_extensions, self.append_message, self.esx_project_unpacked, self.update_esx_project_unpacked, self.drop_target_label_callback)
         self.list_box.SetDropTarget(drop_target)
 
     def append_message(self, message):
@@ -389,6 +403,7 @@ class MyFrame(wx.Frame):
                     if not file_or_dir_exists(item):
                         self.append_message(f"** WARNING ** {nl}The file {item} does not exist.")
                     self.list_box.Append(item)
+                    self.drop_target_label.Hide()  # Hide the drop target label
                 # Restore selected ap rename script index
                 self.ap_rename_script_dropdown.SetSelection(state.get('selected_ap_rename_script_index', 0))
                 self.on_ap_rename_script_dropdown_selection(None)
@@ -406,6 +421,7 @@ class MyFrame(wx.Frame):
         self.list_box.Clear()  # Reset list_box contents
         self.display_log.SetValue("")  # Clear the contents of the display_log
         self.esx_project_unpacked = False  # Reset project_unpacked state
+        self.drop_target_label.Show()  # Show the drop target label
 
     def on_clear_log(self, event):
         self.display_log.SetValue("")  # Clear the contents of the display_log
@@ -449,27 +465,23 @@ class MyFrame(wx.Frame):
 
     def on_backup(self, event):
         if not self.esx_filepath:
-            self.get_single_specific_file_type('.esx')
+            if not self.get_single_specific_file_type('.esx'):
+                return
         backup_esx(self.working_directory, self.esx_project_name, self.esx_filepath, self.append_message)
 
     def on_validate(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
-
+        if not self.basic_checks():
+            return
         validate_esx(self.working_directory, self.esx_project_name, self.append_message, self.esx_required_tag_keys, self.esx_optional_tag_keys)
 
     def on_summarise(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
+        if not self.basic_checks():
+            return
         summarise_esx(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_generate_bom(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
-
+        if not self.basic_checks():
+            return
         if hasattr(self, 'current_profile_bom_module'):
             generate_bom(self.working_directory, self.esx_project_name, self.append_message,
                          self.current_profile_bom_module.create_custom_ap_list)
@@ -516,10 +528,11 @@ class MyFrame(wx.Frame):
 
     def unpack_esx(self):
         if not self.esx_project_unpacked:
-            if self.get_single_specific_file_type('.esx'):
-                unpack_esx_file(self.working_directory, self.esx_project_name, self.esx_filepath, self.append_message)
-                self.esx_project_unpacked = True
-        pass
+            if not self.get_single_specific_file_type('.esx'):
+                return
+            unpack_esx_file(self.working_directory, self.esx_project_name, self.esx_filepath, self.append_message)
+            self.esx_project_unpacked = True
+        return True
 
     def load_project_profile(self, profile_name):
         profile_path = Path(__file__).resolve().parent / "project_profiles" / f"{profile_name}.py"
@@ -539,9 +552,8 @@ class MyFrame(wx.Frame):
         self.save_application_state(None)
 
     def on_rename_aps(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
+        if not self.basic_checks():
+            return
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
         script_path = str(Path(__file__).resolve().parent / RENAME_APS_FOLDER / (selected_script + ".py"))
 
@@ -605,9 +617,8 @@ class MyFrame(wx.Frame):
         self.append_message(f'No action implemented yet')
 
     def on_export_ap_images(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
+        if not self.basic_checks():
+            return
         export_ap_images.export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_insert_images(self, event):
@@ -629,9 +640,8 @@ class MyFrame(wx.Frame):
         self.placeholder(None)
 
     def on_create_ap_location_maps(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
+        if not self.basic_checks():
+            return
 
         # Retrieve the number from the custom AP icon size text box
         custom_ap_icon_size = self.custom_ap_icon_size_text_box.GetValue()
@@ -645,9 +655,8 @@ class MyFrame(wx.Frame):
             wx.MessageBox("Please enter a valid number", "Error", wx.OK | wx.ICON_ERROR)
 
     def on_create_zoomed_ap_maps(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
+        if not self.basic_checks():
+            return
 
         # Retrieve the number from the zoomed AP crop size text box
         zoomed_ap_crop_size = self.zoomed_ap_crop_text_box.GetValue()
@@ -656,15 +665,14 @@ class MyFrame(wx.Frame):
         try:
             zoomed_ap_crop_size = int(zoomed_ap_crop_size)  # Convert the input to a float
             custom_ap_icon_size = int(custom_ap_icon_size)  # Convert the input to a float
-            create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, zoomed_ap_crop_size, custom_ap_icon_size)
+            create_zoomed_ap_location_maps_threaded(self, self.working_directory, self.esx_project_name, self.append_message, zoomed_ap_crop_size, custom_ap_icon_size)
         except ValueError:
             # Handle the case where the input is not a valid number
             wx.MessageBox("Please enter a valid number", "Error", wx.OK | wx.ICON_ERROR)
 
     def on_export_blank_maps(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
+        if not self.basic_checks():
+            return
         export_blank_maps(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_tab_changed(self, event):
@@ -677,9 +685,8 @@ class MyFrame(wx.Frame):
         event.Skip()
 
     def on_display_project_detail(self, event):
-        self.on_clear_log(None)
-        if not self.esx_project_unpacked:
-            self.unpack_esx()
+        if not self.basic_checks():
+            return
         display_project_details(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_rebundle_esx(self, event):
@@ -688,3 +695,20 @@ class MyFrame(wx.Frame):
         # Check that working directory and project name directories exist
         if self.working_directory and (self.working_directory / self.esx_project_name).exists():
             rebundle_project(self.working_directory, self.esx_project_name, self.append_message)
+
+    def drop_target_label_callback(self, hide=False):
+        if hide:
+            self.drop_target_label.Hide()
+        else:
+            self.drop_target_label.Show()
+        self.panel.Refresh()  # Refresh the panel to reflect the change
+
+    def basic_checks(self):
+        if not self.esx_project_unpacked:
+            if not self.unpack_esx():
+                return False
+        self.on_clear_log(None)
+        return True
+
+    def on_abort_thread(self, event):
+        self.placeholder(None)

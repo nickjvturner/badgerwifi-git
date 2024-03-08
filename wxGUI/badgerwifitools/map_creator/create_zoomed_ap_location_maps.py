@@ -35,8 +35,10 @@ def create_zoomed_ap_location_maps_threaded(working_directory, project_name, mes
 
 
 def create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size):
+    wx.CallAfter(message_callback, f'Creating zoomed per AP location maps for {project_name}:{nl}'
+                                   f'Custom AP icon size: {custom_ap_icon_size}{nl}'
+                                   f'Zoomed AP crop size: {zoomed_ap_crop_size}{nl}')
 
-    message_callback(f'Creating custom zoomed per AP location maps for: {project_name}{nl}')
     project_dir = Path(working_directory) / project_name
 
     # Load JSON data
@@ -68,11 +70,11 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
     temp_dir = output_dir / 'temp'
     temp_dir.mkdir(parents=True, exist_ok=True)
 
-    for floor in floor_plans_json['floorPlans']:
+    for floor in sorted(floor_plans_json['floorPlans'], key=lambda i: i['name']):
 
         floor_id = vector_source_check(floor, message_callback)
 
-        # Extract floor plan
+        # Extract floor plan and save to temp directory
         shutil.copy(project_dir / ('image-' + floor_id), temp_dir / floor_id)
 
         # Open the floor plan to be used for AP placement activities
@@ -86,30 +88,38 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
             if ap['location']['floorPlanId'] == floor['id']:
                 aps_on_this_floor.append(ap)
 
-        current_map_image = source_floor_plan_image.copy()
+        if aps_on_this_floor:
+            current_map_image = source_floor_plan_image.copy()
 
-        # Generate the all_aps map
-        for ap in aps_on_this_floor:
-            all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, floor_plans_dict)
+            # Generate the all_aps map
+            wx.CallAfter(message_callback, f'{nl}Creating Custom AP location map for: {floor["name"]}{nl}')
+            for ap in aps_on_this_floor:
+                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, floor_plans_dict)
 
-        # Zoom faded AP map generation
-        all_aps_faded = all_aps.copy().convert('RGBA')
-        faded_ap_background_map_image = source_floor_plan_image.convert('RGBA')
+            # Save the output images
+            wx.CallAfter(message_callback, f'{nl}Saving annotated floorplan: {floor["name"]}{nl}')
+            all_aps.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
 
-        all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
+            # Zoom faded AP map generation
+            wx.CallAfter(message_callback, f'{nl}Creating zoomed per AP images for: {floor["name"]}{nl}')
+            all_aps_faded = all_aps.copy().convert('RGBA')
+            faded_ap_background_map_image = source_floor_plan_image.convert('RGBA')
+            all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
 
-        for ap in aps_on_this_floor:
-            cropped_map_image = crop_map(all_aps_faded.copy(), ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, zoomed_ap_crop_size, floor_plans_dict)
+            for ap in aps_on_this_floor:
+                per_ap_map_image = annotate_map(all_aps_faded.copy(), ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, FIVE_GHZ_RADIO_ID, RECT_TEXT_OFFSET, message_callback, floor_plans_dict)
 
-            # Save the cropped image with a new filename
-            cropped_map_image.save(Path(zoom_faded_dir / (ap['name'] + '-zoomed')).with_suffix('.png'))
+                cropped_per_ap_map_image = crop_map(per_ap_map_image, ap, scaling_ratio, zoomed_ap_crop_size)
 
-        # If map was cropped within Ekahau, crop the all_AP map
-        if map_cropped_within_ekahau:
-            all_aps = all_aps.crop(crop_bitmap)
+                # Save the cropped image with a new filename
+                cropped_per_ap_map_image.save(Path(zoom_faded_dir / (ap['name'] + '-zoomed')).with_suffix('.png'))
 
-        # Save the output images
-        all_aps.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
+            # If map was cropped within Ekahau, crop the all_AP map
+            if map_cropped_within_ekahau:
+                all_aps = all_aps.crop(crop_bitmap)
+
+        else:
+            wx.CallAfter(message_callback, f'{nl}No APs found on floor: {floor["name"]}{nl}')
 
     try:
         shutil.rmtree(temp_dir)
