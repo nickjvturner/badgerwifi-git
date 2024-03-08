@@ -19,7 +19,8 @@ setup(
         'inflect>=7.0.0',
         'python-docx>=1.1.0',
         'docx2pdf>=0.1.8',
-        'pillow>=10.2.0'
+        'pillow>=10.2.0',
+        'python-magic>=0.4.0'
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
