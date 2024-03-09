@@ -40,7 +40,14 @@ class DropTarget(wx.FileDropTarget):
                     if existing_file.lower().endswith('.esx'):
                         # There is already an .esx file in the list, show replace dialog
                         existing_esx_in_list = True  # Mark the file as processed
-                        if self.show_replace_dialog(filepath):
+                        if not Path(existing_file).exists():
+                            self.window.Delete(index)  # Remove the existing .esx file
+                            self.window.Append(filepath)  # Append the new one
+                            self.message_callback(f'{existing_file} replaced with {filepath}')
+                            self.esx_project_unpacked = False
+                            self.update_esx_project_unpacked_callback(False)
+
+                        elif self.show_replace_dialog(filepath):
                             self.message_callback(f"{Path(self.window.GetStrings()[0]).name} removed.")
                             self.window.Delete(index)  # Remove the existing .esx file
                             self.window.Append(filepath)  # Append the new one

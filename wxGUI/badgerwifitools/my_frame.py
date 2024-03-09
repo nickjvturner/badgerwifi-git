@@ -3,11 +3,13 @@
 import wx
 import os
 import json
+import subprocess
+import importlib.util
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
-import importlib.util
 
 from drop_target import DropTarget
+from common import file_or_dir_exists
 
 from esx_actions.validate_esx import validate_esx
 from esx_actions.unpack_esx import unpack_esx_file
@@ -16,8 +18,6 @@ from esx_actions.backup_esx import backup_esx
 from esx_actions.bom_generator import generate_bom
 from esx_actions.display_project_details import display_project_details
 from esx_actions.rebundle_esx import rebundle_project
-
-from common import file_or_dir_exists
 
 from exports import export_ap_images
 from exports.export_blank_maps import export_blank_maps
@@ -133,6 +133,10 @@ class MyFrame(wx.Frame):
         self.project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_project_profile_dropdown_selection)
 
     def setup_buttons(self):
+        # Create open working directory button
+        self.open_working_directory_button = wx.Button(self.panel, label="Open Working Directory")
+        self.open_working_directory_button.Bind(wx.EVT_BUTTON, self.on_open_working_directory)
+
         # Create reset button
         self.reset_button = wx.Button(self.panel, label="Reset")
         self.reset_button.Bind(wx.EVT_BUTTON, self.on_reset)
@@ -236,10 +240,10 @@ class MyFrame(wx.Frame):
         # Create a label for the custom AP icon size
         self.custom_ap_icon_size_label = wx.StaticText(self.tab1, label="Custom AP Icon Size:")
 
-
     def setup_panel_rows(self):
         self.button_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_row1_sizer.AddStretchSpacer(1)
+        self.button_row1_sizer.Add(self.open_working_directory_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row1_sizer.Add(self.reset_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
 
         self.button_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -517,6 +521,9 @@ class MyFrame(wx.Frame):
             if filepath.lower().endswith(extension):
                 if extension == '.esx':
                     self.esx_filepath = Path(filepath)
+                    if not self.esx_filepath.exists():
+                        self.append_message(f'The file {self.esx_filepath} does not exist.')
+                        return False
                     self.esx_project_name = self.esx_filepath.stem  # Set the project name based on the file stem
                     self.append_message(f'Project name: {self.esx_project_name}')
                     self.working_directory = self.esx_filepath.parent
@@ -712,3 +719,15 @@ class MyFrame(wx.Frame):
 
     def on_abort_thread(self, event):
         self.placeholder(None)
+
+    def on_open_working_directory(self, event):
+        if not self.basic_checks():
+            return
+        # Open the directory using the operating system's file navigator
+        if wx.Platform == "__WXMSW__":  # Windows
+            os.startfile(self.working_directory)
+        elif wx.Platform == "__WXMAC__":  # macOS
+            print('macos')
+            subprocess.Popen(['open', self.working_directory])
+        else:  # Linux or other Unix-like systems
+            wx.MessageBox("Unable to open directory. Are you using Linux? You need to tell the app developer", "Error", wx.OK | wx.ICON_ERROR)
