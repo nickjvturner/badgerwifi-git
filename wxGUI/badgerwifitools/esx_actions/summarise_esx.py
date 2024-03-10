@@ -14,7 +14,7 @@ nl = '\n'
 
 
 def summarise_esx(working_directory, project_name, message_callback):
-    message_callback(f'Summarising the Contents of: {project_name}{nl}')
+    message_callback(f'Summarising the Contents of: {project_name}')
 
     project_dir = working_directory / project_name
 
@@ -56,11 +56,11 @@ def summarise_esx(working_directory, project_name, message_callback):
         model_counts[ap['model']] += 1
 
     # Prepare the summary message
-    summary_message = f"Count of each model type:{nl}"
+    summary_message = f"{nl}Count of each model type:{nl}"
     for model, count in sorted(model_counts.items()):
         summary_message += f"{model}: {count}{nl}"
 
-    summary_message += f"{nl}{nl}Count of each color:{nl}"
+    summary_message += f"{nl}Count of each color:{nl}"
     color_counts_sorted = sorted(color_counts.items(), key=lambda item: ekahau_color_dict.get(item[0], item[0]))
     for color, count in color_counts_sorted:
         summary_message += f"{ekahau_color_dict.get(color)}: {count}{nl}"
@@ -69,19 +69,20 @@ def summarise_esx(working_directory, project_name, message_callback):
     for height, count in sorted(antenna_height_counts.items()):
         summary_message += f"{height}: {count}{nl}"
 
-    # Print the count of each tag key and value pair, sorted
-    summary_message += f"{nl}Count of each tag key and value pair:{nl}"
+    if tag_keys_json is not None:
+        # Print the count of each tag key and value pair, sorted
+        summary_message += f"{nl}Count of each tag key and value pair:{nl}"
 
-    previous_tag_key = None  # Initialize previous tag_key with None
-    for (tag_key, tag_value), count in sorted(tag_counts.items()):
-        # Check if the current tag_key is different from the previous one
-        if tag_key != previous_tag_key:
-            # Add a blank line if it's not the first tag_key
-            if previous_tag_key is not None:
-                summary_message += f"{nl}"
-            previous_tag_key = tag_key  # Update the previous tag_key
+        previous_tag_key = None  # Initialize previous tag_key with None
+        for (tag_key, tag_value), count in sorted(tag_counts.items()):
+            # Check if the current tag_key is different from the previous one
+            if tag_key != previous_tag_key:
+                # Add a blank line if it's not the first tag_key
+                if previous_tag_key is not None:
+                    summary_message += f"{nl}"
+                previous_tag_key = tag_key  # Update the previous tag_key
 
-        # Append the current tag information
-        summary_message += f"{tag_key} - {tag_value}: {count}{nl}"
+            # Append the current tag information
+            summary_message += f"{tag_key} - {tag_value}: {count}{nl}"
 
     message_callback(summary_message)

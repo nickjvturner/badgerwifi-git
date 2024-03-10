@@ -36,7 +36,7 @@ def set_font():
 def vector_source_check(floor, message_callback):
     # Check if the floor plan is a vector or bitmap image
     if 'bitmapImageId' in floor:
-        wx.CallAfter(message_callback, f"{nl}bitmapImageId detected, source floor plan image is a vector")
+        wx.CallAfter(message_callback, f"bitmapImageId detected, source floor plan image is probably a vector")
         return floor['bitmapImageId']
     else:
         return floor['imageId']

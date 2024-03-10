@@ -1,5 +1,6 @@
 # Fuzzy y-axis.py
 
+import wx
 from pathlib import Path
 
 from common import load_json
@@ -11,6 +12,8 @@ from common import re_bundle_project
 
 from common import model_sort_order
 from common import rename_aps
+
+from common import rename_process_completion_message as completion_message
 
 nl = '\n'
 VERTICAL_DIVISION_FACTOR = 40
@@ -120,4 +123,4 @@ def run(working_directory, project_name, message_callback):
 
     # Re-bundle into .esx File
     re_bundle_project(Path(working_directory / project_name), f"{project_name}_re-zip")
-    message_callback(f"\nProcess complete\n{project_name}_re-zip re-bundled into .esx file")
+    completion_message(message_callback, project_name)

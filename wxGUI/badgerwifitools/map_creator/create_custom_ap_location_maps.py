@@ -163,7 +163,7 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
 
     try:
         shutil.rmtree(temp_dir)
-        wx.CallAfter(message_callback, f'{nl}temp directory removed{nl}')
-        wx.CallAfter(message_callback, f'{nl}### Process Complete ###{nl}')
+        wx.CallAfter(message_callback, f'{nl}temp directory removed')
+        wx.CallAfter(message_callback, f'{nl}### PROCESS COMPLETE ###{nl}')
     except Exception as e:
         wx.CallAfter(message_callback, e)

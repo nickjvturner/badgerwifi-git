@@ -20,7 +20,6 @@ nl = '\n'
 
 
 def export_ap_images(working_directory, project_name, message_callback):
-	message_callback(f'Extracting AP Images from: {project_name}')
 
 	project_dir = working_directory / project_name
 
@@ -30,6 +29,12 @@ def export_ap_images(working_directory, project_name, message_callback):
 
 	access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
 	notes_json = load_json(project_dir, 'notes.json', message_callback)
+
+	if not notes_json:
+		message_callback(f'No notes found in the project{nl}')
+		return
+
+	message_callback(f'Extracting AP Images from: {project_name}')
 
 	image_extraction_counter = []
 

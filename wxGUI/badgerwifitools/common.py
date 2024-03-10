@@ -1,15 +1,16 @@
 # replacement_dict.py
 
+import wx
 import json
 import shutil
 from pathlib import Path
-
-import wx
 
 # Constants
 VERSION = '1.2'
 UNKNOWN = 'Unknown'
 FIVE_GHZ_RADIO_ID = 1
+
+nl = '\n'
 
 ekahau_color_dict = {
     '#00FF00': 'green',
@@ -41,8 +42,8 @@ def load_json(project_dir, filename, message_callback):
         with open(project_dir / filename) as json_file:
             return json.load(json_file)
     except IOError as e:
-        message_callback(f'{filename} not found, this project probably does not contain this data type')
-        print(f"Error loading {filename}: {e}")
+        print(f'{filename} not found, the project probably does not contain this data type.')
+        # print(f"Non-critical error{nl}{filename}: {e}")
         return None
 
 
@@ -92,9 +93,23 @@ def note_text_processor(note_ids, notes_dict):
 
 def create_tag_keys_dict(tag_keys_json):
     """Create a dictionary of tag keys."""
+    # Initialize an empty dictionary
     tag_keys_dict = {}
-    for tagKey in tag_keys_json['tagKeys']:
-        tag_keys_dict[tagKey['id']] = tagKey['key']
+
+    # Check if tag_keys_json exists and has the expected structure
+    if tag_keys_json is not None and isinstance(tag_keys_json, dict) and 'tagKeys' in tag_keys_json:
+        try:
+            # Iterate through each item in 'tagKeys'
+            for tagKey in tag_keys_json['tagKeys']:
+                # Add the id and key to the tag_keys_dict
+                tag_keys_dict[tagKey.get('id')] = tagKey.get('key')
+        except (TypeError, KeyError) as e:
+            # Handle potential exceptions that might occur with incorrect input format
+            print(f"Non-critical error: {e}")
+            return None
+    else:
+        return None
+
     return tag_keys_dict
 
 
@@ -223,3 +238,7 @@ def rename_aps(sorted_ap_list, message_callback, floor_plans_dict):
         ap_sequence_number += 1
 
     return sorted_ap_list
+
+
+def rename_process_completion_message(message_callback, project_name):
+    wx.CallAfter(message_callback, f"{nl}Modified accessPoints.json re-bundled into .esx file{nl}{project_name}_re-zip.esx within working directory{nl}{nl}### PROCESS COMPLETE ###")

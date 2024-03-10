@@ -47,10 +47,10 @@ def validate_required_tags(offenders, total_ap_count, total_required_tag_keys_co
         pass_required_tag_validation.append(True)
 
     if all(pass_required_tag_validation):
-        message_callback(f"{nl}Required tag key assignment test: PASSED{nl}")
+        message_callback(f"{nl}{total_required_tag_keys_count} Required tag keys defined{nl}Required tag keys assignment test: PASSED")
         for tagKey in required_tag_keys:
             message_callback(f"{tagKey}")
-        message_callback(f"{nl}All {total_ap_count} APs have the required {total_required_tag_keys_count} tag keys assigned:")
+        message_callback(f"All {total_ap_count} APs have the required {total_required_tag_keys_count} tag keys assigned:")
         return True
     return False
 
@@ -137,7 +137,7 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
 
     # Print pass/fail states
     if all(validations):
-        message_callback(f"{nl}Validation PASSED!")
+        message_callback(f"{nl}### Validation PASSED! ###")
     else:
-        message_callback(f"{nl}Validation FAILED")
+        message_callback(f"{nl}### Validation FAILED ###")
     return

@@ -3,6 +3,7 @@
 import wx
 import os
 import json
+import webbrowser
 import subprocess
 import importlib.util
 from pathlib import Path
@@ -20,11 +21,11 @@ from esx_actions.display_project_details import display_project_details
 from esx_actions.rebundle_esx import rebundle_project
 
 from exports import export_ap_images
-from exports.export_blank_maps import export_blank_maps
 
 from docx_manipulation.insert_images import insert_images_threaded
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf_threaded
 
+from map_creator.extract_blank_maps import extract_blank_maps
 from map_creator.create_custom_ap_location_maps import create_custom_ap_location_maps_threaded
 from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_location_maps_threaded
 
@@ -45,9 +46,9 @@ def discover_available_scripts(directory):
     """
     script_dir = Path(__file__).resolve().parent / directory
     available_scripts = []
-    for fname in os.listdir(script_dir):
-        if fname.endswith(".py") and not fname.startswith(("_", "common")):
-            available_scripts.append(fname[:-3])
+    for filename in os.listdir(script_dir):
+        if filename.endswith(".py") and not filename.startswith(("_", "common")):
+            available_scripts.append(filename[:-3])
     return sorted(available_scripts)
 
 
@@ -179,8 +180,8 @@ class MyFrame(wx.Frame):
         self.summarise_button = wx.Button(self.tab1, label="Summarise")
         self.summarise_button.Bind(wx.EVT_BUTTON, self.on_summarise)
 
-        self.export_plain_maps_button = wx.Button(self.tab1, label="Export Blank Maps")
-        self.export_plain_maps_button.Bind(wx.EVT_BUTTON, self.on_export_blank_maps)
+        self.extract_blank_maps_button = wx.Button(self.tab1, label="Extract Blank Maps")
+        self.extract_blank_maps_button.Bind(wx.EVT_BUTTON, self.on_export_blank_maps)
 
         self.create_ap_location_maps_button = wx.Button(self.tab1, label="AP Location Maps")
         self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
@@ -311,7 +312,7 @@ class MyFrame(wx.Frame):
         self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1_row4_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row4_sizer.Add(self.export_plain_maps_button, 0, wx.ALL, 5)
+        self.tab1_row4_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
         self.tab1_row4_sizer.AddStretchSpacer(1)
         self.tab1_row4_sizer.Add(self.create_custom_ap_map_label, 0, wx.TOP | wx.RIGHT, 6)
         self.tab1_row4_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
@@ -350,13 +351,48 @@ class MyFrame(wx.Frame):
         self.tab3.SetSizer(self.tab3_sizer)
 
     def create_menu(self):
-        """Create a menu bar."""
         menubar = wx.MenuBar()
+
+        # File Menu
         file_menu = wx.Menu()
         file_menu.Append(wx.ID_ADD, "&Add File", "Add a file to the list")
+        file_menu.Append(wx.ID_SAVE, "&Save", "Save the current configuration")
+        file_menu.AppendSeparator()
+        file_menu.Append(wx.ID_EXIT, "&Exit", "Exit the application")
         menubar.Append(file_menu, "&File")
+
+        # Help Menu
+        help_menu = wx.Menu()
+        contribute_menu_item = help_menu.Append(wx.ID_ANY, "&Contribute", "Go to the ko-fi contribution page")
+        documentation_menu_item = help_menu.Append(wx.ID_ANY, "&Documentation", "View the documentation")
+        help_menu.Append(wx.ID_ABOUT, '&About')
+        menubar.Append(help_menu, '&Help')
+
         self.SetMenuBar(menubar)
+
+        # Bind the menu items to their respective functions
+        self.Bind(wx.EVT_MENU, self.on_about, id=wx.ID_ABOUT)
         self.Bind(wx.EVT_MENU, self.on_add_file, id=wx.ID_ADD)
+        self.Bind(wx.EVT_MENU, self.on_save, id=wx.ID_SAVE)
+
+        self.Bind(wx.EVT_MENU, self.on_contribute, contribute_menu_item)
+        self.Bind(wx.EVT_MENU, self.on_view_documentation, documentation_menu_item)
+
+    def on_contribute(self, event):
+        webbrowser.open("https://ko-fi.com/badgerwifitools")
+
+    def on_view_documentation(self, event):
+        webbrowser.open("https://ko-fi.com/badgerwifitools")
+
+    def on_about(self, event):
+        # Implement the About dialog logic
+        wx.MessageBox("This is a wxPython GUI application created by Nick Turner. Intended to make the lives of Wi-Fi engineers making reports a little bit easier. ", "About")
+
+    def on_save(self, event):
+        self.save_application_state(event)
+        message = f'Application state saved on exit, file list and dropdown options should be the same next time you launch the app.'
+        self.append_message(message)
+        print(message)
 
     def setup_drop_target(self):
         """Set up the drop target for the list box."""
@@ -431,7 +467,7 @@ class MyFrame(wx.Frame):
         self.display_log.SetValue("")  # Clear the contents of the display_log
 
     def on_add_file(self, event):
-        wildcard = "Ekahau Project file (*.esx)|*.esx"
+        wildcard = "Ekahau Project file (*.esx)|*.esx|Microsoft Word document (*.docx)|*.docx"
         dlg = wx.FileDialog(self, "Choose a file", wildcard=wildcard,
                             style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_MULTIPLE)
         if dlg.ShowModal() == wx.ID_OK:
@@ -680,7 +716,7 @@ class MyFrame(wx.Frame):
     def on_export_blank_maps(self, event):
         if not self.basic_checks():
             return
-        export_blank_maps(self.working_directory, self.esx_project_name, self.append_message)
+        extract_blank_maps(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_tab_changed(self, event):
         # Get the index of the newly selected tab
@@ -723,11 +759,12 @@ class MyFrame(wx.Frame):
     def on_open_working_directory(self, event):
         if not self.basic_checks():
             return
-        # Open the directory using the operating system's file navigator
-        if wx.Platform == "__WXMSW__":  # Windows
-            os.startfile(self.working_directory)
-        elif wx.Platform == "__WXMAC__":  # macOS
-            print('macos')
-            subprocess.Popen(['open', self.working_directory])
-        else:  # Linux or other Unix-like systems
-            wx.MessageBox("Unable to open directory. Are you using Linux? You need to tell the app developer", "Error", wx.OK | wx.ICON_ERROR)
+        try:
+            # Open the directory using the operating system's file navigator
+            if os.name == 'nt':  # Windows
+                os.startfile(self.working_directory)
+            elif os.name == 'posix':  # macOS or Linux
+                # Directly attempt to use 'open' on macOS
+                subprocess.Popen(['open', self.working_directory], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except Exception as e:
+            wx.MessageBox(f"Error opening directory: {str(e)}", "Error", wx.OK | wx.ICON_ERROR)

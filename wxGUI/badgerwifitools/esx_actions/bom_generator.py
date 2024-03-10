@@ -9,6 +9,8 @@ from common import create_tag_keys_dict
 from common import create_simulated_radios_dict
 from common import create_notes_dict
 
+nl = '\n'
+
 
 def adjust_column_widths(df, writer):
     """Adjust column widths in the Excel sheet and apply text wrap to the 'Notes' column."""
@@ -64,4 +66,4 @@ def generate_bom(working_directory, project_name, message_callback, create_custo
     adjust_column_widths(df, writer)
     format_headers(df, writer)
     writer.close()
-    message_callback(f'{output_filename} BoM XLSX successfully generated: \n')
+    message_callback(f'{nl}"{Path(output_filename).name}" created successfully{nl}{nl}### PROCESS COMPLETE ###')
