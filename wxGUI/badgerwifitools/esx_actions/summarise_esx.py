@@ -85,4 +85,4 @@ def summarise_esx(working_directory, project_name, message_callback):
             # Append the current tag information
             summary_message += f"{tag_key} - {tag_value}: {count}{nl}"
 
-    message_callback(summary_message)
+    message_callback(f"{summary_message}{nl}{nl}### SUMMARY COMPLETE ###")
