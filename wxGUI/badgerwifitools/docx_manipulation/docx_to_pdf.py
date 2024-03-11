@@ -28,7 +28,7 @@ def convert_docx_to_pdf_threaded(docx_file, message_callback):
 
 
 def convert_docx_to_pdf(docx_file, message_callback):
-    wx.CallAfter(message_callback, '.docx conversion process started')
+    wx.CallAfter(message_callback, f'{nl}DOCX to PDF conversion process started')
 
     docx_path = Path(docx_file).resolve()  # Ensure it's an absolute path
 
@@ -36,6 +36,6 @@ def convert_docx_to_pdf(docx_file, message_callback):
 
     try:
         convert(str(docx_path), str(output_pdf_path.parent))
-        message_callback(f"Converted: {docx_path.name} to PDF")
+        message_callback(f"PDF created Successfully: {docx_path.name}{nl}{nl}### PROCESS COMPLETE ###")
     except Exception as e:
         message_callback(f"Error converting {docx_path.name}: {e}")
