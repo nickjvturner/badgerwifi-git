@@ -1,7 +1,7 @@
 .idea/*/
 OUTPUT/
 esx_files/
-example/
+example*/
 archive/
 *.esx
 *.docx
