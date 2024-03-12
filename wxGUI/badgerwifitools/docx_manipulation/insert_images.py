@@ -7,22 +7,22 @@ import wx
 from docx import Document
 from docx.shared import Mm
 
+from common import nl
+
 from docx_manipulation.replacement_dict import image_search
 from docx_manipulation.replacement_dict import text_search
 
-nl = '\n'
 
-
-def insert_images_threaded(docx_file, message_callback, progress_callback):
+def insert_images_threaded(docx_file, message_callback, progress_callback, stop_event):
 	# Wrapper function to run insert_images in a separate thread
 	def run_in_thread():
-		insert_images(docx_file, message_callback, progress_callback)
+		insert_images(docx_file, message_callback, progress_callback, stop_event)
 
 	# Start the long-running task in a separate thread
 	threading.Thread(target=run_in_thread).start()
 
 
-def insert_images(docx_file, message_callback, progress_callback):
+def insert_images(docx_file, message_callback, progress_callback, stop_event):
 	wx.CallAfter(message_callback, f'Image Insertion process started')
 
 	file = Path(docx_file)
@@ -45,6 +45,9 @@ def insert_images(docx_file, message_callback, progress_callback):
 			count_image_insertion_point = True
 			for cell in row.cells:
 				for paragraph in cell.paragraphs:
+					if stop_event.is_set():
+						wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+						return
 					if paragraph.text in ['Tilt:', 'Height:']:
 						# if the row contains 'Tilt' or 'Height' ignore, skip it
 						count_image_insertion_point = False
@@ -67,6 +70,9 @@ def insert_images(docx_file, message_callback, progress_callback):
 				for paragraph in cell.paragraphs:
 					for key in image_search.keys():
 						if str_prefix + key in paragraph.text:
+							if stop_event.is_set():
+								wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+								return
 							paragraph.text = paragraph.text.replace(str_prefix + key, "")
 							picture_path = Path(__file__).resolve().parent / 'images' / image_search[key]['image']
 							paragraph.add_run().add_picture(str(picture_path), height=Mm(image_search[key]['height']))
@@ -85,6 +91,9 @@ def insert_images(docx_file, message_callback, progress_callback):
 				for paragraph in cell.paragraphs:
 					for key in text_search.keys():
 						if key in paragraph.text:
+							if stop_event.is_set():
+								wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+								return
 							text_replacements.append(key)
 							paragraph.text = paragraph.text.replace(key, text_search[key])
 							# wx.CallAfter(progress_callback, f'text strings replaced: {len(text_replacements)}')

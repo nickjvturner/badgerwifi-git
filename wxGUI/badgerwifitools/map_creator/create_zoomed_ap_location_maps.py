@@ -2,10 +2,11 @@
 
 import shutil
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 import threading
 import wx
 
+from common import nl
 from common import load_json
 from common import create_floor_plans_dict
 from common import create_simulated_radios_dict
@@ -18,20 +19,15 @@ from map_creator.map_creator_comon import crop_map
 from map_creator.map_creator_comon import OPACITY
 
 
-
-# Variables
-nl = '\n'
-
-
-def create_zoomed_ap_location_maps_threaded(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size):
+def create_zoomed_ap_location_maps_threaded(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, stop_event):
     # Wrapper function to run insert_images in a separate thread
     def run_in_thread():
-        create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size)
+        create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, stop_event)
     # Start the long-running task in a separate thread
     threading.Thread(target=run_in_thread).start()
 
 
-def create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size):
+def create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, stop_event):
     wx.CallAfter(message_callback, f'Creating zoomed per AP location maps for {project_name}:{nl}'
                                    f'Custom AP icon size: {custom_ap_icon_size}{nl}'
                                    f'Zoomed AP crop size: {zoomed_ap_crop_size}{nl}')
@@ -67,6 +63,9 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
     temp_dir.mkdir(parents=True, exist_ok=True)
 
     for floor in sorted(floor_plans_json['floorPlans'], key=lambda i: i['name']):
+        if stop_event.is_set():
+            wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+            return
 
         floor_id = vector_source_check(floor, message_callback)
 
@@ -81,19 +80,30 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
         aps_on_this_floor = []
 
         for ap in sorted(access_points_json['accessPoints'], key=lambda i: i['name']):
+            if stop_event.is_set():
+                wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+                return
+
             if ap['location']['floorPlanId'] == floor['id']:
                 aps_on_this_floor.append(ap)
 
         if aps_on_this_floor:
+            if stop_event.is_set():
+                wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+                return
+
             current_map_image = source_floor_plan_image.copy()
 
             # Generate the all_aps map
             wx.CallAfter(message_callback, f'{nl}Creating Custom AP location map for: {floor["name"]}{nl}')
             for ap in aps_on_this_floor:
+                if stop_event.is_set():
+                    wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+                    return
                 all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
             # Save the output images
-            wx.CallAfter(message_callback, f'{nl}Saving annotated floorplan: {floor["name"]}{nl}')
+            wx.CallAfter(message_callback, f'{nl}Saving annotated floor plan: {floor["name"]}{nl}')
             all_aps.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
 
             # Zoom faded AP map generation
@@ -103,6 +113,10 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
             all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
 
             for ap in aps_on_this_floor:
+                if stop_event.is_set():
+                    wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
+                    return
+
                 per_ap_map_image = annotate_map(all_aps_faded.copy(), ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
                 cropped_per_ap_map_image = crop_map(per_ap_map_image, ap, scaling_ratio, zoomed_ap_crop_size)

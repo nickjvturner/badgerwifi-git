@@ -38,7 +38,7 @@ def format_headers(df, writer):
         worksheet.write(0, idx, col, header_format)
 
 
-def generate_bom(working_directory, project_name, message_callback, create_custom_ap_list):
+def create_ap_list(working_directory, project_name, message_callback, create_custom_ap_list):
     message_callback(f'Generating BoM XLSX for: {project_name}\n')
     project_dir = Path(working_directory) / project_name
 
