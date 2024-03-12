@@ -21,8 +21,6 @@ OPACITY = 0.5  # Value from 0 -> 1, defines the opacity of the 'other' APs on zo
 # Define assets directory path
 ASSETS_DIR = Path(__file__).parent / 'assets'
 
-nl = '\n'
-
 
 def set_font():
     # Define text, font and size
@@ -113,9 +111,8 @@ def crop_assessment(floor, source_floor_plan_image, project_dir, floor_id, blank
         # set boolean value
         map_cropped_within_ekahau = False
 
-        # save a blank copy of the floorplan
-        shutil.copy(project_dir / ('image-' + floor_id),
-                    Path(blank_plan_dir / floor['name']).with_suffix('.png'))
+        # save a blank copy of the floor plan
+        shutil.copy(project_dir / ('image-' + floor_id), Path(blank_plan_dir / floor['name']).with_suffix('.png'))
 
         return map_cropped_within_ekahau, scaling_ratio, None
 
@@ -129,8 +126,7 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
     x, y = (ap['location']['coord']['x'] * scaling_ratio,
             ap['location']['coord']['y'] * scaling_ratio)
 
-    wx.CallAfter(message_callback,
-        f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId'])} ][ colour: '{ekahau_color_dict.get(ap_color)}' ][ coordinates {round(x)}, {round(y)}")
+    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId'])} ][ colour: '{ekahau_color_dict.get(ap_color)}' ][ coordinates {round(x)}, {round(y)}")
 
     spot = get_ap_icon(ap, custom_ap_icon_size)
 

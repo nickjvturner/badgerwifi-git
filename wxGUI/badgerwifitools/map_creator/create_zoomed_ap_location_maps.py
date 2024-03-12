@@ -18,6 +18,8 @@ from map_creator.map_creator_comon import crop_map
 
 from map_creator.map_creator_comon import OPACITY
 
+CUSTOM_AP_ICON_SIZE_ADJUSTER = 4.87
+
 
 def create_zoomed_ap_location_maps_threaded(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, stop_event):
     # Wrapper function to run insert_images in a separate thread
@@ -31,6 +33,8 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
     wx.CallAfter(message_callback, f'Creating zoomed per AP location maps for {project_name}:{nl}'
                                    f'Custom AP icon size: {custom_ap_icon_size}{nl}'
                                    f'Zoomed AP crop size: {zoomed_ap_crop_size}{nl}')
+
+    custom_ap_icon_size = int(custom_ap_icon_size * CUSTOM_AP_ICON_SIZE_ADJUSTER)
 
     project_dir = Path(working_directory) / project_name
 
@@ -51,12 +55,12 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
     blank_plan_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for 'faded zoomed AP' images
-    zoom_faded_dir = output_dir / 'zoom_faded_dir'
+    zoom_faded_dir = output_dir / 'zoomed AP location maps'
     zoom_faded_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create subdirectory for Annotated floorplans
-    annotated_plan_dir = output_dir / 'annotated'
-    annotated_plan_dir.mkdir(parents=True, exist_ok=True)
+    # Create subdirectory for Custom AP Location maps
+    custom_ap_location_maps = output_dir / 'custom AP location maps'
+    custom_ap_location_maps.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for temporary files
     temp_dir = output_dir / 'temp'
@@ -104,7 +108,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
 
             # Save the output images
             wx.CallAfter(message_callback, f'{nl}Saving annotated floor plan: {floor["name"]}{nl}')
-            all_aps.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
+            all_aps.save(Path(custom_ap_location_maps / floor['name']).with_suffix('.png'))
 
             # Zoom faded AP map generation
             wx.CallAfter(message_callback, f'{nl}Creating zoomed per AP images for: {floor["name"]}{nl}')
@@ -133,7 +137,6 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
 
     try:
         shutil.rmtree(temp_dir)
-        wx.CallAfter(message_callback, f'{nl}temp directory removed{nl}')
         wx.CallAfter(message_callback, f'{nl}### Process Complete ###{nl}')
     except Exception as e:
         print(e)

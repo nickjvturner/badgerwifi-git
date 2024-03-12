@@ -15,6 +15,8 @@ from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
 from map_creator.map_creator_comon import annotate_pds_map
 
+CUSTOM_AP_ICON_SIZE_ADJUSTER = 5.3
+
 
 def create_pds_maps_threaded(working_directory, project_name, message_callback, custom_ap_icon_size, stop_event):
     # Wrapper function to run insert_images in a separate thread
@@ -27,6 +29,8 @@ def create_pds_maps_threaded(working_directory, project_name, message_callback, 
 def create_pds_maps(working_directory, project_name, message_callback, custom_ap_icon_size, stop_event):
     wx.CallAfter(message_callback, f'Creating custom AP location maps for: {project_name}{nl}'
                                    f'Custom AP icon size: {custom_ap_icon_size}{nl}')
+
+    custom_ap_icon_size = int(custom_ap_icon_size * CUSTOM_AP_ICON_SIZE_ADJUSTER)
 
     project_dir = Path(working_directory) / project_name
 
@@ -99,7 +103,6 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
 
     try:
         shutil.rmtree(temp_dir)
-        wx.CallAfter(message_callback, f'{nl}temp directory removed')
         wx.CallAfter(message_callback, f'{nl}### PROCESS COMPLETE ###{nl}')
     except Exception as e:
         wx.CallAfter(message_callback, e)

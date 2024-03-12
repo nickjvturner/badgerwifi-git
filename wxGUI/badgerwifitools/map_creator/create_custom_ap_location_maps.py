@@ -15,6 +15,8 @@ from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
 from map_creator.map_creator_comon import annotate_map
 
+CUSTOM_AP_ICON_SIZE_ADJUSTER = 4.87
+
 
 def create_custom_ap_location_maps_threaded(working_directory, project_name, message_callback, custom_ap_icon_size, stop_event):
     # Wrapper function to run insert_images in a separate thread
@@ -27,6 +29,8 @@ def create_custom_ap_location_maps_threaded(working_directory, project_name, mes
 def create_custom_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, stop_event):
     wx.CallAfter(message_callback, f'Creating custom AP location maps for: {project_name}{nl}'
                                    f'Custom AP icon size: {custom_ap_icon_size}{nl}')
+
+    custom_ap_icon_size = int(custom_ap_icon_size * CUSTOM_AP_ICON_SIZE_ADJUSTER)
 
     project_dir = Path(working_directory) / project_name
 
@@ -47,9 +51,9 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
     blank_plan_dir = output_dir / 'blank'
     blank_plan_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create subdirectory for Annotated floorplans
-    annotated_plan_dir = output_dir / 'annotated'
-    annotated_plan_dir.mkdir(parents=True, exist_ok=True)
+    # Create subdirectory for Custom AP Location maps
+    custom_ap_location_maps = output_dir / 'custom AP location maps'
+    custom_ap_location_maps.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for temporary files
     temp_dir = output_dir / 'temp'
@@ -59,6 +63,9 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
         if stop_event.is_set():
             wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
             return
+
+        wx.CallAfter(message_callback, f'{nl}Processing floor: {floor["name"]}{nl}')
+
         floor_id = vector_source_check(floor, message_callback)
 
         # Move floor plan to temp_dir
@@ -71,12 +78,11 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
 
         aps_on_this_floor = []
 
-        wx.CallAfter(message_callback, f'{nl}Processing floor: {floor["name"]}{nl}')
-
         for ap in sorted(access_points_json['accessPoints'], key=lambda i: i['name']):
             if stop_event.is_set():
                 wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
                 return
+
             if ap['location']['floorPlanId'] == floor['id']:
                 aps_on_this_floor.append(ap)
 
@@ -94,11 +100,10 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
             all_aps = all_aps.crop(crop_bitmap)
 
         # Save the output images
-        all_aps.save(Path(annotated_plan_dir / floor['name']).with_suffix('.png'))
+        all_aps.save(Path(custom_ap_location_maps / floor['name']).with_suffix('.png'))
 
     try:
         shutil.rmtree(temp_dir)
-        wx.CallAfter(message_callback, f'{nl}temp directory removed')
         wx.CallAfter(message_callback, f'{nl}### PROCESS COMPLETE ###{nl}')
     except Exception as e:
         wx.CallAfter(message_callback, e)

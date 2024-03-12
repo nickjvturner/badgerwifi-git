@@ -205,27 +205,31 @@ class MyFrame(wx.Frame):
 
         self.export_ap_images_button = wx.Button(self.tab2, label="AP Images")
         self.export_ap_images_button.Bind(wx.EVT_BUTTON, self.on_export_ap_images)
-        self.export_ap_images_button.SetToolTip(wx.ToolTip("Export images from the AP notes"))
+        self.export_ap_images_button.SetToolTip(wx.ToolTip("Images from within AP notes"))
 
         self.export_note_images_button = wx.Button(self.tab2, label="Note Images")
         self.export_note_images_button.Bind(wx.EVT_BUTTON, self.on_export_note_images)
-        self.export_note_images_button.SetToolTip(wx.ToolTip("Export images from the map notes"))
+        self.export_note_images_button.SetToolTip(wx.ToolTip("Images from within map notes"))
 
         self.extract_blank_maps_button = wx.Button(self.tab2, label="Blank Maps")
         self.extract_blank_maps_button.Bind(wx.EVT_BUTTON, self.on_export_blank_maps)
-        self.extract_blank_maps_button.SetToolTip(wx.ToolTip("Export blank maps"))
+        self.extract_blank_maps_button.SetToolTip(wx.ToolTip("No APs, no walls, nothing, just the map image as it was imported"))
 
         self.create_ap_location_maps_button = wx.Button(self.tab2, label="AP Location Maps")
         self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
-        self.create_ap_location_maps_button.SetToolTip(wx.ToolTip("Create custom AP location maps"))
+        self.create_ap_location_maps_button.SetToolTip(wx.ToolTip("Generate AP location maps with custom AP icons"))
 
         self.create_zoomed_ap_maps_button = wx.Button(self.tab2, label="Zoomed AP Maps")
         self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_zoomed_ap_maps)
-        self.create_zoomed_ap_maps_button.SetToolTip(wx.ToolTip("Create zoomed custom AP location maps"))
+        self.create_zoomed_ap_maps_button.SetToolTip(wx.ToolTip("Generate zoomed per AP location maps with custom AP icons"))
+
+        self.estimate_custom_icon_size_button = wx.Button(self.tab2, label="Estimate Icon / Crop")
+        self.estimate_custom_icon_size_button.Bind(wx.EVT_BUTTON, self.on_estimate_custom_icon_size)
+        self.estimate_custom_icon_size_button.SetToolTip(wx.ToolTip("Estimate the custom AP icon size and appropriate crop based on the map dimensions"))
 
         self.export_pds_maps_button = wx.Button(self.tab2, label="PDS Maps")
         self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
-        self.export_pds_maps_button.SetToolTip(wx.ToolTip("Create Post Deployment Survey maps"))
+        self.export_pds_maps_button.SetToolTip(wx.ToolTip("Generate maps with red circle AP markers for use during Post Deployment Surveys"))
 
         self.insert_images_button = wx.Button(self.tab3, label="Insert Images to .docx")
         self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
@@ -242,14 +246,13 @@ class MyFrame(wx.Frame):
         # Create exit button
         self.exit_button = wx.Button(self.panel, label="Exit")
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
-        self.exit_button.SetToolTip(wx.ToolTip("Exit the application"))
 
     def setup_text_input_boxes(self):
         # Create a text input box for the zoomed AP image crop size
         self.zoomed_ap_crop_text_box = wx.TextCtrl(self.tab2, value="2000", style=wx.TE_PROCESS_ENTER)
 
         # Create a text input box for the custom AP icon size
-        self.custom_ap_icon_size_text_box = wx.TextCtrl(self.tab2, value="200", style=wx.TE_PROCESS_ENTER)
+        self.custom_ap_icon_size_text_box = wx.TextCtrl(self.tab2, value="50", style=wx.TE_PROCESS_ENTER)
 
     def setup_text_labels(self):
         # Create a text label for the drop target with custom position
@@ -269,9 +272,11 @@ class MyFrame(wx.Frame):
 
         # Create a text label for the zoomed AP crop size text box
         self.zoomed_ap_crop_label = wx.StaticText(self.tab2, label="Zoomed AP Crop Size:")
+        self.zoomed_ap_crop_label.SetToolTip(wx.ToolTip("Enter the size of the zoomed AP crop in pixels"))
 
         # Create a text label for the custom AP icon size
         self.custom_ap_icon_size_label = wx.StaticText(self.tab2, label="Custom AP Icon Size:")
+        self.custom_ap_icon_size_label.SetToolTip(wx.ToolTip("Enter the size of the custom AP icon in pixels"))
 
         # Create a text label for Export functions
         self.export_label = wx.StaticText(self.tab2, label="Export:")
@@ -360,22 +365,22 @@ class MyFrame(wx.Frame):
         self.tab2_row1_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
         self.tab2_sizer.Add(self.tab2_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
-
         self.tab2_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab2_row2_sizer.AddStretchSpacer(1)
-        self.tab2_row2_sizer.Add(self.custom_ap_icon_size_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab2_row2_sizer.Add(self.custom_ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab2_row2_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab2_row2_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.EXPAND | wx.ALL, 5)
         self.tab2_row2_sizer.AddSpacer(2)
+        self.tab2_row2_sizer.Add(self.create_custom_ap_map_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        self.tab2_row2_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
+        self.tab2_row2_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
+        self.tab2_row2_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
         self.tab2_sizer.Add(self.tab2_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab2_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab2_row3_sizer.Add(self.estimate_custom_icon_size_button, 0, wx.ALL, 5)
         self.tab2_row3_sizer.AddStretchSpacer(1)
-        self.tab2_row3_sizer.Add(self.create_custom_ap_map_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        self.tab2_row3_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
-        self.tab2_row3_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
-        self.tab2_row3_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
+        self.tab2_row3_sizer.Add(self.custom_ap_icon_size_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        self.tab2_row3_sizer.Add(self.custom_ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab2_row3_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        self.tab2_row3_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.EXPAND | wx.ALL, 5)
         self.tab2_sizer.Add(self.tab2_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab2.SetSizer(self.tab2_sizer)
@@ -417,13 +422,16 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_contribute, contribute_menu_item)
         self.Bind(wx.EVT_MENU, self.on_view_documentation, documentation_menu_item)
 
-    def on_contribute(self, event):
+    @staticmethod
+    def on_contribute(event):
         webbrowser.open("https://ko-fi.com/badgerwifitools")
 
-    def on_view_documentation(self, event):
-        webbrowser.open("https://ko-fi.com/badgerwifitools")
+    @staticmethod
+    def on_view_documentation(event):
+        webbrowser.open("https://badgerwifi.co.uk")
 
-    def on_about(self, event):
+    @staticmethod
+    def on_about(event):
         # Implement the About dialog logic
         wx.MessageBox("This is a wxPython GUI application created by Nick Turner. Intended to make the lives of Wi-Fi engineers making reports a little bit easier. ", "About")
 
@@ -501,6 +509,9 @@ class MyFrame(wx.Frame):
         self.display_log.SetValue("")  # Clear the contents of the display_log
         self.esx_project_unpacked = False  # Reset project_unpacked state
         self.drop_target_label.Show()  # Show the drop target label
+        self.custom_ap_icon_size_text_box.SetValue("50")  # Reset the custom AP icon size
+        self.zoomed_ap_crop_text_box.SetValue("2000")  # Reset the zoomed AP crop size
+        self.stop_event.clear()  # Clear the stop event
 
     def on_clear_log(self, event):
         self.display_log.SetValue("")  # Clear the contents of the display_log
@@ -884,3 +895,8 @@ class MyFrame(wx.Frame):
         result = dlg.ShowModal() == wx.ID_YES
         dlg.Destroy()
         return result
+
+    def on_estimate_custom_icon_size(self, event):
+        if not self.basic_checks():
+            return
+        self.placeholder(None)
