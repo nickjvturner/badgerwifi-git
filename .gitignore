@@ -1,4 +1,3 @@
-.idea/*/
 OUTPUT/
 esx_files/
 example*/
@@ -6,3 +5,5 @@ archive/
 *.esx
 *.docx
 app_state.json
+*.xml
+*.iml
