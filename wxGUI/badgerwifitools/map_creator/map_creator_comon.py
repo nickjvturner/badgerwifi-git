@@ -19,7 +19,7 @@ EDGE_BUFFER = 80  # gap between rounded rectangle and cropped image edge
 OPACITY = 0.5  # Value from 0 -> 1, defines the opacity of the 'other' APs on zoomed AP images
 
 # Define assets directory path
-ASSETS_DIR = Path(__file__).parent / 'assets' / 'ekahau_style'
+ASSETS_DIR = Path(__file__).parent / 'assets'
 
 nl = '\n'
 
@@ -48,7 +48,7 @@ def get_ap_icon(ap, custom_ap_icon_size):
     ap_color = ekahau_color_dict.get(ap_color_hex)
 
     # Import ekahau style custom
-    spot = Image.open(ASSETS_DIR / f'ekahau-AP-{ap_color}.png')
+    spot = Image.open(ASSETS_DIR / 'ekahau_style' / f'ekahau-AP-{ap_color}.png')
 
     return spot.resize((custom_ap_icon_size, custom_ap_icon_size))
 
@@ -136,7 +136,7 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
 
     angle = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaDirection']
 
-    arrow = Image.open(ASSETS_DIR / 'ekahau-AP-arrow.png')
+    arrow = Image.open(ASSETS_DIR / 'ekahau_style' / 'ekahau-AP-arrow.png')
     arrow = arrow.resize((custom_ap_icon_size, custom_ap_icon_size))
 
     # Calculate AP icon rounded rectangle offset value for text below the AP icon
@@ -164,7 +164,7 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
         # Calculate the top-left corner of the icon based on the center point and x, y
         top_left = (int(x) - rotated_arrow_centre_point[0], int(y) - rotated_arrow_centre_point[1])
 
-        # draw the rotated arrow onto the floorplan
+        # draw the rotated arrow onto the floor plan
         map_image.paste(rotated_arrow, top_left, mask=rotated_arrow)
 
     # Calculate the height and width of the AP Name rounded rectangle
@@ -204,3 +204,52 @@ def crop_map(map_image, ap, scaling_ratio, zoomed_ap_crop_size):
     cropped_map_image = map_image.crop(crop_box)
 
     return cropped_map_image
+
+
+def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_callback, floor_plans_dict):
+    font = set_font()
+
+    # establish x and y
+    x, y = (ap['location']['coord']['x'] * scaling_ratio,
+            ap['location']['coord']['y'] * scaling_ratio)
+
+    wx.CallAfter(message_callback,
+        f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId'])} ][ coordinates {round(x)}, {round(y)}")
+
+    spot = Image.open(ASSETS_DIR / 'custom' / 'spot.png')
+    spot = spot.resize((custom_ap_icon_size, custom_ap_icon_size))
+
+    # Calculate AP icon rounded rectangle offset value for text below the AP icon
+    y_offset = (custom_ap_icon_size / 3)
+
+    # Define the centre point of the spot
+    spot_centre_point = (spot.width // 2, spot.height // 2)
+
+    # Calculate the top-left corner of the icon based on the center point and x, y
+    top_left = (int(x) - spot_centre_point[0], int(y) - spot_centre_point[1])
+
+    # Paste the arrow onto the floor plan at the calculated location
+    map_image.paste(spot, top_left, mask=spot)
+
+    # Calculate the height and width of the AP Name rounded rectangle
+    text_width, text_height = text_width_and_height_getter(ap['name'])
+
+    # Establish coordinates for the rounded rectangle
+    x1 = x - (text_width / 2) - RECT_TEXT_OFFSET
+    y1 = y + y_offset
+
+    x2 = x + (text_width / 2) + RECT_TEXT_OFFSET
+    y2 = y + y_offset + text_height + (RECT_TEXT_OFFSET * 2)
+
+    r = (y2 - y1) / 3
+
+    # Create ImageDraw object for ALL APs Placement map
+    draw_map_image = ImageDraw.Draw(map_image)
+
+    # draw the rounded rectangle for "AP Name"
+    draw_map_image.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
+
+    # draw the text for "AP Name"
+    draw_map_image.text((x, y + y_offset + RECT_TEXT_OFFSET), ap['name'], anchor='mt', fill='black', font=font)
+
+    return map_image

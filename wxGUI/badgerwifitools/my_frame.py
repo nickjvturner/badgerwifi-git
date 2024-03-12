@@ -29,6 +29,7 @@ from docx_manipulation.docx_to_pdf import convert_docx_to_pdf_threaded
 from map_creator.extract_blank_maps import extract_blank_maps
 from map_creator.create_custom_ap_location_maps import create_custom_ap_location_maps_threaded
 from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_location_maps_threaded
+from map_creator.create_pds_maps import create_pds_maps_threaded
 
 
 # CONSTANTS
@@ -765,7 +766,22 @@ class MyFrame(wx.Frame):
         self.placeholder(None)
 
     def on_export_pds_maps(self, event):
-        self.placeholder(None)
+        if not self.basic_checks():
+            return
+
+        # Retrieve the number from the custom AP icon size text box
+        custom_ap_icon_size = self.custom_ap_icon_size_text_box.GetValue()
+
+        # Clear the stop event flag before starting the thread
+        self.stop_event.clear()
+
+        try:
+            custom_ap_icon_size = int(custom_ap_icon_size)  # Convert the input to a float
+            create_pds_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, custom_ap_icon_size, self.stop_event)
+
+        except ValueError:
+            # Handle the case where the input is not a valid number
+            wx.MessageBox("Please enter a valid number", "Error", wx.OK | wx.ICON_ERROR)
 
     def on_create_ap_location_maps(self, event):
         if not self.basic_checks():
@@ -847,7 +863,8 @@ class MyFrame(wx.Frame):
         self.stop_event.set()
 
     def on_open_working_directory(self, event):
-        if not self.basic_checks():
+        if not self.esx_project_unpacked:
+            self.append_message("Project has not been unpacked yet, the working directory is not defined.")
             return
         try:
             # Open the directory using the operating system's file navigator
