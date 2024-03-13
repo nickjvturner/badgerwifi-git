@@ -409,6 +409,7 @@ class MyFrame(wx.Frame):
         help_menu = wx.Menu()
         contribute_menu_item = help_menu.Append(wx.ID_ANY, "&Contribute", "Go to the ko-fi contribution page")
         documentation_menu_item = help_menu.Append(wx.ID_ANY, "&Documentation", "View the documentation")
+        view_release_notes_menu_item = help_menu.Append(wx.ID_ANY, "&View 'Release Notes'", "View the GitHub commit messages")
         help_menu.Append(wx.ID_ABOUT, '&About')
         menubar.Append(help_menu, '&Help')
 
@@ -421,6 +422,8 @@ class MyFrame(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.on_contribute, contribute_menu_item)
         self.Bind(wx.EVT_MENU, self.on_view_documentation, documentation_menu_item)
+        self.Bind(wx.EVT_MENU, self.on_view_release_notes, view_release_notes_menu_item)
+
 
     @staticmethod
     def on_contribute(event):
@@ -429,6 +432,10 @@ class MyFrame(wx.Frame):
     @staticmethod
     def on_view_documentation(event):
         webbrowser.open("https://badgerwifi.co.uk")
+
+    @staticmethod
+    def on_view_release_notes(event):
+        webbrowser.open("https://github.com/nickjvturner/badgerwifi-git/activity")
 
     @staticmethod
     def on_about(event):
