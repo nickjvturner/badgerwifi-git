@@ -18,23 +18,27 @@ RECT_TEXT_OFFSET = 15  # gap between text and box edge
 EDGE_BUFFER = 80  # gap between rounded rectangle and cropped image edge
 OPACITY = 0.5  # Value from 0 -> 1, defines the opacity of the 'other' APs on zoomed AP images
 
+FONT_SIZE = 30  # Font size for AP names on the map
+WINDOWS_FONT = 'Consola.ttf'
+MACOS_FONT = 'Menlo.ttc'
+
 # Define assets directory path
 ASSETS_DIR = Path(__file__).parent / 'assets'
 
 
 def set_font():
     # Define text, font and size
-    if platform.system() == "Windows":
-        font_path = os.path.join(os.environ["SystemRoot"], "Fonts", "Consola.ttf")
-        return ImageFont.truetype(font_path, 30)
+    if platform.system() == 'Windows':
+        font_path = os.path.join(os.environ['SystemRoot'], 'Fonts', WINDOWS_FONT)
+        return ImageFont.truetype(font_path, FONT_SIZE)
     else:
-        return ImageFont.truetype("Menlo.ttc", 30)
+        return ImageFont.truetype(MACOS_FONT, FONT_SIZE)
 
 
 def vector_source_check(floor, message_callback):
     # Check if the floor plan is a vector or bitmap image
     if 'bitmapImageId' in floor:
-        wx.CallAfter(message_callback, f"bitmapImageId detected, source floor plan image is probably a vector")
+        wx.CallAfter(message_callback, f'bitmapImageId detected, source floor plan image is probably a vector')
         return floor['bitmapImageId']
     else:
         return floor['imageId']
@@ -69,11 +73,11 @@ def text_width_and_height_getter(text):
     font = set_font()
 
     # Create a working space image and draw object
-    working_space = Image.new("RGB", (500, 500), color="white")
+    working_space = Image.new('RGB', (500, 500), color='white')
     draw = ImageDraw.Draw(working_space)
 
     # Draw the text onto the image and get its bounding box
-    text_box = draw.textbbox((0, 0), text, font=font, spacing=4, align="center")
+    text_box = draw.textbbox((0, 0), text, font=font, spacing=4, align='center')
 
     # Width and height of the bounding box
     width = text_box[2] - text_box[0]
@@ -96,7 +100,7 @@ def crop_assessment(floor, source_floor_plan_image, project_dir, floor_id, blank
                        crop_bitmap[2] * scaling_ratio,
                        crop_bitmap[3] * scaling_ratio)
 
-        # save a blank copy of the cropped floorplan
+        # save a blank copy of the cropped floor plan
         cropped_blank_map = source_floor_plan_image.copy()
         cropped_blank_map = cropped_blank_map.crop(crop_bitmap)
         cropped_blank_map.save(Path(blank_plan_dir / floor['name']).with_suffix('.png'))
@@ -178,10 +182,10 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
     # Create ImageDraw object for ALL APs Placement map
     draw_map_image = ImageDraw.Draw(map_image)
 
-    # draw the rounded rectangle for "AP Name"
+    # draw the rounded rectangle for 'AP Name'
     draw_map_image.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
 
-    # draw the text for "AP Name"
+    # draw the text for 'AP Name'
     draw_map_image.text((x, y + y_offset + RECT_TEXT_OFFSET), ap['name'], anchor='mt', fill='black', font=font)
 
     return map_image
@@ -209,8 +213,7 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_
     x, y = (ap['location']['coord']['x'] * scaling_ratio,
             ap['location']['coord']['y'] * scaling_ratio)
 
-    wx.CallAfter(message_callback,
-        f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId'])} ][ coordinates {round(x)}, {round(y)}")
+    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId'])} ][ coordinates {round(x)}, {round(y)}")
 
     spot = Image.open(ASSETS_DIR / 'custom' / 'spot.png')
     spot = spot.resize((custom_ap_icon_size, custom_ap_icon_size))
@@ -242,10 +245,10 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_
     # Create ImageDraw object for ALL APs Placement map
     draw_map_image = ImageDraw.Draw(map_image)
 
-    # draw the rounded rectangle for "AP Name"
+    # draw the rounded rectangle for 'AP Name'
     draw_map_image.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
 
-    # draw the text for "AP Name"
+    # draw the text for 'AP Name'
     draw_map_image.text((x, y + y_offset + RECT_TEXT_OFFSET), ap['name'], anchor='mt', fill='black', font=font)
 
     return map_image

@@ -47,7 +47,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
     simulated_radio_dict = create_simulated_radios_dict(simulated_radios_json)
 
-    output_dir = working_directory / "OUTPUT"
+    output_dir = working_directory / 'OUTPUT'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for Blank floor plans
@@ -98,8 +98,11 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
 
             current_map_image = source_floor_plan_image.copy()
 
+            # Initialize all_aps to None
+            all_aps = None
+
             # Generate the all_aps map
-            wx.CallAfter(message_callback, f'{nl}Creating Custom AP location map for: {floor["name"]}{nl}')
+            wx.CallAfter(message_callback, f"{nl}Creating Custom AP location map for: {floor['name']}{nl}")
             for ap in aps_on_this_floor:
                 if stop_event.is_set():
                     wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
@@ -107,11 +110,11 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
                 all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
             # Save the output images
-            wx.CallAfter(message_callback, f'{nl}Saving annotated floor plan: {floor["name"]}{nl}')
+            wx.CallAfter(message_callback, f"{nl}Saving annotated floor plan: {floor['name']}{nl}")
             all_aps.save(Path(custom_ap_location_maps / floor['name']).with_suffix('.png'))
 
             # Zoom faded AP map generation
-            wx.CallAfter(message_callback, f'{nl}Creating zoomed per AP images for: {floor["name"]}{nl}')
+            wx.CallAfter(message_callback, f"{nl}Creating zoomed per AP images for: {floor['name']}{nl}")
             all_aps_faded = all_aps.copy().convert('RGBA')
             faded_ap_background_map_image = source_floor_plan_image.convert('RGBA')
             all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
@@ -133,7 +136,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
                 all_aps = all_aps.crop(crop_bitmap)
 
         else:
-            wx.CallAfter(message_callback, f'{nl}No APs found on floor: {floor["name"]}{nl}')
+            wx.CallAfter(message_callback, f"{nl}No APs found on floor: {floor['name']}{nl}")
 
     try:
         shutil.rmtree(temp_dir)

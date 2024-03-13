@@ -1,21 +1,12 @@
-#!/usr/bin/env python3
-
-"""
-Written by Nick Turner (@nickjvturner@mastodon.social)
-This script will find 'the' word doc in the same directory as the script
-Create an output directory called 'PDF Output'
-
-Initially created in August 2023
-Latest meaningful update: 2023-08-10
-"""
+# docx_to_pdf.py
 
 from pathlib import Path
 
 import wx
-from docx2pdf import convert
 import threading
+from docx2pdf import convert
 
-nl = '\n'
+from common import nl
 
 
 def convert_docx_to_pdf_threaded(docx_file, message_callback):
@@ -36,6 +27,6 @@ def convert_docx_to_pdf(docx_file, message_callback):
 
     try:
         convert(str(docx_path), str(output_pdf_path.parent))
-        message_callback(f"PDF created Successfully: {docx_path.name}{nl}{nl}### PROCESS COMPLETE ###")
+        message_callback(f'PDF created Successfully: {docx_path.name}{nl}{nl}### PROCESS COMPLETE ###')
     except Exception as e:
-        message_callback(f"Error converting {docx_path.name}: {e}")
+        message_callback(f'Error converting {docx_path.name}: {e}')

@@ -22,7 +22,7 @@ def export_floor_plan(source, destination, crop_bitmap=None):
 
 def extract_blank_maps(working_directory, project_name, message_callback):
     project_dir = Path(working_directory) / project_name
-    output_dir = working_directory / "OUTPUT" / 'blank'
+    output_dir = working_directory / 'OUTPUT' / 'blank'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     floor_plans_json = load_json(project_dir, 'floorPlans.json', message_callback)
@@ -43,9 +43,3 @@ def extract_blank_maps(working_directory, project_name, message_callback):
 
         wx.CallAfter(message_callback, f"{nl}Exported blank map for {floor['name']} to:{nl}{dest_path}{nl}")
     wx.CallAfter(message_callback, f"{nl}### PROCESS COMPLETE ###")
-
-if __name__ == '__main__':
-    working_directory = '/path/to/working/directory'
-    project_name = 'ProjectName'
-    message_callback = print  # Using print function as a simple callback for messages
-    export_blank_maps(working_directory, project_name, message_callback)

@@ -44,7 +44,7 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
     simulated_radio_dict = create_simulated_radios_dict(simulated_radios_json)
 
     # Create directory to hold output directories
-    output_dir = working_directory / "OUTPUT"
+    output_dir = working_directory / 'OUTPUT'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for Blank floor plans
@@ -64,7 +64,7 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
             wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
             return
 
-        wx.CallAfter(message_callback, f'{nl}Processing floor: {floor["name"]}{nl}')
+        wx.CallAfter(message_callback, f"{nl}Processing floor: {floor['name']}{nl}")
 
         floor_id = vector_source_check(floor, message_callback)
 
@@ -87,6 +87,9 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
                 aps_on_this_floor.append(ap)
 
         current_map_image = source_floor_plan_image.copy()
+
+        # Initialize all_aps to None
+        all_aps = None
 
         # Generate the all_aps map
         for ap in aps_on_this_floor:

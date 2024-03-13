@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# insert_images.py
 
 from pathlib import Path
 import threading
@@ -73,7 +73,7 @@ def insert_images(docx_file, message_callback, progress_callback, stop_event):
 							if stop_event.is_set():
 								wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
 								return
-							paragraph.text = paragraph.text.replace(str_prefix + key, "")
+							paragraph.text = paragraph.text.replace(str_prefix + key, '')
 							picture_path = Path(__file__).resolve().parent / 'images' / image_search[key]['image']
 							paragraph.add_run().add_picture(str(picture_path), height=Mm(image_search[key]['height']))
 							images_inserted += 1

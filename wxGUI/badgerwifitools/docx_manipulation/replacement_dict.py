@@ -1,3 +1,5 @@
+# replacement_dict.py
+
 image_search = {
     # AP Brackets, indoor APs
     'AP-MNT-A': {

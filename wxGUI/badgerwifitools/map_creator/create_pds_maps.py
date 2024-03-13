@@ -9,7 +9,6 @@ from PIL import Image
 from common import nl
 from common import load_json
 from common import create_floor_plans_dict
-from common import create_simulated_radios_dict
 
 from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
@@ -42,7 +41,7 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
 
     # Create directory to hold output directories
-    output_dir = working_directory / "OUTPUT"
+    output_dir = working_directory / 'OUTPUT'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for Blank floor plans
@@ -74,7 +73,7 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
 
         aps_on_this_floor = []
 
-        wx.CallAfter(message_callback, f'{nl}Processing floor: {floor["name"]}{nl}')
+        wx.CallAfter(message_callback, f"{nl}Processing floor: {floor['name']}{nl}")
 
         for ap in sorted(access_points_json['accessPoints'], key=lambda i: i['name']):
             if stop_event.is_set():
@@ -85,6 +84,9 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
                 aps_on_this_floor.append(ap)
 
         current_map_image = source_floor_plan_image.copy()
+
+        # Initialize all_aps to None
+        all_aps = None
 
         # Generate the all_aps map
         for ap in aps_on_this_floor:
