@@ -224,10 +224,6 @@ class MyFrame(wx.Frame):
         self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_zoomed_ap_maps)
         self.create_zoomed_ap_maps_button.SetToolTip(wx.ToolTip("Generate zoomed per AP location maps with custom AP icons"))
 
-        self.estimate_custom_icon_size_button = wx.Button(self.tab2, label="Estimate Icon / Crop")
-        self.estimate_custom_icon_size_button.Bind(wx.EVT_BUTTON, self.on_estimate_custom_icon_size)
-        self.estimate_custom_icon_size_button.SetToolTip(wx.ToolTip("Estimate the custom AP icon size and appropriate crop based on the map dimensions"))
-
         self.export_pds_maps_button = wx.Button(self.tab2, label="PDS Maps")
         self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
         self.export_pds_maps_button.SetToolTip(wx.ToolTip("Generate maps with red circle AP markers for use during Post Deployment Surveys"))
@@ -376,7 +372,6 @@ class MyFrame(wx.Frame):
         self.tab2_sizer.Add(self.tab2_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab2_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab2_row3_sizer.Add(self.estimate_custom_icon_size_button, 0, wx.ALL, 5)
         self.tab2_row3_sizer.AddStretchSpacer(1)
         self.tab2_row3_sizer.Add(self.custom_ap_icon_size_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab2_row3_sizer.Add(self.custom_ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
@@ -908,8 +903,3 @@ class MyFrame(wx.Frame):
         result = dlg.ShowModal() == wx.ID_YES
         dlg.Destroy()
         return result
-
-    def on_estimate_custom_icon_size(self, event):
-        if not self.basic_checks():
-            return
-        self.placeholder(None)
