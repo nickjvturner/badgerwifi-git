@@ -36,14 +36,14 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
             'Model': model,
             'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
             'Mounting': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
-            'AP Bracket': 'not-required' if mini_tags_dict.get('ap-bracket') else mini_tags_dict.get('ap-bracket'),
+            'AP Bracket': mini_tags_dict.get('ap-bracket', UNKNOWN),
             'Antenna': antenna,
             'Antenna Description': antenna_description,
-            'Antenna Bracket': mini_tags_dict.get('antenna-bracket'),
+            'Antenna Bracket': mini_tags_dict.get('antenna-bracket', UNKNOWN),
             'Antenna Height': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', ''),
             'Antenna Tilt': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
             'Simulated Tx power (5 GHz)': round(simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('transmitPower', 0), 1),
-            'RF-Group': mini_tags_dict.get('rf-group'),
+            'RF-Group': mini_tags_dict.get('rf-group', UNKNOWN),
             'Notes': note_text_processor(ap['noteIds'], notes_dict)
         }
         custom_ap_list.append(ap_details)

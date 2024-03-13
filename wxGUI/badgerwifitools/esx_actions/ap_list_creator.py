@@ -59,7 +59,7 @@ def create_ap_list(working_directory, project_name, message_callback, create_cus
 
     # Create a pandas dataframe and export to Excel
     df = pd.DataFrame(custom_ap_list)
-    output_filename = f'{project_dir} - BoM vX.xlsx'
+    output_filename = f'{project_dir} - AP List.xlsx'
 
     writer = pd.ExcelWriter(output_filename, engine='xlsxwriter')
     df.to_excel(writer, sheet_name='AP List', index=False)
