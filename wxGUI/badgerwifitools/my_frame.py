@@ -57,6 +57,7 @@ def discover_available_scripts(directory):
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(1000, 800))
+        self.SetMinSize((800, 600))
         self.panel = wx.Panel(self)
         self.initialize_variables()
         self.setup_list_box()
@@ -481,7 +482,9 @@ class MyFrame(wx.Frame):
             'list_box_contents': [self.list_box.GetString(i) for i in range(self.list_box.GetCount())],
             'selected_ap_rename_script_index': self.ap_rename_script_dropdown.GetSelection(),
             'selected_project_profile_index': self.project_profile_dropdown.GetSelection(),
-            'selected_tab_index': self.notebook.GetSelection()
+            'selected_tab_index': self.notebook.GetSelection(),
+            'custom_ap_icon_size_text_box': self.custom_ap_icon_size_text_box.GetValue(),
+            'zoomed_ap_crop_text_box': self.zoomed_ap_crop_text_box.GetValue()
         }
         # Save the state to the defined path
         with open(self.app_state_file_path, 'w') as f:
@@ -506,6 +509,9 @@ class MyFrame(wx.Frame):
                 self.on_project_profile_dropdown_selection(None)
                 # Restore selected tab index
                 self.notebook.SetSelection(state.get('selected_tab_index', 0))
+                # Restore the text box values
+                self.custom_ap_icon_size_text_box.SetValue(state.get('custom_ap_icon_size_text_box', "50"))
+                self.zoomed_ap_crop_text_box.SetValue(state.get('zoomed_ap_crop_text_box', "2000"))
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
             self.on_project_profile_dropdown_selection(None)
