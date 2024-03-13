@@ -33,7 +33,7 @@ setup(
     python_requires='>=3.9',
     entry_points={
         'console_scripts': [
-            'badgerwifitools=badgerwifitools.main:main',
+            'badgerwifitools=badgerwifitools.launcher:main',
         ],
     },
 )
