@@ -698,8 +698,10 @@ class MyFrame(wx.Frame):
 
         # Load and execute the selected script
         script_module = SourceFileLoader(selected_script, script_path).load_module()
-        ap_renamer(self.working_directory, self.esx_project_name, script_module.sort_logic, self.append_message)
-        # script_module.run(self.working_directory, self.esx_project_name, self.append_message)
+        if hasattr(script_module, 'complex_rename'):
+            script_module.run(self.working_directory, self.esx_project_name, self.append_message)
+        else:
+            ap_renamer(self.working_directory, self.esx_project_name, script_module.sort_logic, self.append_message)
 
     def on_ap_rename_script_dropdown_selection(self, event):
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]

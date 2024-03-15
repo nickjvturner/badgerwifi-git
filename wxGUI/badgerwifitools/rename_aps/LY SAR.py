@@ -1,4 +1,4 @@
-# LY structure.py
+# LY SAR.py
 from pathlib import Path
 
 from common import load_json
@@ -6,8 +6,10 @@ from common import create_floor_plans_dict
 
 from common import save_and_move_json
 from common import re_bundle_project
-from common import rename_aps
 from common import rename_process_completion_message as completion_message
+
+# Add an attribute to the module
+SAR = "This is a Stand Alone Rename module"
 
 
 def create_tag_keys_dict(tag_keys_json):
@@ -52,8 +54,7 @@ def rename_aps(access_points, tag_keys_dict, floor_plans_dict, message_callback)
     for ap in access_points:
         new_ap_name = f"{sort_tag_value_getter(ap['tags'], 'UNIT', tag_keys_dict)}-AP{ap_sequence_number:03}"
 
-        message_callback(
-            f"{ap['name']} {ap['model']} from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed to {new_ap_name}")
+        message_callback(f"{ap['name']} ({ap['model']}) | {floor_plans_dict.get(ap['location']['floorPlanId']).get('name')} | renamed to {new_ap_name}")
 
         ap['name'] = new_ap_name
         ap_sequence_number += 1
