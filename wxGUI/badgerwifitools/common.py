@@ -55,19 +55,13 @@ def load_json(project_dir, filename, message_callback):
 
 
 def create_floor_plans_dict(floor_plans_json):
-    """Create a dictionary of floor plans."""
-    floor_plans_dict = {}
-    for floor in floor_plans_json['floorPlans']:
-        floor_plans_dict[floor['id']] = floor['name']
-    return floor_plans_dict
-
-
-def create_floor_plans_height_dict(floor_plans_json):
-    """Create a dictionary of floor plans."""
-    floor_plans_dict = {}
-    for floor in floor_plans_json['floorPlans']:
-        floor_plans_dict[floor['id']] = floor['height']
-    return floor_plans_dict
+    """Create a dictionary of pertinent floor plan detail."""
+    return {
+        floor['id']: {
+            'name': floor['name'],
+            'height': floor['height']
+        } for floor in floor_plans_json['floorPlans']
+    }
 
 
 def create_notes_dict(notes_json):
@@ -217,7 +211,7 @@ def create_custom_ap_dict(access_points_json, floor_plans_dict, simulated_radio_
             'color': ap.get('color', 'none'),
             'model': ap_model,
             'antenna': external_antenna,
-            'floor': floor_plans_dict.get(ap['location']['floorPlanId'], ''),
+            'floor': floor_plans_dict.get(ap['location']['floorPlanId']).get('name'),
             'antennaTilt': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
             'antennaMounting': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
             'antennaHeight': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', 0),
@@ -238,8 +232,7 @@ def rename_aps(sorted_ap_list, message_callback, floor_plans_dict):
         # Define new AP naming scheme
         new_ap_name = f'AP-{ap_sequence_number:03}'
 
-        # message_callback(f"{ap['name']} [ {model_antenna_split(ap['model'])[0]} ] from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed: {new_ap_name}")
-        wx.CallAfter(message_callback, f"{ap['name']} [ {model_antenna_split(ap['model'])[0]} ] from: {floor_plans_dict.get(ap['location']['floorPlanId'])} renamed: {new_ap_name}")
+        wx.CallAfter(message_callback, f"{ap['name']} ][ {model_antenna_split(ap['model'])[0]} from: {floor_plans_dict.get(ap['location']['floorPlanId']).get('name')} ][ renamed: {new_ap_name}")
 
         ap['name'] = new_ap_name
         ap_sequence_number += 1

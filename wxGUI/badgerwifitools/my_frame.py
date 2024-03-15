@@ -33,6 +33,8 @@ from map_creator.create_custom_ap_location_maps import create_custom_ap_location
 from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_location_maps_threaded
 from map_creator.create_pds_maps import create_pds_maps_threaded
 
+from rename_aps._ap_renamer import ap_renamer
+
 
 # CONSTANTS
 from common import nl
@@ -697,7 +699,8 @@ class MyFrame(wx.Frame):
 
         # Load and execute the selected script
         script_module = SourceFileLoader(selected_script, script_path).load_module()
-        script_module.run(self.working_directory, self.esx_project_name, self.append_message)
+        ap_renamer(self.working_directory, self.esx_project_name, script_module.sort_logic, self.append_message)
+        # script_module.run(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_ap_rename_script_dropdown_selection(self, event):
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]

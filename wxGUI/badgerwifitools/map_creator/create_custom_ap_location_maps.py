@@ -59,7 +59,7 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
     temp_dir = output_dir / 'temp'
     temp_dir.mkdir(parents=True, exist_ok=True)
 
-    for floor in floor_plans_json['floorPlans']:
+    for floor in sorted(floor_plans_json['floorPlans'], key=lambda i: i['name']):
         if stop_event.is_set():
             wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
             return
@@ -91,12 +91,17 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
         # Initialize all_aps to None
         all_aps = None
 
-        # Generate the all_aps map
-        for ap in aps_on_this_floor:
-            if stop_event.is_set():
-                wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
-                return
-            all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
+        if not aps_on_this_floor:
+            wx.CallAfter(message_callback, "No APs on this floor.")
+            continue
+
+        else:
+            # Generate the all_aps map
+            for ap in aps_on_this_floor:
+                if stop_event.is_set():
+                    wx.CallAfter(message_callback, "### PROCESS ABORTED ###")
+                    return
+                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
         # If map was cropped within Ekahau, crop the all_AP map
         if map_cropped_within_ekahau:

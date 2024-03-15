@@ -121,6 +121,21 @@ def crop_assessment(floor, source_floor_plan_image, project_dir, floor_id, blank
         return map_cropped_within_ekahau, scaling_ratio, None
 
 
+def crop_map(map_image, ap, scaling_ratio, zoomed_ap_crop_size):
+
+    # establish x and y
+    x, y = (ap['location']['coord']['x'] * scaling_ratio,
+            ap['location']['coord']['y'] * scaling_ratio)
+
+    # Calculate the crop box for the new image
+    crop_box = (x - zoomed_ap_crop_size // 2, y - zoomed_ap_crop_size // 2, x + zoomed_ap_crop_size // 2, y + zoomed_ap_crop_size // 2)
+
+    # Crop the image
+    cropped_map_image = map_image.crop(crop_box)
+
+    return cropped_map_image
+
+
 def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict):
     font = set_font()
 
@@ -130,7 +145,7 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
     x, y = (ap['location']['coord']['x'] * scaling_ratio,
             ap['location']['coord']['y'] * scaling_ratio)
 
-    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId'])} ][ colour: '{ekahau_color_dict.get(ap_color)}' ][ coordinates {round(x)}, {round(y)}")
+    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId']).get('name')} ][ colour: {ekahau_color_dict.get(ap_color)} ][ coordinates {round(x)}, {round(y)}")
 
     spot = get_ap_icon(ap, custom_ap_icon_size)
 
@@ -191,21 +206,6 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
     return map_image
 
 
-def crop_map(map_image, ap, scaling_ratio, zoomed_ap_crop_size):
-
-    # establish x and y
-    x, y = (ap['location']['coord']['x'] * scaling_ratio,
-            ap['location']['coord']['y'] * scaling_ratio)
-
-    # Calculate the crop box for the new image
-    crop_box = (x - zoomed_ap_crop_size // 2, y - zoomed_ap_crop_size // 2, x + zoomed_ap_crop_size // 2, y + zoomed_ap_crop_size // 2)
-
-    # Crop the image
-    cropped_map_image = map_image.crop(crop_box)
-
-    return cropped_map_image
-
-
 def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_callback, floor_plans_dict):
     font = set_font()
 
@@ -213,7 +213,7 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_
     x, y = (ap['location']['coord']['x'] * scaling_ratio,
             ap['location']['coord']['y'] * scaling_ratio)
 
-    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId'])} ][ coordinates {round(x)}, {round(y)}")
+    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId']).get('name')} ][ coordinates {round(x)}, {round(y)}")
 
     spot = Image.open(ASSETS_DIR / 'custom' / 'spot.png')
     spot = spot.resize((custom_ap_icon_size, custom_ap_icon_size))

@@ -32,7 +32,7 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
         model, antenna, antenna_description = model_antenna_split(ap.get('model', UNKNOWN))
         ap_details = {
             'Name': ap['name'],
-            'Floor': floor_plans_dict.get(ap['location']['floorPlanId'], UNKNOWN),
+            'Floor': floor_plans_dict.get(ap['location']['floorPlanId']).get('name'),
             'Model': model,
             'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
             'Mounting': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),

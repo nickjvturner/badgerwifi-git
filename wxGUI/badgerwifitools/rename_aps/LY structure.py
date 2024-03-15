@@ -1,5 +1,4 @@
 # LY structure.py
-import wx
 from pathlib import Path
 
 from common import load_json

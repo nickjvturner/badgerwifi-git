@@ -6,11 +6,9 @@ from pathlib import Path
 import wx
 from PIL import Image
 
+from common import nl
 from common import load_json
 from map_creator.map_creator_comon import vector_source_check
-
-# Variables
-nl = '\n'
 
 
 def export_floor_plan(source, destination, crop_bitmap=None):

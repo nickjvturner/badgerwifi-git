@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 
 from common import load_json
 from common import create_simulated_radios_dict
-# from common import create_floor_plans_dict
+from common import create_floor_plans_dict
 from common import model_antenna_split
 from pathlib import Path
 from common import FIVE_GHZ_RADIO_ID
@@ -103,8 +103,7 @@ class MapDialog(wx.Dialog):
                 ap_list.append(ap)
 
         if self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):
-            sorted_aps_list = self.current_sorting_module.sort_logic(ap_list,
-                                                                     self.floor_plans_dict)  # Adjust as per the sorting function's requirements
+            sorted_aps_list = self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict)  # Adjust as per the sorting function's requirements
 
             # Prepare lists of x and y coordinates
             x_coords = [ap['location']['coord']['x'] for ap in sorted_aps_list]
@@ -112,10 +111,8 @@ class MapDialog(wx.Dialog):
 
             # Plot APs with new IDs based on their sorted position
             for i, ap in enumerate(sorted_aps_list, start=1):
-                ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=250,
-                           zorder=5)
-                ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center',
-                        va='center', zorder=6)
+                ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=250, zorder=5)
+                ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center', va='center', zorder=6)
 
             # Draw lines connecting the points
             # Check if there are at least two points to connect
@@ -160,16 +157,6 @@ def create_reversed_floor_plans_dict(floor_plans_json):
     floor_plans_dict = {}
     for floor in floor_plans_json['floorPlans']:
         floor_plans_dict[floor['imageId']] = floor['name']
-    return floor_plans_dict
-
-
-def create_floor_plans_dict(floor_plans_json):
-    """Create a dictionary of pertinent floor plan detail."""
-    floor_plans_dict = {}
-    for floor in floor_plans_json['floorPlans']:
-        floor_plans_dict[floor['id']] = {}
-        floor_plans_dict[floor['id']]['name'] = floor['name']
-        floor_plans_dict[floor['id']]['height'] = floor['height']
     return floor_plans_dict
 
 

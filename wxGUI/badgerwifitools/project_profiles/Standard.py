@@ -18,7 +18,7 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
         ap_details = {
             'Name': ap['name'],
             'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
-            'Floor': floor_plans_dict.get(ap['location']['floorPlanId'], UNKNOWN),
+            'Floor': floor_plans_dict.get(ap['location']['floorPlanId']).get('name'),
             'Model': model,
             'Antenna': antenna,
             'Antenna Description': antenna_description,
