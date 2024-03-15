@@ -19,7 +19,8 @@ setup(
         'inflect>=7.0.0',
         'python-docx>=1.1.0',
         'docx2pdf>=0.1.8',
-        'pillow>=10.2.0'
+        'pillow>=10.2.0',
+        'matplotlib>=3.8.3',
     ],
     classifiers=[
         'Intended Audience :: End Users/Desktop',
