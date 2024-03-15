@@ -23,7 +23,6 @@ def import_module_from_path(module_name, path_to_module):
     spec.loader.exec_module(module)
     return module
 
-
 class MapDialog(wx.Dialog):
     def __init__(self, parent, title, ap_data, map_data, floor_plans_dict):
         super(MapDialog, self).__init__(parent, title=title, size=(1000, 900))
@@ -38,7 +37,6 @@ class MapDialog(wx.Dialog):
 
         self.setup_buttons()
         self.setup_dropdowns()
-        self.setup_text_input_boxes()
         self.setup_figure()
         self.setup_dialog_sizer()
         self.on_rename_change(None)
@@ -54,63 +52,37 @@ class MapDialog(wx.Dialog):
         self.rename_choice = wx.Choice(self.panel, choices=discover_available_scripts(RENAME_APS_DIR))
         self.rename_choice.Bind(wx.EVT_CHOICE, self.on_rename_change)
 
-    def setup_text_input_boxes(self):
-        # Create a text input box for the static row sizing
-        self.static_row_size = wx.TextCtrl(self.panel, value="200", style=wx.TE_PROCESS_ENTER)
-
     def setup_figure(self):
         self.figure = Figure()
         self.canvas = FigureCanvas(self.panel, -1, self.figure)
 
     def setup_dialog_sizer(self):
-        self.dialog_row1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.dialog_row1.Add(self.map_choice, 0, wx.EXPAND | wx.ALL, 5)
-        self.dialog_row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, border=5)
-        self.dialog_row1.Add(self.static_row_size, 0, wx.EXPAND | wx.ALL, border=5)
-        self.dialog_row1.AddStretchSpacer(1)
+        dialog_row1 = wx.BoxSizer(wx.HORIZONTAL)
+        dialog_row1.Add(self.map_choice, 0, wx.EXPAND | wx.ALL, 5)
+        dialog_row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, border=5)
+        dialog_row1.AddStretchSpacer(1)
 
-        self.dialog_exit_row = wx.BoxSizer(wx.HORIZONTAL)
-        self.dialog_exit_row.AddStretchSpacer(1)
-        self.dialog_exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
+        dialog_exit_row = wx.BoxSizer(wx.HORIZONTAL)
+        dialog_exit_row.AddStretchSpacer(1)
+        dialog_exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
 
-        self.dialog_main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.dialog_main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.EXPAND, border=5)
-        self.dialog_main_sizer.Add(self.dialog_row1, 0, wx.EXPAND | wx.ALL, border=5)
-        self.dialog_main_sizer.Add(self.dialog_exit_row, 0, wx.EXPAND | wx.ALL, border=5)
+        dialog_main_sizer = wx.BoxSizer(wx.VERTICAL)
+        dialog_main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.EXPAND, border=5)
+        dialog_main_sizer.Add(dialog_row1, 0, wx.EXPAND | wx.ALL, border=5)
+        dialog_main_sizer.Add(dialog_exit_row, 0, wx.EXPAND | wx.ALL, border=5)
 
-        self.panel.SetSizer(self.dialog_main_sizer)
+        self.panel.SetSizer(dialog_main_sizer)
         self.Centre()
 
     def on_map_change(self, event):
         self.current_map = self.map_choice.GetStringSelection()
         self.update_plot()
 
-    # def on_rename_change(self, event):
-    #     selected_script = self.rename_choice.GetStringSelection()
-    #     path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
-    #     self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
-    #     self.update_plot()
-
     def on_rename_change(self, event):
         selected_script = self.rename_choice.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
-
-        # Example of removing existing widget(s)
-        if hasattr(self, 'dynamic_widget'):
-            self.dynamic_widget.Destroy()
-
-        # Example of adding a new widget based on the choice
-        if selected_script == "Fuzzy y-axis":
-            self.dynamic_widget = wx.TextCtrl(self.panel, value="This is dynamic")
-            self.panel.GetSizer().Add(self.dynamic_widget, 0, wx.EXPAND | wx.ALL, 5)
-        elif selected_script == "AnotherCondition":
-            self.dynamic_widget = wx.Button(self.panel, label="Dynamic Button")
-            self.panel.GetSizer().Add(self.dynamic_widget, 0, wx.EXPAND | wx.ALL, 5)
-            self.dynamic_widget.Bind(wx.EVT_BUTTON, self.on_dynamic_button_click)
-
-        self.panel.Layout()  # Re-layout the panel to reflect changes
-        self.update_plot()  # Assuming you want to update the plot on change
+        self.update_plot()
 
     def on_show(self, event):
         self.map_choice.SetSelection(0)
@@ -197,6 +169,7 @@ def visualise_ap_renaming(working_directory, project_name, message_callback, par
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
     simulated_radios_dict = create_simulated_radios_dict(simulated_radio_json)
     ap_data = create_custom_ap_dict(access_points_json, simulated_radios_dict, floor_plans_dict)
+
 
     # Prepare map_data
     map_data = {}
