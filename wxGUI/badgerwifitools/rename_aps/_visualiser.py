@@ -23,6 +23,7 @@ def import_module_from_path(module_name, path_to_module):
     spec.loader.exec_module(module)
     return module
 
+
 class MapDialog(wx.Dialog):
     def __init__(self, parent, title, ap_data, map_data, floor_plans_dict):
         super(MapDialog, self).__init__(parent, title=title, size=(1000, 900))
@@ -82,7 +83,10 @@ class MapDialog(wx.Dialog):
         selected_script = self.rename_choice.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
-        self.update_plot()
+        if hasattr(self.current_sorting_module, "SAR"):
+            wx.MessageBox(f"The selected script '{selected_script}' is a Stand Alone Rename module and cannot be used for visualisation.", "Error", wx.OK | wx.ICON_ERROR)
+        else:
+            self.update_plot()
 
     def on_show(self, event):
         self.map_choice.SetSelection(0)
@@ -103,6 +107,7 @@ class MapDialog(wx.Dialog):
                 ap_list.append(ap)
 
         if self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):
+
             sorted_aps_list = self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict)  # Adjust as per the sorting function's requirements
 
             # Prepare lists of x and y coordinates
@@ -117,12 +122,10 @@ class MapDialog(wx.Dialog):
             # Draw lines connecting the points
             # Check if there are at least two points to connect
             if len(x_coords) > 1:
-                ax.plot(x_coords, y_coords, color='gray', linestyle='-', linewidth=2,
-                        zorder=4)  # Adjust color, linestyle, and linewidth as needed
+                ax.plot(x_coords, y_coords, color='gray', linestyle='-', linewidth=2, zorder=4)  # Adjust color, linestyle, and linewidth as needed
 
         ax.axis('off')
         self.figure.tight_layout()
-
         self.canvas.draw()
 
     def on_dismiss(self, event):
@@ -169,7 +172,6 @@ def visualise_ap_renaming(working_directory, project_name, message_callback, par
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
     simulated_radios_dict = create_simulated_radios_dict(simulated_radio_json)
     ap_data = create_custom_ap_dict(access_points_json, simulated_radios_dict, floor_plans_dict)
-
 
     # Prepare map_data
     map_data = {}

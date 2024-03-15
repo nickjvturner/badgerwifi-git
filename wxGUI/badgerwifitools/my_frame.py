@@ -698,7 +698,7 @@ class MyFrame(wx.Frame):
 
         # Load and execute the selected script
         script_module = SourceFileLoader(selected_script, script_path).load_module()
-        if hasattr(script_module, 'complex_rename'):
+        if hasattr(script_module, 'SAR'):
             script_module.run(self.working_directory, self.esx_project_name, self.append_message)
         else:
             ap_renamer(self.working_directory, self.esx_project_name, script_module.sort_logic, self.append_message)
