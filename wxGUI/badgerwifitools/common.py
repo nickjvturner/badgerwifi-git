@@ -244,7 +244,7 @@ def rename_process_completion_message(message_callback, project_name):
     wx.CallAfter(message_callback, f"{nl}Modified accessPoints.json re-bundled into .esx file{nl}{project_name}_re-zip.esx within working directory{nl}{nl}### PROCESS COMPLETE ###")
 
 
-def discover_available_scripts(directory):
+def discover_available_scripts(directory, ignore_files=("_", "common")):
     """
     General-purpose function to discover available Python script files in a specified directory.
     Excludes files starting with underscores or 'common'.
@@ -252,6 +252,6 @@ def discover_available_scripts(directory):
     script_dir = Path(__file__).resolve().parent / directory
     available_scripts = []
     for filename in os.listdir(script_dir):
-        if filename.endswith(".py") and not filename.startswith(("_", "common")):
+        if filename.endswith(".py") and not filename.startswith(ignore_files):
             available_scripts.append(filename[:-3])
     return sorted(available_scripts)

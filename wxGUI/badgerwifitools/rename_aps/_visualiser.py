@@ -50,7 +50,7 @@ class MapDialog(wx.Dialog):
         self.map_choice = wx.Choice(self.panel, choices=sorted(list(self.map_data.keys())))
         self.map_choice.Bind(wx.EVT_CHOICE, self.on_map_change)
 
-        self.rename_choice = wx.Choice(self.panel, choices=discover_available_scripts(RENAME_APS_DIR))
+        self.rename_choice = wx.Choice(self.panel, choices=discover_available_scripts(RENAME_APS_DIR, ("_", "common", "SAR")))
         self.rename_choice.Bind(wx.EVT_CHOICE, self.on_rename_change)
 
     def setup_figure(self):
@@ -83,10 +83,7 @@ class MapDialog(wx.Dialog):
         selected_script = self.rename_choice.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
-        if hasattr(self.current_sorting_module, "SAR"):
-            wx.MessageBox(f"The selected script '{selected_script}' is a Stand Alone Rename module and cannot be used for visualisation.", "Error", wx.OK | wx.ICON_ERROR)
-        else:
-            self.update_plot()
+        self.update_plot()
 
     def on_show(self, event):
         self.map_choice.SetSelection(0)

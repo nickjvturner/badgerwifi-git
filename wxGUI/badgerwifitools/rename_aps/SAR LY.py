@@ -1,4 +1,4 @@
-# LY SAR.py
+# SAR LY.py
 from pathlib import Path
 
 from common import load_json
