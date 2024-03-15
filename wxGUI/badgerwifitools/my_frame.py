@@ -177,7 +177,7 @@ class MyFrame(wx.Frame):
         self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
         self.rename_aps_button.SetToolTip(wx.ToolTip("Execute the selected AP renaming script"))
 
-        self.visualise_ap_renaming_button = wx.Button(self.tab1, label="Visualise AP Renaming")
+        self.visualise_ap_renaming_button = wx.Button(self.tab1, label="AP Rename Visualiser")
         self.visualise_ap_renaming_button.Bind(wx.EVT_BUTTON, self.on_visualise_ap_renaming)
         self.visualise_ap_renaming_button.SetToolTip(wx.ToolTip("Preview the AP renaming results"))
 
@@ -333,6 +333,7 @@ class MyFrame(wx.Frame):
         self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row2_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
         self.tab1_row2_sizer.AddStretchSpacer(1)
         self.tab1_row2_sizer.Add(self.ap_rename_script_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab1_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
@@ -341,7 +342,6 @@ class MyFrame(wx.Frame):
         self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row3_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
         self.tab1_row3_sizer.AddStretchSpacer(1)
         self.tab1_row3_sizer.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab1_row3_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
