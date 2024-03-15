@@ -25,21 +25,24 @@ def import_module_from_path(module_name, path_to_module):
 
 
 class MapDialog(wx.Dialog):
+    """A dialog for displaying maps and access point information."""
     def __init__(self, parent, title, ap_data, map_data, floor_plans_dict):
-        super(MapDialog, self).__init__(parent, title=title, size=(1000, 900))
-        self.panel = wx.Panel(self)
-
+        super().__init__(parent, title=title, size=(1000, 900))
         self.ap_data = ap_data
         self.map_data = map_data
-
-        self.current_map = list(map_data.keys())[0]
+        self.current_map = next(iter(map_data))
         self.current_sorting_module = None
         self.floor_plans_dict = floor_plans_dict
 
+        self.init_ui()
+
+    def init_ui(self):
+        """Initialize the user interface."""
+        self.panel = wx.Panel(self)
         self.setup_buttons()
         self.setup_dropdowns()
         self.setup_figure()
-        self.setup_dialog_sizer()
+        self.setup_layout()
         self.on_rename_change(None)
 
     def setup_buttons(self):
@@ -47,39 +50,44 @@ class MapDialog(wx.Dialog):
         self.dismiss_button.Bind(wx.EVT_BUTTON, self.on_dismiss)
 
     def setup_dropdowns(self):
-        self.map_choice = wx.Choice(self.panel, choices=sorted(list(self.map_data.keys())))
+        """Setup the dropdown menus."""
+        self.map_choice = wx.Choice(self.panel, choices=sorted(self.map_data.keys()))
         self.map_choice.Bind(wx.EVT_CHOICE, self.on_map_change)
 
-        self.rename_choice = wx.Choice(self.panel, choices=discover_available_scripts(RENAME_APS_DIR, ("_", "common", "SAR")))
+        self.rename_choice = wx.Choice(self.panel, choices=discover_available_scripts(RENAME_APS_DIR))
         self.rename_choice.Bind(wx.EVT_CHOICE, self.on_rename_change)
 
     def setup_figure(self):
+        """Setup the matplotlib figure."""
         self.figure = Figure()
         self.canvas = FigureCanvas(self.panel, -1, self.figure)
 
-    def setup_dialog_sizer(self):
-        dialog_row1 = wx.BoxSizer(wx.HORIZONTAL)
-        dialog_row1.Add(self.map_choice, 0, wx.EXPAND | wx.ALL, 5)
-        dialog_row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, border=5)
-        dialog_row1.AddStretchSpacer(1)
+    def setup_layout(self):
+        """Setup the layout of the dialog."""
+        row1 = wx.BoxSizer(wx.HORIZONTAL)
+        row1.Add(self.map_choice, 0, wx.EXPAND | wx.ALL, 5)
+        row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, 5)
+        row1.AddStretchSpacer()
 
-        dialog_exit_row = wx.BoxSizer(wx.HORIZONTAL)
-        dialog_exit_row.AddStretchSpacer(1)
-        dialog_exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
+        exit_row = wx.BoxSizer(wx.HORIZONTAL)
+        exit_row.AddStretchSpacer()
+        exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
 
-        dialog_main_sizer = wx.BoxSizer(wx.VERTICAL)
-        dialog_main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.EXPAND, border=5)
-        dialog_main_sizer.Add(dialog_row1, 0, wx.EXPAND | wx.ALL, border=5)
-        dialog_main_sizer.Add(dialog_exit_row, 0, wx.EXPAND | wx.ALL, border=5)
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(row1, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(exit_row, 0, wx.EXPAND | wx.ALL, 5)
 
-        self.panel.SetSizer(dialog_main_sizer)
+        self.panel.SetSizer(main_sizer)
         self.Centre()
 
     def on_map_change(self, event):
+        """Handle map selection changes."""
         self.current_map = self.map_choice.GetStringSelection()
         self.update_plot()
 
     def on_rename_change(self, event):
+        """Handle rename script selection changes."""
         selected_script = self.rename_choice.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
@@ -91,12 +99,13 @@ class MapDialog(wx.Dialog):
         self.update_plot()
 
     def update_plot(self):
-        # Clear the figure for the new plot
+        """Update the plot with the current map and AP data."""
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         img_path = self.map_data[self.current_map][0]
         img = mpimg.imread(img_path)
         ax.imshow(img)
+        ax.axis('off')
 
         ap_list = []
         for ap in self.ap_data.values():
