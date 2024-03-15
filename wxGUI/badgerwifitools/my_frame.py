@@ -323,7 +323,6 @@ class MyFrame(wx.Frame):
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
 
     def setup_tab1(self):
-
         self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row1_sizer.AddStretchSpacer(1)
         self.tab1_row1_sizer.Add(self.project_profile_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
