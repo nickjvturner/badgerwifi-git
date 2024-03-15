@@ -15,7 +15,6 @@ from common import rename_aps
 
 from common import rename_process_completion_message as completion_message
 
-nl = '\n'
 VERTICAL_DIVISION_FACTOR = 40
 
 SHORT_DESCRIPTION = f"""Intended for simulated APs
@@ -68,6 +67,39 @@ the APs are now sorted by their x-axis value within each row
 the sorted list is iterated through and a new AP Name is assigned"""
 
 
+def sort_logic(access_points_list, floor_plans_dict):
+    # Sort the list of APs, by the floor name(floorPlanId lookup) and x coord
+    access_points_list_sorted = sorted(access_points_list,
+                                       key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
+                                                      i['location']['coord']['y']))
+
+    y_coordinate_group = 1
+    current_floor = 0
+    current_y = None
+    y_coordinate_threshold = None
+
+    for ap in access_points_list_sorted:
+        if current_floor != ap['location']['floorPlanId']:
+            current_y = ap['location']['coord']['y']
+            # Set a threshold for the maximum x-coordinate difference to be in the same group
+            y_coordinate_threshold = int(
+                floor_plans_dict.get(ap['location']['floorPlanId']).get('height')) / VERTICAL_DIVISION_FACTOR
+
+        if abs(ap['location']['coord']['y'] - current_y) <= y_coordinate_threshold:
+            ap['location']['coord']['y_group'] = y_coordinate_group
+        else:
+            y_coordinate_group += 1
+            current_y = ap['location']['coord']['y']
+            ap['location']['coord']['y_group'] = y_coordinate_group
+        current_floor = ap['location']['floorPlanId']
+
+    # by floor name(floorPlanId lookup) and x coord
+    return sorted(access_points_list_sorted, key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
+                                           model_sort_order.get(i['model'], i['model']),
+                                           i['location']['coord']['y_group'],
+                                           i['location']['coord']['x']))
+
+
 def run(working_directory, project_name, message_callback):
     message_callback(f'Renaming APs within project: {project_name}')
 
@@ -83,42 +115,12 @@ def run(working_directory, project_name, message_callback):
     for ap in access_points_json['accessPoints']:
         access_points_list.append(ap)
 
-    # Sort the list of APs, by the floor name(floorPlanId lookup) and x coord
-    access_points_list_sorted = sorted(access_points_list,
-                                     key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
-                                                    i['location']['coord']['y']))
+    access_points_list_sorted = sort_logic(access_points_list, floor_plans_dict, floor_plans_height_dict)
 
-    y_coordinate_group = 1
-    current_floor = 0
-    current_y = None
-    y_coordinate_threshold = None
-
-    for ap in access_points_list_sorted:
-        if current_floor != ap['location']['floorPlanId']:
-            current_y = ap['location']['coord']['y']
-            # Set a threshold for the maximum x-coordinate difference to be in the same group
-            y_coordinate_threshold = int(
-                floor_plans_height_dict.get(ap['location']['floorPlanId'])) / VERTICAL_DIVISION_FACTOR
-
-        if abs(ap['location']['coord']['y'] - current_y) <= y_coordinate_threshold:
-            ap['location']['coord']['y_group'] = y_coordinate_group
-        else:
-            y_coordinate_group += 1
-            current_y = ap['location']['coord']['y']
-            ap['location']['coord']['y_group'] = y_coordinate_group
-        current_floor = ap['location']['floorPlanId']
-
-    # by floor name(floorPlanId lookup) and x coord
-    sorted_ap_list = sorted(access_points_list_sorted,
-                                     key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
-                                                    model_sort_order.get(i['model'], i['model']),
-                                                    i['location']['coord']['y_group'],
-                                                    i['location']['coord']['x']))
-
-    sorted_ap_list = rename_aps(sorted_ap_list, message_callback, floor_plans_dict)
+    access_points_list_renamed = rename_aps(access_points_list_sorted, message_callback, floor_plans_dict)
 
     # Save and Move the Updated JSON
-    updated_access_points_json = {'accessPoints': sorted_ap_list}
+    updated_access_points_json = {'accessPoints': access_points_list_renamed}
     save_and_move_json(updated_access_points_json, working_directory / project_name / 'accessPoints.json')
 
     # Re-bundle into .esx File

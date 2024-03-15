@@ -1,6 +1,5 @@
 # simple, y-axis.py
 
-import wx
 from pathlib import Path
 
 from common import load_json
@@ -37,7 +36,10 @@ AP Naming pattern is defined by:
 resulting AP names should look like:
     AP-001, AP-002, AP-003..."""
 
-nl = '\n'
+
+def sort_logic(access_points_list, floor_plans_dict):
+    return sorted(access_points_list, key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
+                                                     i['location']['coord']['y']))
 
 
 def run(working_directory, project_name, message_callback):
@@ -55,14 +57,12 @@ def run(working_directory, project_name, message_callback):
         access_points_list.append(ap)
 
     # Sort the list of APs, by the floor name(floorPlanId lookup) and x coord
-    access_points_list_sorted = sorted(access_points_list,
-                                     key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId'], ''),
-                                                    i['location']['coord']['y']))
+    access_points_list_sorted = sort_logic(access_points_list, floor_plans_dict)
 
-    access_points_list_sorted = rename_aps(access_points_list_sorted, message_callback, floor_plans_dict)
+    access_points_list_renamed = rename_aps(access_points_list_sorted, message_callback, floor_plans_dict)
 
     # Save and Move the Updated JSON
-    updated_access_points_json = {'accessPoints': access_points_list_sorted}
+    updated_access_points_json = {'accessPoints': access_points_list_renamed}
     save_and_move_json(updated_access_points_json, working_directory / project_name / 'accessPoints.json')
 
     # Re-bundle into .esx File

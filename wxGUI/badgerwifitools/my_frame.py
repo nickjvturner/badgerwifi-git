@@ -21,6 +21,8 @@ from esx_actions.ap_list_creator import create_ap_list
 from esx_actions.display_project_details import display_project_details
 from esx_actions.rebundle_esx import rebundle_project
 
+from rename_aps._visualiser import visualise_ap_renaming
+
 from exports import export_ap_images
 
 from docx_manipulation.insert_images import insert_images_threaded
@@ -33,25 +35,12 @@ from map_creator.create_pds_maps import create_pds_maps_threaded
 
 
 # CONSTANTS
-nl = '\n'
-ESX_EXTENSION = '.esx'
-DOCX_EXTENSION = '.docx'
-CONFIGURATION_FOLDER = 'configuration'
-PROJECT_PROFILES_FOLDER = 'project_profiles'
-RENAME_APS_FOLDER = 'rename_aps'
-
-
-def discover_available_scripts(directory):
-    """
-    General-purpose function to discover available Python script files in a specified directory.
-    Excludes files starting with underscores or 'common'.
-    """
-    script_dir = Path(__file__).resolve().parent / directory
-    available_scripts = []
-    for filename in os.listdir(script_dir):
-        if filename.endswith(".py") and not filename.startswith(("_", "common")):
-            available_scripts.append(filename[:-3])
-    return sorted(available_scripts)
+from common import nl
+from common import DOCX_EXTENSION
+from common import CONFIGURATION_DIR
+from common import PROJECT_PROFILES_DIR
+from common import RENAME_APS_DIR
+from common import discover_available_scripts
 
 
 class MyFrame(wx.Frame):
@@ -91,7 +80,7 @@ class MyFrame(wx.Frame):
         self.docx_files = []
 
         # Define the configuration directory path
-        self.config_dir = Path(__file__).resolve().parent / CONFIGURATION_FOLDER
+        self.config_dir = Path(__file__).resolve().parent / CONFIGURATION_DIR
 
         # Ensure the configuration directory exists
         self.config_dir.mkdir(parents=True, exist_ok=True)
@@ -121,7 +110,7 @@ class MyFrame(wx.Frame):
         Setup all dropdown elements
         """
         # Discover available AP renaming scripts in 'rename_aps' directory
-        self.available_ap_rename_scripts = discover_available_scripts(RENAME_APS_FOLDER)
+        self.available_ap_rename_scripts = discover_available_scripts(RENAME_APS_DIR)
 
         # Create a dropdown to select an AP renaming script
         self.ap_rename_script_dropdown = wx.Choice(self.tab1, choices=self.available_ap_rename_scripts)
@@ -129,7 +118,7 @@ class MyFrame(wx.Frame):
         self.ap_rename_script_dropdown.Bind(wx.EVT_CHOICE, self.on_ap_rename_script_dropdown_selection)
 
         # Discover available project Profiles 'project_profiles' directory
-        self.available_project_profiles = discover_available_scripts(PROJECT_PROFILES_FOLDER)
+        self.available_project_profiles = discover_available_scripts(PROJECT_PROFILES_DIR)
 
         # Create a dropdown to select a Project Profile
         self.project_profile_dropdown = wx.Choice(self.tab1, choices=self.available_project_profiles)
@@ -185,6 +174,10 @@ class MyFrame(wx.Frame):
         self.rename_aps_button = wx.Button(self.tab1, label="Rename APs")
         self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
         self.rename_aps_button.SetToolTip(wx.ToolTip("Execute the selected AP renaming script"))
+
+        self.visualise_ap_renaming_button = wx.Button(self.tab1, label="Visualise AP Renaming")
+        self.visualise_ap_renaming_button.Bind(wx.EVT_BUTTON, self.on_visualise_ap_renaming)
+        self.visualise_ap_renaming_button.SetToolTip(wx.ToolTip("Preview the AP renaming results"))
 
         # Create a button for showing long descriptions with a specified narrow size
         self.description_button = wx.Button(self.tab1, label="?", size=(20, -1))  # Width of 40, default height
@@ -346,6 +339,7 @@ class MyFrame(wx.Frame):
         self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         self.tab1_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row3_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
         self.tab1_row3_sizer.AddStretchSpacer(1)
         self.tab1_row3_sizer.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab1_row3_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
@@ -639,6 +633,7 @@ class MyFrame(wx.Frame):
         self.save_application_state(None)
         print(f'Application state saved on exit, file list and dropdown options should be the same next time you launch the application')
         self.Close()
+        self.Destroy()
 
     def get_multiple_specific_file_type(self, extension):
         filepaths = []
@@ -698,7 +693,7 @@ class MyFrame(wx.Frame):
         if not self.basic_checks():
             return
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
-        script_path = str(Path(__file__).resolve().parent / RENAME_APS_FOLDER / (selected_script + ".py"))
+        script_path = str(Path(__file__).resolve().parent / RENAME_APS_DIR / (selected_script + ".py"))
 
         # Load and execute the selected script
         script_module = SourceFileLoader(selected_script, script_path).load_module()
@@ -903,3 +898,8 @@ class MyFrame(wx.Frame):
         result = dlg.ShowModal() == wx.ID_YES
         dlg.Destroy()
         return result
+
+    def on_visualise_ap_renaming(self, event):
+        if not self.basic_checks():
+            return
+        visualise_ap_renaming(self.working_directory, self.esx_project_name, self.append_message, self)

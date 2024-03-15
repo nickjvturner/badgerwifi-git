@@ -1,5 +1,6 @@
 # replacement_dict.py
 
+import os
 import wx
 import json
 import shutil
@@ -11,6 +12,12 @@ UNKNOWN = 'Unknown'
 FIVE_GHZ_RADIO_ID = 1
 
 nl = '\n'
+
+ESX_EXTENSION = '.esx'
+DOCX_EXTENSION = '.docx'
+CONFIGURATION_DIR = 'configuration'
+PROJECT_PROFILES_DIR = 'project_profiles'
+RENAME_APS_DIR = 'rename_aps'
 
 ekahau_color_dict = {
     '#00FF00': 'green',
@@ -242,3 +249,16 @@ def rename_aps(sorted_ap_list, message_callback, floor_plans_dict):
 
 def rename_process_completion_message(message_callback, project_name):
     wx.CallAfter(message_callback, f"{nl}Modified accessPoints.json re-bundled into .esx file{nl}{project_name}_re-zip.esx within working directory{nl}{nl}### PROCESS COMPLETE ###")
+
+
+def discover_available_scripts(directory):
+    """
+    General-purpose function to discover available Python script files in a specified directory.
+    Excludes files starting with underscores or 'common'.
+    """
+    script_dir = Path(__file__).resolve().parent / directory
+    available_scripts = []
+    for filename in os.listdir(script_dir):
+        if filename.endswith(".py") and not filename.startswith(("_", "common")):
+            available_scripts.append(filename[:-3])
+    return sorted(available_scripts)
