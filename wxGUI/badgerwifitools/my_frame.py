@@ -906,4 +906,4 @@ class MyFrame(wx.Frame):
     def on_visualise_ap_renaming(self, event):
         if not self.basic_checks():
             return
-        visualise_ap_renaming(self.working_directory, self.esx_project_name, self.append_message, self)
+        visualise_ap_renaming(self.working_directory, self.esx_project_name, self.append_message, self.ap_rename_script_dropdown.GetSelection(), self)
