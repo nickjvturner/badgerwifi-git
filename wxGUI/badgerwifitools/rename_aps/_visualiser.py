@@ -5,11 +5,9 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from common import load_json
-from common import create_simulated_radios_dict
 from common import create_floor_plans_dict
 from common import model_antenna_split
 from pathlib import Path
-from common import FIVE_GHZ_RADIO_ID
 
 from common import discover_available_scripts
 from common import RENAME_APS_DIR
@@ -33,6 +31,9 @@ class MapDialog(wx.Dialog):
         self.current_map = next(iter(map_data))
         self.current_sorting_module = None
         self.floor_plans_dict = floor_plans_dict
+
+        self.image_cache = {}  # Cache for loaded images
+        self.y_axis_threshold = 200
 
         self.init_ui()
 
@@ -62,23 +63,29 @@ class MapDialog(wx.Dialog):
         self.figure = Figure()
         self.canvas = FigureCanvas(self.panel, -1, self.figure)
 
+    def load_image(self, img_path):
+        """Load and cache the image to avoid redundant disk reads."""
+        if img_path not in self.image_cache:
+            self.image_cache[img_path] = mpimg.imread(img_path)
+        return self.image_cache[img_path]
+
     def setup_layout(self):
         """Setup the layout of the dialog."""
-        row1 = wx.BoxSizer(wx.HORIZONTAL)
-        row1.Add(self.map_choice, 0, wx.EXPAND | wx.ALL, 5)
-        row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, 5)
-        row1.AddStretchSpacer()
+        self.row1 = wx.BoxSizer(wx.HORIZONTAL)
+        self.row1.Add(self.map_choice, 0, wx.EXPAND | wx.ALL, 5)
+        self.row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, 5)
+        self.row1.AddStretchSpacer()
 
-        exit_row = wx.BoxSizer(wx.HORIZONTAL)
-        exit_row.AddStretchSpacer()
-        exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
+        self.exit_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.exit_row.AddStretchSpacer()
+        self.exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
 
-        main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(row1, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(exit_row, 0, wx.EXPAND | wx.ALL, 5)
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer.Add(self.row1, 0, wx.EXPAND | wx.ALL, 5)
+        self.main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 5)
+        self.main_sizer.Add(self.exit_row, 0, wx.EXPAND | wx.ALL, 5)
 
-        self.panel.SetSizer(main_sizer)
+        self.panel.SetSizer(self.main_sizer)
         self.Centre()
 
     def on_map_change(self, event):
@@ -91,6 +98,41 @@ class MapDialog(wx.Dialog):
         selected_script = self.rename_choice.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
+
+        # Remove existing dynamic widget if it exists
+        if hasattr(self, 'spin_ctrl'):
+            self.row1.Detach(self.spin_ctrl)  # Detach from sizer
+            self.spin_ctrl.Destroy()  # Destroy the widget
+            del self.spin_ctrl  # Remove the attribute to avoid reusing it
+
+            self.row1.Detach(self.spin_ctrl_label)  # Detach from sizer
+            self.spin_ctrl_label.Destroy()  # Destroy the widget
+            del self.spin_ctrl_label  # Remove the attribute to avoid reusing it
+
+        # Add a new widget only if the selected script has attribute "dynamic_widget"
+        # Inside the on_rename_change method, modify the creation of the dynamic_widget
+        if hasattr(self.current_sorting_module, 'dynamic_widget'):
+
+            self.spin_ctrl_label = wx.StaticText(self.panel, label="y axis threshold:")
+
+            self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
+            self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
+            self.spin_ctrl.SetValue(200)  # Set the initial value
+            self.spin_ctrl.SetIncrement(50)  # Set the increment value (step size)
+            self.spin_ctrl.Bind(wx.EVT_SPINCTRL, self.on_spin)  # Bind to its event
+
+            self.row1.Add(self.spin_ctrl_label, 0, wx.ALIGN_CENTER_VERTICAL, 1)
+            self.row1.Add(self.spin_ctrl, 0, wx.ALIGN_CENTER_VERTICAL, 1)
+
+        self.panel.Layout()  # Re-layout the panel to reflect changes
+        self.update_plot()  # Update plot or other UI elements as necessary
+
+    def on_y_axis_threshold_change(self, event):
+        self.y_axis_threshold = int(self.spin_ctrl.GetValue())
+        self.update_plot()
+
+    def on_spin(self, event):
+        self.y_axis_threshold = int(self.spin_ctrl.GetValue())
         self.update_plot()
 
     def on_show(self, event):
@@ -100,35 +142,46 @@ class MapDialog(wx.Dialog):
 
     def update_plot(self):
         """Update the plot with the current map and AP data."""
+        centre_rows = None
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         img_path = self.map_data[self.current_map][0]
-        img = mpimg.imread(img_path)
+        img = self.load_image(img_path)  # Use cached image
         ax.imshow(img)
-        ax.axis('off')
 
         ap_list = []
         for ap in self.ap_data.values():
             if ap['floor'] == self.current_map:
                 ap_list.append(ap)
 
-        if self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):
+        if self.current_sorting_module and hasattr(self.current_sorting_module, "visualise_centre_rows"):
+            sorted_aps_list, centre_rows = self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict, self.y_axis_threshold, True)
 
+        elif self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):
             sorted_aps_list = self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict)  # Adjust as per the sorting function's requirements
 
-            # Prepare lists of x and y coordinates
-            x_coords = [ap['location']['coord']['x'] for ap in sorted_aps_list]
-            y_coords = [ap['location']['coord']['y'] for ap in sorted_aps_list]
+        # Prepare lists of x and y coordinates
+        x_coords = [ap['location']['coord']['x'] for ap in sorted_aps_list]
+        y_coords = [ap['location']['coord']['y'] for ap in sorted_aps_list]
 
-            # Plot APs with new IDs based on their sorted position
-            for i, ap in enumerate(sorted_aps_list, start=1):
-                ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=250, zorder=5)
-                ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center', va='center', zorder=6)
+        # Plot APs with new IDs based on their sorted position
+        for i, ap in enumerate(sorted_aps_list, start=1):
+            ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=250, zorder=5)
+            ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center', va='center', zorder=6)
 
-            # Draw lines connecting the points
-            # Check if there are at least two points to connect
-            if len(x_coords) > 1:
-                ax.plot(x_coords, y_coords, color='gray', linestyle='-', linewidth=2, zorder=4)  # Adjust color, linestyle, and linewidth as needed
+        # Draw lines connecting the points
+        # Check if there are at least two points to connect
+        if len(x_coords) > 1:
+            ax.plot(x_coords, y_coords, color='gray', linestyle='-', linewidth=2, zorder=4)  # Adjust color, linestyle, and linewidth as needed
+
+        # Calculate and draw horizontal row boundaries
+        if centre_rows is not None:
+            for centre_row in centre_rows:
+                ax.axhline(y=centre_row, color='r', linestyle='--', linewidth=1)  # Draw the first line
+                ax.axhline(y=centre_row + self.y_axis_threshold, color='b', linestyle='-', linewidth=1)  # Draw the first line
+
+            last_row = centre_rows[-1]
+            ax.axhline(y=last_row - self.y_axis_threshold, color='b', linestyle='-', linewidth=1)  # Draw the second line
 
         ax.axis('off')
         self.figure.tight_layout()
@@ -139,7 +192,7 @@ class MapDialog(wx.Dialog):
         self.Destroy()
 
 
-def create_custom_ap_dict(access_points_json, simulated_radio_dict, floor_plans_dict):
+def create_custom_ap_dict(access_points_json, floor_plans_dict):
     custom_ap_dict = {}
     for ap in access_points_json['accessPoints']:
         ap_model, external_antenna, antenna_description = model_antenna_split(ap.get('model', ''))
@@ -148,12 +201,7 @@ def create_custom_ap_dict(access_points_json, simulated_radio_dict, floor_plans_
             'name': ap['name'],
             'color': ap.get('color', 'grey'),
             'model': ap_model,
-            'antenna': external_antenna,
             'floor': floor_plans_dict.get(ap['location']['floorPlanId']).get('name'),
-            'antennaTilt': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
-            'antennaMounting': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaMounting', ''),
-            'antennaHeight': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', 0),
-            'radios': simulated_radio_dict.get(ap['id'], {}),
             'location': ap['location'],
             'floorPlanName': floor_plans_dict.get(ap['location']['floorPlanId'])
             }
@@ -172,12 +220,10 @@ def create_reversed_floor_plans_dict(floor_plans_json):
 def visualise_ap_renaming(working_directory, project_name, message_callback, parent_frame):
     floor_plans_json = load_json(working_directory / project_name, 'floorPlans.json', message_callback)
     access_points_json = load_json(working_directory / project_name, 'accessPoints.json', message_callback)
-    simulated_radio_json = load_json(working_directory / project_name, 'simulatedRadios.json', message_callback)
 
     floor_plans_dict_reversed = create_reversed_floor_plans_dict(floor_plans_json)
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
-    simulated_radios_dict = create_simulated_radios_dict(simulated_radio_json)
-    ap_data = create_custom_ap_dict(access_points_json, simulated_radios_dict, floor_plans_dict)
+    ap_data = create_custom_ap_dict(access_points_json, floor_plans_dict)
 
     # Prepare map_data
     map_data = {}
