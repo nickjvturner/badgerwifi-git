@@ -16,20 +16,27 @@ The tool is not compiled, this means you can look inside the code and see how it
 
 To install the application, you will need to have Python 3.9 or later installed.
 To check what you currently have installed, if any:
-Windows users:
+
+
+## Windows users
 Open command prompt (CMD)
 `python --version`
 if you don't have Python installed, this prompt will offer to take you to the Windows App Store to download and install Python.
 
-macOS users:
+
+## macOS users
 Open terminal
 `python3 --version`
 if you don't have Python installed you can download Python from the official website: https://www.python.org/downloads/ or use Homebrew to install it.
 
-Regardless of your operating system, you will also need Git installed.
+
+## Regardless of your operating system
+You will also need Git installed.
 Try the command
 `git` from your terminal window.
 If you don't have Git installed, you can download it from the official website: https://git-scm.com/downloads
+On Windows all the default options are fine.
+
 
 ## Installation
 Clone the repository to your local machine using the following command:
