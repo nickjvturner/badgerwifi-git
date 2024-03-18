@@ -181,14 +181,15 @@ class MapDialog(wx.Dialog):
 
     def update_plot(self):
         """High-level plot update management."""
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)
-        self.load_image_and_plot(ax)
-        self.plot_aps(ax)
-        self.draw_connections(ax)
-        self.plot_boundaries(ax)
-        self.figure.tight_layout()
-        self.canvas.draw()
+        with wx.BusyCursor():
+            self.figure.clear()
+            ax = self.figure.add_subplot(111)
+            self.load_image_and_plot(ax)
+            self.plot_aps(ax)
+            self.draw_connections(ax)
+            self.plot_boundaries(ax)
+            self.figure.tight_layout()
+            self.canvas.draw()
 
     def load_image_and_plot(self, ax):
         """Load and plot the current map image."""
@@ -217,9 +218,18 @@ class MapDialog(wx.Dialog):
                 segment_color = self.sorted_aps_list[i]['color']  # Or some logic to choose the color.
 
                 # Draw the line segment with the specified color.
+                if self.current_sorting_module and hasattr(self.current_sorting_module, "visualise_centre_rows"):
+                    if self.sorted_aps_list[i]['location']['coord']['y_group']:
+                        if self.sorted_aps_list[i]['location']['coord']['y_group'] != self.sorted_aps_list[i + 1]['location']['coord']['y_group']:
+                            ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle=':', linewidth=2, zorder=4)
+                     # if self.sorted_aps_list[i]['location']['coord']['x_group']:
+                     #     self.sorted_aps_list[i]['location']['coord']['x_group'] != self.sorted_aps_list[i + 1]['location']['coord']['x_group']:
+                     #        ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle=':', linewidth=2, zorder=4)
+
                 if self.sorted_aps_list[i]['color'] == self.sorted_aps_list[i + 1]['color']:
                     ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle='-', linewidth=2, zorder=4)
-                ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color='grey', linestyle=':', linewidth=1, zorder=4)
+
+                ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color='grey', linestyle='', linewidth=1, zorder=4)
 
     def get_sorted_aps_list(self):
         """Obtain the sorted list of APs and any additional data like center rows."""
