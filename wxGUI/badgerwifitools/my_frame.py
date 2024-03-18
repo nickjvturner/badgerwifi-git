@@ -132,7 +132,7 @@ class MyFrame(wx.Frame):
         self.available_project_detail_views = discover_available_scripts(PROJECT_DETAIL_DIR)
 
         # Create a dropdown to select a Project Detail View
-        self.project_detail_dropdown = wx.Choice(self.panel, choices=self.available_project_detail_views)
+        self.project_detail_dropdown = wx.Choice(self.tab1, choices=self.available_project_detail_views)
         self.project_detail_dropdown.SetSelection(0)  # Set default selection
         self.project_detail_dropdown.Bind(wx.EVT_CHOICE, self.on_project_detail_dropdown_selection)
 
@@ -162,7 +162,7 @@ class MyFrame(wx.Frame):
         self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
         self.clear_log_button.SetToolTip(wx.ToolTip("Clear the log"))
 
-        self.display_project_detail_button = wx.Button(self.panel, label="Display Project Detail")
+        self.display_project_detail_button = wx.Button(self.tab1, label="Display Project Detail")
         self.display_project_detail_button.Bind(wx.EVT_BUTTON, self.on_display_project_detail)
         self.display_project_detail_button.SetToolTip(wx.ToolTip("Display detailed information about the current .esx project"))
 
@@ -293,8 +293,6 @@ class MyFrame(wx.Frame):
         self.button_row2_sizer.Add(self.copy_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.clear_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.AddStretchSpacer(1)
-        self.button_row2_sizer.Add(self.project_detail_dropdown, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-        self.button_row2_sizer.Add(self.display_project_detail_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.unpack_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.rebundle_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.backup_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
@@ -334,6 +332,8 @@ class MyFrame(wx.Frame):
 
     def setup_tab1(self):
         self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row1_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row1_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row1_sizer.AddStretchSpacer(1)
         self.tab1_row1_sizer.Add(self.project_profile_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab1_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
