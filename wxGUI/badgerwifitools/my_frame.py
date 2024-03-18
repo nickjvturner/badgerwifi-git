@@ -93,6 +93,9 @@ class MyFrame(wx.Frame):
         # Create a thread control variable
         self.stop_event = threading.Event()  # Initialize the stop event
 
+        # Define the default value for the renaming boundary separator
+        self.rename_aps_boundary_separator = 400
+
     def setup_list_box(self):
         # Set up your list box here
         self.list_box = wx.ListBox(self.panel, style=wx.LB_EXTENDED)
@@ -698,10 +701,7 @@ class MyFrame(wx.Frame):
 
         # Load and execute the selected script
         script_module = SourceFileLoader(selected_script, script_path).load_module()
-        if hasattr(script_module, 'SAR'):
-            script_module.run(self.working_directory, self.esx_project_name, self.append_message)
-        else:
-            ap_renamer(self.working_directory, self.esx_project_name, script_module.sort_logic, self.append_message)
+        ap_renamer(self.working_directory, self.esx_project_name, script_module, self.append_message, self.rename_aps_boundary_separator)
 
     def on_ap_rename_script_dropdown_selection(self, event):
         selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
@@ -907,3 +907,7 @@ class MyFrame(wx.Frame):
         if not self.basic_checks():
             return
         visualise_ap_renaming(self.working_directory, self.esx_project_name, self.append_message, self.ap_rename_script_dropdown.GetSelection(), self)
+
+    def update_boundary_separator_value(self, value):
+        """Callback function to update the boundary_separator variable."""
+        self.rename_aps_boundary_separator = value

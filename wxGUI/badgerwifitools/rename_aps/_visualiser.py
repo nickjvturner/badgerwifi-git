@@ -3,17 +3,17 @@ import wx
 import matplotlib.image as mpimg
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
+from pathlib import Path
+import importlib.util
 
 from common import load_json
 from common import create_floor_plans_dict
 from common import model_antenna_split
-from pathlib import Path
 
 from common import discover_available_scripts
 from common import RENAME_APS_DIR
 
-import importlib.util
-
+from rename_aps._ap_renamer import ap_renamer
 
 def import_module_from_path(module_name, path_to_module):
     spec = importlib.util.spec_from_file_location(module_name, path_to_module)
@@ -34,8 +34,11 @@ class MapDialog(wx.Dialog):
 
         self.current_sorting_module = None
         self.image_cache = {}  # Cache for loaded images
-        self.boundary_separation = 400
+        self.boundary_separation = parent.rename_aps_boundary_separator
+        self.update_boundary_separator_value = parent.update_boundary_separator_value
         self.boundaries = None
+
+        self.parent = parent
 
         self.init_ui()
 
@@ -51,6 +54,9 @@ class MapDialog(wx.Dialog):
     def setup_buttons(self):
         self.dismiss_button = wx.Button(self.panel, label='Dismiss')
         self.dismiss_button.Bind(wx.EVT_BUTTON, self.on_dismiss)
+
+        self.rename_aps_button = wx.Button(self.panel, label='Rename APs')
+        self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
 
     def setup_dropdowns(self):
         """Setup the dropdown menus."""
@@ -80,6 +86,8 @@ class MapDialog(wx.Dialog):
         self.row1.AddStretchSpacer()
 
         self.exit_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.exit_row.AddStretchSpacer()
+        self.exit_row.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, 5)
         self.exit_row.AddStretchSpacer()
         self.exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
 
@@ -123,7 +131,7 @@ class MapDialog(wx.Dialog):
         self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
         self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
         self.spin_ctrl.SetValue(400)  # Set the initial value
-        self.spin_ctrl.SetIncrement(50)  # Set the increment value (step size)
+        self.spin_ctrl.SetIncrement(10)  # Set the increment value (step size)
 
         self.update_button = wx.Button(self.panel, label='Update')
         self.update_button.Bind(wx.EVT_BUTTON, self.on_spin)
@@ -149,6 +157,7 @@ class MapDialog(wx.Dialog):
 
     def on_spin(self, event):
         self.boundary_separation = int(self.spin_ctrl.GetValue())
+        self.update_boundary_separator_value(self.boundary_separation)
         self.update_plot()
 
     def on_show(self, event):
@@ -251,6 +260,9 @@ class MapDialog(wx.Dialog):
     def on_dismiss(self, event):
         self.EndModal(wx.ID_CANCEL)
         self.Destroy()
+
+    def on_rename_aps(self, event):
+        ap_renamer(self.parent.working_directory, self.parent.esx_project_name, self.current_sorting_module, self.parent.append_message, self.boundary_separation)
 
 
 def create_custom_ap_dict(access_points_json, floor_plans_dict):
