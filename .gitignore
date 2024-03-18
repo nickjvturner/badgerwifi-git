@@ -8,3 +8,4 @@ app_state.json
 *.xml
 *.iml
 .idea/*
+*.egg*

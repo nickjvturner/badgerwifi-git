@@ -15,6 +15,7 @@ from common import RENAME_APS_DIR
 
 from rename_aps._ap_renamer import ap_renamer
 
+
 def import_module_from_path(module_name, path_to_module):
     spec = importlib.util.spec_from_file_location(module_name, path_to_module)
     module = importlib.util.module_from_spec(spec)
@@ -86,7 +87,6 @@ class MapDialog(wx.Dialog):
         self.row1.AddStretchSpacer()
 
         self.exit_row = wx.BoxSizer(wx.HORIZONTAL)
-        self.exit_row.AddStretchSpacer()
         self.exit_row.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, 5)
         self.exit_row.AddStretchSpacer()
         self.exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
