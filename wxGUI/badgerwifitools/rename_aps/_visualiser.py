@@ -118,16 +118,19 @@ class MapDialog(wx.Dialog):
     def add_boundary_separation_widget(self):
         """Add boundary separation widget based on the current sorting module."""
         # Logic from on_rename_change for adding widgets
-        self.spin_ctrl_label = wx.StaticText(self.panel, label="boundary separation:")
+        self.spin_ctrl_label = wx.StaticText(self.panel, label="Boundary Separator:")
 
         self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
         self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
         self.spin_ctrl.SetValue(400)  # Set the initial value
         self.spin_ctrl.SetIncrement(50)  # Set the increment value (step size)
-        self.spin_ctrl.Bind(wx.EVT_SPINCTRL, self.on_spin)  # Bind to its event
 
-        self.row1.Add(self.spin_ctrl_label, 0, wx.ALIGN_CENTER_VERTICAL, 1)
+        self.update_button = wx.Button(self.panel, label='Update')
+        self.update_button.Bind(wx.EVT_BUTTON, self.on_spin)
+
+        self.row1.Add(self.spin_ctrl_label, 0, wx.ALL, 5)
         self.row1.Add(self.spin_ctrl, 0, wx.ALIGN_CENTER_VERTICAL, 1)
+        self.row1.Add(self.update_button, 0, wx.ALL, 5)
 
     def remove_boundary_separation_widget(self):
         """Remove any existing dynamic widgets."""
@@ -136,13 +139,13 @@ class MapDialog(wx.Dialog):
         self.spin_ctrl.Destroy()  # Destroy the widget
         del self.spin_ctrl  # Remove the attribute to avoid reusing it
 
-        self.row1.Detach(self.spin_ctrl_label)  # Detach from sizer
+        self.row1.Detach(self.spin_ctrl_label)
         self.spin_ctrl_label.Destroy()  # Destroy the widget
         del self.spin_ctrl_label  # Remove the attribute to avoid reusing it
 
-    def on_y_axis_threshold_change(self, event):
-        self.boundary_separation = int(self.spin_ctrl.GetValue())
-        self.update_plot()
+        self.row1.Detach(self.update_button)
+        self.update_button.Destroy()
+        del self.update_button
 
     def on_spin(self, event):
         self.boundary_separation = int(self.spin_ctrl.GetValue())
@@ -193,6 +196,7 @@ class MapDialog(wx.Dialog):
                 # Draw the line segment with the specified color.
                 if self.sorted_aps_list[i]['color'] == self.sorted_aps_list[i + 1]['color']:
                     ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle='-', linewidth=2, zorder=4)
+                ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color='grey', linestyle=':', linewidth=1, zorder=4)
 
     def get_sorted_aps_list(self):
         """Obtain the sorted list of APs and any additional data like center rows."""
@@ -205,7 +209,7 @@ class MapDialog(wx.Dialog):
             return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict, self.boundary_separation, True)
 
         elif self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):
-            return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict), None  # Adjust as per the sorting function's requirements
+            return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict), None, None  # Adjust as per the sorting function's requirements
 
     def plot_boundaries(self, ax):
         if self.boundaries is None:
@@ -215,7 +219,9 @@ class MapDialog(wx.Dialog):
             self.draw_row_indicators(ax)
             for boundary in self.boundaries:
                 ax.axhline(y=boundary, color='b', linestyle='--', linewidth=1)
-            ax.axhline(y=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1) # Draw the last boundary
+            # Skip drawing the last boundary if it's beyond the plot's limits
+            if self.boundaries[-1] + self.boundary_separation < ax.get_ylim()[1]:
+                ax.axhline(y=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1) # Draw the last boundary
 
         elif self.boundary_orientation == 'vertical':
             self.draw_column_indicators(ax)
