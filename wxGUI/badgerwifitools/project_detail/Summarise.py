@@ -13,7 +13,7 @@ from common import ekahau_color_dict
 nl = '\n'
 
 
-def summarise_esx(working_directory, project_name, message_callback):
+def run(working_directory, project_name, message_callback):
     message_callback(f'Summarising the Contents of: {project_name}')
 
     project_dir = working_directory / project_name

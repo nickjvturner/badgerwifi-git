@@ -1,4 +1,4 @@
-# display_project_details.py
+# Floor Plan JSON.py
 
 from common import nl
 from common import load_json
@@ -19,7 +19,7 @@ def map_bitmap_resolution_check(project_dir, bitmapImageId):
     return bitmap_image.width, bitmap_image.height
 
 
-def display_project_details(working_directory, project_name, message_callback):
+def run(working_directory, project_name, message_callback):
     """Display the project details."""
 
     project_dir = working_directory / project_name

@@ -15,11 +15,11 @@ from common import file_or_dir_exists
 
 from esx_actions.validate_esx import validate_esx
 from esx_actions.unpack_esx import unpack_esx_file
-from esx_actions.summarise_esx import summarise_esx
 from esx_actions.backup_esx import backup_esx
 from esx_actions.ap_list_creator import create_ap_list
-from esx_actions.display_project_details import display_project_details
 from esx_actions.rebundle_esx import rebundle_project
+
+from project_detail.Summarise import run as summarise_esx
 
 from rename_aps.visualiser import visualise_ap_renaming
 from rename_aps.ap_renamer import ap_renamer
@@ -39,6 +39,7 @@ from common import DOCX_EXTENSION
 from common import CONFIGURATION_DIR
 from common import PROJECT_PROFILES_DIR
 from common import RENAME_APS_DIR
+from common import PROJECT_DETAIL_DIR
 from common import discover_available_scripts
 
 
@@ -126,6 +127,14 @@ class MyFrame(wx.Frame):
         self.project_profile_dropdown = wx.Choice(self.tab1, choices=self.available_project_profiles)
         self.project_profile_dropdown.SetSelection(0)  # Set default selection
         self.project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_project_profile_dropdown_selection)
+
+        # Discover available Project Detail Views
+        self.available_project_detail_views = discover_available_scripts(PROJECT_DETAIL_DIR)
+
+        # Create a dropdown to select a Project Detail View
+        self.project_detail_dropdown = wx.Choice(self.panel, choices=self.available_project_detail_views)
+        self.project_detail_dropdown.SetSelection(0)  # Set default selection
+        self.project_detail_dropdown.Bind(wx.EVT_CHOICE, self.on_project_detail_dropdown_selection)
 
     def setup_buttons(self):
         # Create add file button
@@ -284,6 +293,7 @@ class MyFrame(wx.Frame):
         self.button_row2_sizer.Add(self.copy_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.clear_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.AddStretchSpacer(1)
+        self.button_row2_sizer.Add(self.project_detail_dropdown, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.display_project_detail_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.unpack_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
         self.button_row2_sizer.Add(self.rebundle_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
@@ -401,6 +411,7 @@ class MyFrame(wx.Frame):
         contribute_menu_item = help_menu.Append(wx.ID_ANY, "&Contribute", "Go to the ko-fi contribution page")
         documentation_menu_item = help_menu.Append(wx.ID_ANY, "&Documentation", "View the documentation")
         view_release_notes_menu_item = help_menu.Append(wx.ID_ANY, "&View 'Release Notes'", "View the GitHub commit messages")
+        feedback_menu_item = help_menu.Append(wx.ID_ANY, "&Feedback", "Send feedback to the developer")
         help_menu.Append(wx.ID_ABOUT, '&About')
         menubar.Append(help_menu, '&Help')
 
@@ -414,7 +425,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_contribute, contribute_menu_item)
         self.Bind(wx.EVT_MENU, self.on_view_documentation, documentation_menu_item)
         self.Bind(wx.EVT_MENU, self.on_view_release_notes, view_release_notes_menu_item)
-
+        self.Bind(wx.EVT_MENU, self.on_feedback, feedback_menu_item)
 
     @staticmethod
     def on_contribute(event):
@@ -429,9 +440,23 @@ class MyFrame(wx.Frame):
         webbrowser.open("https://github.com/nickjvturner/badgerwifi-git/activity")
 
     @staticmethod
+    def on_feedback(event):
+        webbrowser.open("https://github.com/nickjvturner/badgerwifi-git/issues")
+
+    @staticmethod
     def on_about(event):
         # Implement the About dialog logic
         wx.MessageBox("This is a wxPython GUI application created by Nick Turner. Intended to make the lives of Wi-Fi engineers making reports a little bit easier. ", "About")
+
+    def on_project_detail_dropdown_selection(self, event):
+        selected_index = self.project_detail_dropdown.GetSelection()
+        selected_project_detail_module = self.available_project_detail_views[selected_index]
+        self.current_project_detail_module = importlib.import_module(f"{PROJECT_DETAIL_DIR}.{selected_project_detail_module}")
+
+    def on_display_project_detail(self, event):
+        if not self.basic_checks():
+            return
+        self.current_project_detail_module.run(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_save(self, event):
         self.save_application_state(event)
@@ -472,6 +497,7 @@ class MyFrame(wx.Frame):
             'list_box_contents': [self.list_box.GetString(i) for i in range(self.list_box.GetCount())],
             'selected_ap_rename_script_index': self.ap_rename_script_dropdown.GetSelection(),
             'selected_project_profile_index': self.project_profile_dropdown.GetSelection(),
+            'selected_project_detail_index': self.project_detail_dropdown.GetSelection(),
             'selected_tab_index': self.notebook.GetSelection(),
             'custom_ap_icon_size_text_box': self.custom_ap_icon_size_text_box.GetValue(),
             'zoomed_ap_crop_text_box': self.zoomed_ap_crop_text_box.GetValue()
@@ -485,23 +511,33 @@ class MyFrame(wx.Frame):
         try:
             with open(self.app_state_file_path, 'r') as f:
                 state = json.load(f)
+
                 # Restore list box contents
                 for item in state.get('list_box_contents', []):
                     if not file_or_dir_exists(item):
                         self.append_message(f"** WARNING ** {nl}The file {item} does not exist.")
                     self.list_box.Append(item)
                     self.drop_target_label.Hide()  # Hide the drop target label
+
                 # Restore selected ap rename script index
                 self.ap_rename_script_dropdown.SetSelection(state.get('selected_ap_rename_script_index', 0))
                 self.on_ap_rename_script_dropdown_selection(None)
+
                 # Restore selected project profile index
                 self.project_profile_dropdown.SetSelection(state.get('selected_project_profile_index', 0))
                 self.on_project_profile_dropdown_selection(None)
+
+                # Restore selected project detail index
+                self.project_detail_dropdown.SetSelection(state.get('selected_project_detail_index', 0))
+                self.on_project_detail_dropdown_selection(None)
+
                 # Restore selected tab index
                 self.notebook.SetSelection(state.get('selected_tab_index', 0))
+
                 # Restore the text box values
                 self.custom_ap_icon_size_text_box.SetValue(state.get('custom_ap_icon_size_text_box', "50"))
                 self.zoomed_ap_crop_text_box.SetValue(state.get('zoomed_ap_crop_text_box', "2000"))
+
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
             self.on_project_profile_dropdown_selection(None)
@@ -847,11 +883,6 @@ class MyFrame(wx.Frame):
 
         # It's important to call event.Skip() to ensure the event is not blocked
         event.Skip()
-
-    def on_display_project_detail(self, event):
-        if not self.basic_checks():
-            return
-        display_project_details(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_rebundle_esx(self, event):
         if not self.esx_project_unpacked:

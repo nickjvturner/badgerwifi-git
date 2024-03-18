@@ -19,6 +19,7 @@ CONFIGURATION_DIR = 'configuration'
 PROJECT_PROFILES_DIR = 'project_profiles'
 RENAME_APS_DIR = 'rename_aps/rename_scripts'
 BOUNDARY_SEPARATION_WIDGET = 'BOUNDARY_SEPARATOR'
+PROJECT_DETAIL_DIR = 'project_detail'
 
 ekahau_color_dict = {
     '#00FF00': 'green',
