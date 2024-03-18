@@ -55,43 +55,43 @@ the APs are now sorted by their x-axis value within each row
 the sorted list is iterated through and a new AP Name is assigned"""
 
 
-def sort_logic(access_points_list, floor_plans_dict, y_axis_threshold, output_boundaries=False):
+def sort_logic(access_points_list, floor_plans_dict, x_axis_threshold, output_boundaries=False):
     # First, sort APs by floor name (via floorPlanId) and then by y-coordinate.
     access_points_list_sorted = sorted(access_points_list, key=lambda ap: (
         floor_plans_dict.get(ap['location']['floorPlanId']).get('name', ''),
-        ap['location']['coord']['y']))
+        ap['location']['coord']['x']))
 
     # Initialize variables for grouping.
-    y_coordinate_group = 1
-    current_group_start_y = None
+    x_coordinate_group = 1
+    current_group_start_x = None
     boundaries = []
 
     for ap in access_points_list_sorted:
-        if current_group_start_y is None:
+        if current_group_start_x is None:
             # First AP in the list defines the start of the first group.
-            current_group_start_y = ap['location']['coord']['y']
-            boundaries.append(current_group_start_y)
-        elif (ap['location']['coord']['y'] - current_group_start_y) > y_axis_threshold:
-            # Current AP's y-coordinate is outside the threshold of the current group; start a new group.
-            y_coordinate_group += 1
-            current_group_start_y += y_axis_threshold
-            boundaries.append(current_group_start_y)
+            current_group_start_x = ap['location']['coord']['x']
+            boundaries.append(current_group_start_x)
+        elif (ap['location']['coord']['x'] - current_group_start_x) > x_axis_threshold:
+            # Current AP's x-coordinate is outside the threshold of the current group; start a new group.
+            x_coordinate_group += 1
+            current_group_start_x += x_axis_threshold
+            boundaries.append(current_group_start_x)
 
         # Assign group ID to the AP.
-        ap['location']['coord']['y_group'] = y_coordinate_group
+        ap['location']['coord']['x_group'] = x_coordinate_group
 
     # After grouping, you can further sort APs within each group if needed.
     # For example, by x-coordinate or another attribute.
 
-    # Final sorting by group ID, then x-coordinate within each group.
+    # Final sorting by group ID, then y-coordinate within each group.
     access_points_list_sorted = sorted(access_points_list_sorted,
                                        key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId']).get('name'),
                                                       model_sort_order.get(i['model'], i['model']),
-                                                      i['location']['coord']['y_group'],
-                                                      i['location']['coord']['x']))
+                                                      i['location']['coord']['x_group'],
+                                                      i['location']['coord']['y']))
 
     if output_boundaries:
         # Calculate the center for the last group.
-        return access_points_list_sorted, boundaries, 'horizontal'
+        return access_points_list_sorted, boundaries, 'vertical'
 
     return access_points_list_sorted

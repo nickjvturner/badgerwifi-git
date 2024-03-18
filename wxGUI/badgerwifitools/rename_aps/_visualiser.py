@@ -29,12 +29,13 @@ class MapDialog(wx.Dialog):
         self.ap_data = ap_data
         self.map_data = map_data
         self.current_map = next(iter(map_data))
-        self.current_sorting_module = None
         self.floor_plans_dict = floor_plans_dict
         self.current_dropdown_selection = initial_dropdown_selection
 
+        self.current_sorting_module = None
         self.image_cache = {}  # Cache for loaded images
-        self.y_axis_threshold = 400
+        self.boundary_separation = 400
+        self.boundaries = None
 
         self.init_ui()
 
@@ -97,26 +98,27 @@ class MapDialog(wx.Dialog):
 
     def on_rename_change(self, event):
         """Handle rename script selection changes."""
+        self.boundaries = None
         selected_script = self.rename_choice.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
 
         # Remove existing dynamic widget if it exists
         if hasattr(self, 'spin_ctrl'):
-            self.remove_dynamic_widgets()
+            self.remove_boundary_separation_widget()
 
         # Add a new widget only if the selected script has attribute "dynamic_widget"
         # Inside the on_rename_change method, modify the creation of the dynamic_widget
         if hasattr(self.current_sorting_module, 'dynamic_widget'):
-            self.add_dynamic_widgets()
+            self.add_boundary_separation_widget()
 
         self.panel.Layout()  # Re-layout the panel to reflect changes
         self.update_plot()  # Update plot or other UI elements as necessary
 
-    def add_dynamic_widgets(self):
-        """Add dynamic widgets based on the current sorting module."""
+    def add_boundary_separation_widget(self):
+        """Add boundary separation widget based on the current sorting module."""
         # Logic from on_rename_change for adding widgets
-        self.spin_ctrl_label = wx.StaticText(self.panel, label="y axis threshold:")
+        self.spin_ctrl_label = wx.StaticText(self.panel, label="boundary separation:")
 
         self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
         self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
@@ -127,7 +129,7 @@ class MapDialog(wx.Dialog):
         self.row1.Add(self.spin_ctrl_label, 0, wx.ALIGN_CENTER_VERTICAL, 1)
         self.row1.Add(self.spin_ctrl, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 
-    def remove_dynamic_widgets(self):
+    def remove_boundary_separation_widget(self):
         """Remove any existing dynamic widgets."""
         # Logic from on_rename_change for removing widgets
         self.row1.Detach(self.spin_ctrl)  # Detach from sizer
@@ -139,11 +141,11 @@ class MapDialog(wx.Dialog):
         del self.spin_ctrl_label  # Remove the attribute to avoid reusing it
 
     def on_y_axis_threshold_change(self, event):
-        self.y_axis_threshold = int(self.spin_ctrl.GetValue())
+        self.boundary_separation = int(self.spin_ctrl.GetValue())
         self.update_plot()
 
     def on_spin(self, event):
-        self.y_axis_threshold = int(self.spin_ctrl.GetValue())
+        self.boundary_separation = int(self.spin_ctrl.GetValue())
         self.update_plot()
 
     def on_show(self, event):
@@ -152,47 +154,93 @@ class MapDialog(wx.Dialog):
         self.update_plot()
 
     def update_plot(self):
-        """Update the plot with the current map and AP data."""
-        boundaries = None
+        """High-level plot update management."""
         self.figure.clear()
         ax = self.figure.add_subplot(111)
+        self.load_image_and_plot(ax)
+        self.plot_aps(ax)
+        self.draw_connections(ax)
+        self.plot_boundaries(ax)
+        self.figure.tight_layout()
+        self.canvas.draw()
+
+    def load_image_and_plot(self, ax):
+        """Load and plot the current map image."""
         img_path = self.map_data[self.current_map][0]
         img = self.load_image(img_path)  # Use cached image
         ax.imshow(img)
+        ax.axis('off')
 
+    def plot_aps(self, ax):
+        """Plot APs on the map."""
+        self.sorted_aps_list, self.boundaries, self.boundary_orientation = self.get_sorted_aps_list()
+        for i, ap in enumerate(self.sorted_aps_list, start=1):
+            ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=250, zorder=5)
+            ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center', va='center', zorder=6)
+
+    def draw_connections(self, ax):
+        """Draw connections between APs and any additional markers, with each segment in a different color."""
+        # Ensure there are at least two points to connect.
+        if len(self.sorted_aps_list) > 1:
+            for i in range(len(self.sorted_aps_list) - 1):
+                # Extract start and end points for the segment.
+                start_point = (self.sorted_aps_list[i]['location']['coord']['x'], self.sorted_aps_list[i]['location']['coord']['y'])
+                end_point = (self.sorted_aps_list[i + 1]['location']['coord']['x'], self.sorted_aps_list[i + 1]['location']['coord']['y'])
+
+                # Determine the color for this segment.
+                segment_color = self.sorted_aps_list[i]['color']  # Or some logic to choose the color.
+
+                # Draw the line segment with the specified color.
+                if self.sorted_aps_list[i]['color'] == self.sorted_aps_list[i + 1]['color']:
+                    ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle='-', linewidth=2, zorder=4)
+
+    def get_sorted_aps_list(self):
+        """Obtain the sorted list of APs and any additional data like center rows."""
         ap_list = []
         for ap in self.ap_data.values():
             if ap['floor'] == self.current_map:
                 ap_list.append(ap)
 
         if self.current_sorting_module and hasattr(self.current_sorting_module, "visualise_centre_rows"):
-            sorted_aps_list, boundaries = self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict, self.y_axis_threshold, True)
+            return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict, self.boundary_separation, True)
 
         elif self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):
-            sorted_aps_list = self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict)  # Adjust as per the sorting function's requirements
+            return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict), None  # Adjust as per the sorting function's requirements
 
-        # Prepare lists of x and y coordinates
-        x_coords = [ap['location']['coord']['x'] for ap in sorted_aps_list]
-        y_coords = [ap['location']['coord']['y'] for ap in sorted_aps_list]
+    def plot_boundaries(self, ax):
+        if self.boundaries is None:
+            return
 
-        # Plot APs with new IDs based on their sorted position
-        for i, ap in enumerate(sorted_aps_list, start=1):
-            ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=250, zorder=5)
-            ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center', va='center', zorder=6)
+        elif self.boundary_orientation == 'horizontal':
+            self.draw_row_indicators(ax)
+            for boundary in self.boundaries:
+                ax.axhline(y=boundary, color='b', linestyle='--', linewidth=1)
+            ax.axhline(y=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1) # Draw the last boundary
 
-        # Draw lines connecting the points
-        # Check if there are at least two points to connect
-        if len(x_coords) > 1:
-            ax.plot(x_coords, y_coords, color='gray', linestyle='-', linewidth=2, zorder=4)  # Adjust color, linestyle, and linewidth as needed
+        elif self.boundary_orientation == 'vertical':
+            self.draw_column_indicators(ax)
+            for boundary in self.boundaries:
+                ax.axvline(x=boundary, color='b', linestyle='--', linewidth=1)
+            ax.axvline(x=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1) # Draw the last boundary
 
-        # Calculate and draw horizontal row boundaries
-        if boundaries is not None:
-            for boundary in boundaries:
-                ax.axhline(y=boundary, color='b', linestyle='--', linewidth=1)  # Draw the first line
+    def draw_row_indicators(self, ax):
+        """Draw indicators for row numbers between boundary lines."""
+        plot_xlim = ax.get_xlim()
+        x_position = plot_xlim[0]  # You might want to adjust this to not overlap with your plot
 
-        ax.axis('off')
-        self.figure.tight_layout()
-        self.canvas.draw()
+        for i, y_position in enumerate(self.boundaries, start=1):
+            # Place the row indicator. Adjust `x_position` and `y_position` as needed.
+            # You might want to add or subtract a small value to `y_position` to avoid overlap with the lines
+            ax.text(x_position, y_position + (self.boundary_separation / 2), f"{i}", verticalalignment='center', horizontalalignment='left', color='blue', fontsize=10)
+
+    def draw_column_indicators(self, ax):
+        """Draw indicators for column numbers between boundary lines."""
+        plot_ylim = ax.get_ylim()
+        y_position = plot_ylim[0]  # Adjust as needed, depending on where you want the text
+
+        for i, x_position in enumerate(self.boundaries, start=1):
+            # Similar to rows, but now we're adjusting the x positions for column indicators
+            ax.text(x_position + (self.boundary_separation / 2), y_position, f"{i}", verticalalignment='bottom', horizontalalignment='center', color='blue', fontsize=10)
 
     def on_dismiss(self, event):
         self.EndModal(wx.ID_CANCEL)
@@ -235,7 +283,7 @@ def visualise_ap_renaming(working_directory, project_name, message_callback, cur
     # Prepare map_data
     map_data = {}
 
-    for key, value in floor_plans_dict_reversed.items():
+    for key, value in sorted(floor_plans_dict_reversed.items()):
         floor_file_id = 'image-' + key
         map_data.setdefault(value, []).append(working_directory / project_name / floor_file_id)
 
