@@ -2,7 +2,7 @@
 
 from common import model_sort_order
 
-# CONSTANTS
+ONE_LINER_DESCRIPTION = 'APs sorted by: floor, model, y-axis value'
 
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 

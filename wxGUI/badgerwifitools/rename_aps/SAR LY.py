@@ -11,6 +11,8 @@ from common import rename_process_completion_message as completion_message
 # Add an attribute to the module
 SAR = "This is a Stand Alone Rename module"
 
+ONE_LINER_DESCRIPTION = 'This code does not work in the visualiser yet'
+
 
 def create_tag_keys_dict(tag_keys_json):
     """Create a dictionary of tag keys."""

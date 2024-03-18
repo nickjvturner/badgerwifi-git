@@ -5,6 +5,8 @@ from common import model_sort_order
 dynamic_widget = 'flag attribute'
 visualise_centre_rows = 'flag attribute'
 
+ONE_LINER_DESCRIPTION = 'APs sorted by: floor, model, y-axis in columns, x-axis value'
+
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 
 Sorts APs by:

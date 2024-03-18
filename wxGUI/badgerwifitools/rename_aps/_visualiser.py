@@ -47,6 +47,7 @@ class MapDialog(wx.Dialog):
         """Initialize the user interface."""
         self.panel = wx.Panel(self)
         self.setup_buttons()
+        self.setup_labels()
         self.setup_dropdowns()
         self.setup_figure()
         self.setup_layout()
@@ -58,6 +59,10 @@ class MapDialog(wx.Dialog):
 
         self.rename_aps_button = wx.Button(self.panel, label='Rename APs')
         self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
+
+    def setup_labels(self):
+        """Setup the labels for the dialog."""
+        self.rename_script_one_liner = wx.StaticText(self.panel, label="")
 
     def setup_dropdowns(self):
         """Setup the dropdown menus."""
@@ -86,14 +91,19 @@ class MapDialog(wx.Dialog):
         self.row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, 5)
         self.row1.AddStretchSpacer()
 
+        self.action_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.action_row.Add(self.rename_script_one_liner, 0, wx.EXPAND | wx.ALL, 5)
+        self.action_row.AddStretchSpacer()
+        self.action_row.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, 5)
+
         self.exit_row = wx.BoxSizer(wx.HORIZONTAL)
-        self.exit_row.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, 5)
         self.exit_row.AddStretchSpacer()
         self.exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(self.row1, 0, wx.EXPAND | wx.ALL, 5)
         self.main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 5)
+        self.main_sizer.Add(self.action_row, 0, wx.EXPAND | wx.ALL, 5)
         self.main_sizer.Add(self.exit_row, 0, wx.EXPAND | wx.ALL, 5)
 
         self.panel.SetSizer(self.main_sizer)
@@ -110,6 +120,10 @@ class MapDialog(wx.Dialog):
         selected_script = self.rename_choice.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
+
+        # Update the one-liner label with a description from the selected module
+        if hasattr(self.current_sorting_module, 'ONE_LINER_DESCRIPTION'):
+            self.rename_script_one_liner.SetLabel(self.current_sorting_module.ONE_LINER_DESCRIPTION)
 
         # Remove existing dynamic widget if it exists
         if hasattr(self, 'spin_ctrl'):

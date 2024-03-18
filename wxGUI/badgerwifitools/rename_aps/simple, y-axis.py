@@ -1,5 +1,7 @@
 # simple, y-axis.py
 
+ONE_LINER_DESCRIPTION = 'APs sorted by: floor, y-axis value'
+
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 Re-sorts APs by:
     floor name,
