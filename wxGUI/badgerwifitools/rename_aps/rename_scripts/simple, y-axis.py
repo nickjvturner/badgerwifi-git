@@ -30,3 +30,10 @@ resulting AP names should look like:
 def sort_logic(access_points_list, floor_plans_dict):
     return sorted(access_points_list, key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId']).get('name'),
                                                      i['location']['coord']['y']))
+
+
+def connections_colour_logic():
+    color = 'grey'
+    linestyle = '-'
+    linewidth = 2
+    return color, linestyle, linewidth

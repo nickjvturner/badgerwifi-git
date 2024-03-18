@@ -2,66 +2,58 @@
 
 from common import model_sort_order
 
-dynamic_widget = 'flag attribute'
-visualise_centre_rows = 'flag attribute'
+BOUNDARY_SEPARATOR = True  # flag attribute
+BOUNDARY_ORIENTATION = 'vertical'  # flag attribute
 
-ONE_LINER_DESCRIPTION = 'APs sorted by: floor, model, y-axis in columns, x-axis value'
+ONE_LINER_DESCRIPTION = 'APs sorted by: floor, model, x-axis in columns, y-axis value'
 
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 
 Sorts APs by:
     floor name,
     model,
-    y-axis in 'bands',
-    x-axis value
+    x-axis in 'columns',
+    y-axis value
 
 AP-001, AP-002, AP-003..."""
 
-LONG_DESCRIPTION = f"""Created with [SIMULATED APs] as the targets...
+LONG_DESCRIPTION = f"""This renaming function works by:
+placing all project APs into a list
 
-script loads accessPoints.json
-places all APs into a list
-
-sorts the list by:
+initially sorting the list by:
     floor name,
-    model,
-    y-axis in 'bands',
     x-axis value
 
-the sorted list is iterated through and a new AP Name is assigned
-
-AP Naming pattern is defined by:
-    AP-{{apSeqNum:03}}
-    
-The resulting AP numbering looks like:
-    AP-001, AP-002, AP-003...
-
-per floor
-script places all APs into a list
-sorts the list by the y-axis value
-iterates through the sorted list
-the very first AP is assigned to y_coordinate_group 1
-establish a value for the acceptable_deviation within the y-axis
-    value is calculated by dividing the current map image height by the vertical_division_factor
-    one twentieth of the current map image height
-    I invite you to manually edit this value, if you so wish
-subsequent APs with a y-axis value within the acceptable_deviation will also be assigned to y_coordinate_group 1
-when an AP with a y-axis value greater than the acceptable_deviation is found, the y_coordinate_group id is incremented
+the APs are then iterated through and assigned to a group
+based on their x-axis value
+the first AP in the list defines the start of the first group
+subsequent APs with an x-axis value within the threshold
+are also assigned to the first group
+when an AP with an x-axis value greater than the threshold is found
+a new group is started
 the assessment of APs continues
-eventually all APs are assigned a y_coordinate_group id
+eventually all APs are assigned to a group
+    
 the list is re-sorted by:
-    y_group, x-axis value
-    specifically in this order
-having been grouped into '20' (horizontal) rows
-the APs are now sorted by their x-axis value within each row
-the sorted list is iterated through and a new AP Name is assigned"""
+    floor name,
+    model,
+    x-axis in 'columns',
+    y-axis value
+    
+the sorted list is iterated through and a new AP Name is assigned
+AP numbering starts at 1, with:
+
+resulting AP names will look like:
+    AP-001, AP-002, AP-003...
+"""
 
 
 def sort_logic(access_points_list, floor_plans_dict, x_axis_threshold, output_boundaries=False):
     # First, sort APs by floor name (via floorPlanId) and then by y-coordinate.
-    access_points_list_sorted = sorted(access_points_list, key=lambda ap: (
-        floor_plans_dict.get(ap['location']['floorPlanId']).get('name', ''),
-        ap['location']['coord']['x']))
+    access_points_list_sorted = sorted(access_points_list,
+                                       key=lambda ap: (
+                                        floor_plans_dict.get(ap['location']['floorPlanId']).get('name', ''),
+                                        ap['location']['coord']['x']))
 
     # Initialize variables for grouping.
     x_coordinate_group = 1
@@ -94,6 +86,6 @@ def sort_logic(access_points_list, floor_plans_dict, x_axis_threshold, output_bo
 
     if output_boundaries:
         # Calculate the center for the last group.
-        return access_points_list_sorted, boundaries, 'vertical'
+        return access_points_list_sorted, boundaries, BOUNDARY_ORIENTATION
 
     return access_points_list_sorted

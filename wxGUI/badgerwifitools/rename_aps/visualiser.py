@@ -12,8 +12,9 @@ from common import model_antenna_split
 
 from common import discover_available_scripts
 from common import RENAME_APS_DIR
+from common import BOUNDARY_SEPARATION_WIDGET
 
-from rename_aps._ap_renamer import ap_renamer
+from rename_aps.ap_renamer import ap_renamer
 
 
 def import_module_from_path(module_name, path_to_module):
@@ -118,20 +119,19 @@ class MapDialog(wx.Dialog):
         """Handle rename script selection changes."""
         self.boundaries = None
         selected_script = self.rename_choice.GetStringSelection()
-        path_to_module = Path(__file__).resolve().parent / f'{selected_script}.py'
+        path_to_module = Path(__file__).resolve().parent.parent / RENAME_APS_DIR / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
 
         # Update the one-liner label with a description from the selected module
         if hasattr(self.current_sorting_module, 'ONE_LINER_DESCRIPTION'):
             self.rename_script_one_liner.SetLabel(self.current_sorting_module.ONE_LINER_DESCRIPTION)
 
-        # Remove existing dynamic widget if it exists
+        # Remove existing boundary_separation widgets if they exist
         if hasattr(self, 'spin_ctrl'):
             self.remove_boundary_separation_widget()
 
-        # Add a new widget only if the selected script has attribute "dynamic_widget"
-        # Inside the on_rename_change method, modify the creation of the dynamic_widget
-        if hasattr(self.current_sorting_module, 'dynamic_widget'):
+        # Add the boundary separator widgets only if the selected script has attribute "visualise_boundaries"
+        if hasattr(self.current_sorting_module, BOUNDARY_SEPARATION_WIDGET):
             self.add_boundary_separation_widget()
 
         self.panel.Layout()  # Re-layout the panel to reflect changes
@@ -155,7 +155,7 @@ class MapDialog(wx.Dialog):
         self.row1.Add(self.update_button, 0, wx.ALL, 5)
 
     def remove_boundary_separation_widget(self):
-        """Remove any existing dynamic widgets."""
+        """Remove any existing boundary_separation widgets."""
         # Logic from on_rename_change for removing widgets
         self.row1.Detach(self.spin_ctrl)  # Detach from sizer
         self.spin_ctrl.Destroy()  # Destroy the widget
@@ -214,31 +214,48 @@ class MapDialog(wx.Dialog):
                 start_point = (self.sorted_aps_list[i]['location']['coord']['x'], self.sorted_aps_list[i]['location']['coord']['y'])
                 end_point = (self.sorted_aps_list[i + 1]['location']['coord']['x'], self.sorted_aps_list[i + 1]['location']['coord']['y'])
 
-                # Determine the color for this segment.
-                segment_color = self.sorted_aps_list[i]['color']  # Or some logic to choose the color.
+                if hasattr(self.current_sorting_module, 'connections_colour_logic'):
+                    segment_color, linestyle, linewidth = self.current_sorting_module.connections_colour_logic()
 
-                # Draw the line segment with the specified color.
-                if self.current_sorting_module and hasattr(self.current_sorting_module, "visualise_centre_rows"):
-                    if self.sorted_aps_list[i]['location']['coord']['y_group']:
-                        if self.sorted_aps_list[i]['location']['coord']['y_group'] != self.sorted_aps_list[i + 1]['location']['coord']['y_group']:
-                            ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle=':', linewidth=2, zorder=4)
-                     # if self.sorted_aps_list[i]['location']['coord']['x_group']:
-                     #     self.sorted_aps_list[i]['location']['coord']['x_group'] != self.sorted_aps_list[i + 1]['location']['coord']['x_group']:
-                     #        ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle=':', linewidth=2, zorder=4)
+                else:
+                    # Determine the color for this segment.
+                    segment_color = self.sorted_aps_list[i]['color']  # Or some logic to choose the color.
 
-                if self.sorted_aps_list[i]['color'] == self.sorted_aps_list[i + 1]['color']:
-                    ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle='-', linewidth=2, zorder=4)
+                    # Initialize default linestyle
+                    linestyle = '-'
+                    linewidth = 3
 
-                ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color='grey', linestyle='', linewidth=1, zorder=4)
+                    if hasattr(self.current_sorting_module, 'visualise_boundaries'):
+                        # Change linestyle for differently colored APs
+                        if self.sorted_aps_list[i]['color'] != self.sorted_aps_list[i + 1]['color']:
+                            linestyle = ':'  # Dashed line for differently colored APs
+                            segment_color = 'grey'  # Change the color to grey for dashed lines
+                            linewidth = 1
+
+                        # Check for different x or y group and change linestyle accordingly
+                        different_group = False
+                        if self.boundary_orientation == 'horizontal':
+                            if self.sorted_aps_list[i]['location']['coord']['y_group'] != self.sorted_aps_list[i + 1]['location']['coord']['y_group']:
+                                different_group = True
+                        if self.boundary_orientation == 'vertical':
+                            if self.sorted_aps_list[i]['location']['coord']['x_group'] != self.sorted_aps_list[i + 1]['location']['coord']['x_group']:
+                                different_group = True
+
+                        if different_group and segment_color != 'grey':
+                            linestyle = '--'  # Dotted line for different grouped APs
+                            linewidth = 2
+
+                # Draw the line segment with the specified color and linestyle
+                ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]], color=segment_color, linestyle=linestyle, linewidth=linewidth, zorder=4)
 
     def get_sorted_aps_list(self):
-        """Obtain the sorted list of APs and any additional data like center rows."""
+        """Obtain the sorted list of APs and any additional data, such as boundaries."""
         ap_list = []
         for ap in self.ap_data.values():
             if ap['floor'] == self.current_map:
                 ap_list.append(ap)
 
-        if self.current_sorting_module and hasattr(self.current_sorting_module, "visualise_centre_rows"):
+        if self.current_sorting_module and hasattr(self.current_sorting_module, BOUNDARY_SEPARATION_WIDGET):
             return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict, self.boundary_separation, True)
 
         elif self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):

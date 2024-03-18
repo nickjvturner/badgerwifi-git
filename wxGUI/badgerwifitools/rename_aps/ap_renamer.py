@@ -10,6 +10,7 @@ from common import re_bundle_project
 from common import rename_aps
 
 from common import rename_process_completion_message as completion_message
+from common import BOUNDARY_SEPARATION_WIDGET
 
 
 def ap_renamer(working_directory, project_name, script_module, message_callback, boundary_separation=None):
@@ -31,7 +32,7 @@ def ap_renamer(working_directory, project_name, script_module, message_callback,
 
     else:
         # Sort the list of APs, by the floor name(floorPlanId lookup) and x coord
-        if hasattr(script_module, 'dynamic_widget'):
+        if hasattr(script_module, BOUNDARY_SEPARATION_WIDGET):
             access_points_list_sorted = script_module.sort_logic(access_points_list, floor_plans_dict, boundary_separation)
 
         else:

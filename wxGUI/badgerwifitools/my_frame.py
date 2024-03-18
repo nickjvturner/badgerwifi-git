@@ -21,7 +21,8 @@ from esx_actions.ap_list_creator import create_ap_list
 from esx_actions.display_project_details import display_project_details
 from esx_actions.rebundle_esx import rebundle_project
 
-from rename_aps._visualiser import visualise_ap_renaming
+from rename_aps.visualiser import visualise_ap_renaming
+from rename_aps.ap_renamer import ap_renamer
 
 from exports import export_ap_images
 
@@ -33,10 +34,6 @@ from map_creator.create_custom_ap_location_maps import create_custom_ap_location
 from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_location_maps_threaded
 from map_creator.create_pds_maps import create_pds_maps_threaded
 
-from rename_aps._ap_renamer import ap_renamer
-
-
-# CONSTANTS
 from common import nl
 from common import DOCX_EXTENSION
 from common import CONFIGURATION_DIR
@@ -710,7 +707,7 @@ class MyFrame(wx.Frame):
         self.save_application_state(None)
 
     def get_ap_rename_script_descriptions(self, script_name):
-        script_path = str(Path(__file__).resolve().parent / "rename_aps" / f"{script_name}.py")
+        script_path = str(Path(__file__).resolve().parent / RENAME_APS_DIR / f"{script_name}.py")
         spec = importlib.util.spec_from_file_location(script_name, script_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

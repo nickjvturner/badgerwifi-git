@@ -17,7 +17,8 @@ ESX_EXTENSION = '.esx'
 DOCX_EXTENSION = '.docx'
 CONFIGURATION_DIR = 'configuration'
 PROJECT_PROFILES_DIR = 'project_profiles'
-RENAME_APS_DIR = 'rename_aps'
+RENAME_APS_DIR = 'rename_aps/rename_scripts'
+BOUNDARY_SEPARATION_WIDGET = 'BOUNDARY_SEPARATOR'
 
 ekahau_color_dict = {
     '#00FF00': 'green',
