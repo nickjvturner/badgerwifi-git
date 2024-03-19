@@ -2,6 +2,7 @@
 
 from common import model_sort_order
 
+SPLIT_BOUNDARY_GROUPS = True  # flag attribute
 BOUNDARY_SEPARATOR = True  # flag attribute
 BOUNDARY_ORIENTATION = 'horizontal'  # flag attribute
 

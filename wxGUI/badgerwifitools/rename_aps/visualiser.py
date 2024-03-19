@@ -225,7 +225,7 @@ class MapDialog(wx.Dialog):
                     linestyle = '-'
                     linewidth = 3
 
-                    if hasattr(self.current_sorting_module, 'visualise_boundaries'):
+                    if hasattr(self.current_sorting_module, 'SPLIT_BOUNDARY_GROUPS'):
                         # Change linestyle for differently colored APs
                         if self.sorted_aps_list[i]['color'] != self.sorted_aps_list[i + 1]['color']:
                             linestyle = ':'  # Dashed line for differently colored APs
@@ -271,13 +271,13 @@ class MapDialog(wx.Dialog):
                 ax.axhline(y=boundary, color='b', linestyle='--', linewidth=1)
             # Skip drawing the last boundary if it's beyond the plot's limits
             if self.boundaries[-1] + self.boundary_separation < ax.get_ylim()[1]:
-                ax.axhline(y=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1) # Draw the last boundary
+                ax.axhline(y=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1)  # Draw the last boundary
 
         elif self.boundary_orientation == 'vertical':
             self.draw_column_indicators(ax)
             for boundary in self.boundaries:
                 ax.axvline(x=boundary, color='b', linestyle='--', linewidth=1)
-            ax.axvline(x=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1) # Draw the last boundary
+            ax.axvline(x=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1)  # Draw the last boundary
 
     def draw_row_indicators(self, ax):
         """Draw indicators for row numbers between boundary lines."""
