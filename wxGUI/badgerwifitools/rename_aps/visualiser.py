@@ -27,7 +27,7 @@ def import_module_from_path(module_name, path_to_module):
 class MapDialog(wx.Dialog):
     """A dialog for displaying maps and access point information."""
     def __init__(self, parent, title, ap_data, map_data, floor_plans_dict, initial_dropdown_selection):
-        super().__init__(parent, title=title, size=(1000, 900))
+        super().__init__(parent, title=title, size=(1000, 800))
         self.ap_data = ap_data
         self.map_data = map_data
         self.current_map = next(iter(map_data))
