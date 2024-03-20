@@ -21,6 +21,7 @@ setup(
         'docx2pdf>=0.1.8',
         'pillow>=10.2.0',
         'matplotlib>=3.8.3',
+        'requests>=2.31.0',
     ],
     classifiers=[
         'Intended Audience :: End Users/Desktop',
