@@ -22,7 +22,9 @@ REPO_URL = "https://api.github.com/repos/nickjvturner/badgerwifi-git/commits/mai
 
 def on_check_for_updates():
     latest_sha = get_latest_commit_sha()
+    print(latest_sha)
     LOCAL_COMMIT_SHA = get_git_revision_short_hash()
+    print(LOCAL_COMMIT_SHA)
     if latest_sha and latest_sha != LOCAL_COMMIT_SHA:
         wx.MessageBox("A new update is available!", "Update Available", wx.OK | wx.ICON_INFORMATION)
     elif latest_sha:
