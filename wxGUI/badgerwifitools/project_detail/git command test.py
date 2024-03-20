@@ -22,7 +22,7 @@ REPO_URL = "https://api.github.com/repos/nickjvturner/badgerwifi-git/commits/mai
 
 def on_check_for_updates():
     latest_sha = get_latest_commit_sha()
-    print(latest_sha)
+    print(latest_sha[:7])
     LOCAL_COMMIT_SHA = get_git_revision_short_hash()
     print(LOCAL_COMMIT_SHA)
     if latest_sha and latest_sha != LOCAL_COMMIT_SHA:
@@ -47,7 +47,7 @@ def get_latest_commit_sha():
 def get_git_commit_sha():
     try:
         # Run the git command to get the current commit SHA
-        commit_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], stderr=subprocess.STDOUT).decode().strip()
+        commit_sha = subprocess.check_output(['git', 'rev-parse', '--short=40', 'HEAD'], stderr=subprocess.STDOUT).decode().strip()
         return commit_sha
     except subprocess.CalledProcessError as e:
         print("Error getting current git commit SHA:", e)
