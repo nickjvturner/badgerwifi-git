@@ -40,7 +40,10 @@ from common import CONFIGURATION_DIR
 from common import PROJECT_PROFILES_DIR
 from common import RENAME_APS_DIR
 from common import PROJECT_DETAIL_DIR
+from common import ADMIN_ACTIONS_DIR
 from common import discover_available_scripts
+
+from admin.check_for_updates import check_for_updates
 
 
 class MyFrame(wx.Frame):
@@ -59,6 +62,7 @@ class MyFrame(wx.Frame):
         self.setup_tab1()
         self.setup_tab2()
         self.setup_tab3()
+        self.setup_tab4()
         self.setup_panel_rows()
         self.setup_main_sizer()
         self.create_menu()
@@ -136,6 +140,14 @@ class MyFrame(wx.Frame):
         self.project_detail_dropdown.SetSelection(0)  # Set default selection
         self.project_detail_dropdown.Bind(wx.EVT_CHOICE, self.on_project_detail_dropdown_selection)
 
+        # Discover available Admin action scripts
+        self.available_admin_actions = discover_available_scripts(ADMIN_ACTIONS_DIR)
+
+        # Create a dropdown to select an Admin action
+        self.admin_actions_dropdown = wx.Choice(self.tab4, choices=self.available_admin_actions)
+        self.admin_actions_dropdown.SetSelection(0)  # Set default selection
+        self.admin_actions_dropdown.Bind(wx.EVT_CHOICE, self.on_admin_actions_dropdown_selection)
+
     def setup_buttons(self):
         # Create add file button
         self.add_files_button = wx.Button(self.panel, label="Add Files")
@@ -162,7 +174,7 @@ class MyFrame(wx.Frame):
         self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
         self.clear_log_button.SetToolTip(wx.ToolTip("Clear the log"))
 
-        self.display_project_detail_button = wx.Button(self.tab1, label="Display Project Detail")
+        self.display_project_detail_button = wx.Button(self.tab1, label="Display")
         self.display_project_detail_button.Bind(wx.EVT_BUTTON, self.on_display_project_detail)
         self.display_project_detail_button.SetToolTip(wx.ToolTip("Display detailed information about the current .esx project"))
 
@@ -186,9 +198,9 @@ class MyFrame(wx.Frame):
         self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
         self.rename_aps_button.SetToolTip(wx.ToolTip("Execute the selected AP renaming script"))
 
-        self.visualise_ap_renaming_button = wx.Button(self.tab1, label="AP Rename Visualiser")
+        self.visualise_ap_renaming_button = wx.Button(self.tab1, label="Rename Pattern Visualiser")
         self.visualise_ap_renaming_button.Bind(wx.EVT_BUTTON, self.on_visualise_ap_renaming)
-        self.visualise_ap_renaming_button.SetToolTip(wx.ToolTip("Preview the AP renaming results"))
+        self.visualise_ap_renaming_button.SetToolTip(wx.ToolTip("Preview the AP renaming pattern"))
 
         # Create a button for showing long descriptions with a specified narrow size
         self.description_button = wx.Button(self.tab1, label="?", size=(20, -1))  # Width of 40, default height
@@ -239,6 +251,22 @@ class MyFrame(wx.Frame):
         self.convert_docx_to_pdf_button = wx.Button(self.tab3, label="Convert .docx to PDF")
         self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
         self.convert_docx_to_pdf_button.SetToolTip(wx.ToolTip("Convert .docx file(s) to PDF"))
+
+        self.perform_admin_action_button = wx.Button(self.tab4, label="Perform Action")
+        self.perform_admin_action_button.Bind(wx.EVT_BUTTON, self.on_perform_admin_action)
+        self.perform_admin_action_button.SetToolTip(wx.ToolTip("Perform the selected Admin action"))
+
+        self.check_for_updates_button = wx.Button(self.tab4, label="Check for Updates")
+        self.check_for_updates_button.Bind(wx.EVT_BUTTON, self.on_check_for_updates)
+        self.check_for_updates_button.SetToolTip(wx.ToolTip("Check for new commits on GitHub"))
+
+        self.feedback_button = wx.Button(self.tab4, label="Feedback")
+        self.feedback_button.Bind(wx.EVT_BUTTON, self.on_feedback)
+        self.feedback_button.SetToolTip(wx.ToolTip("Send feedback to the developer"))
+
+        self.contribute_button = wx.Button(self.tab4, label="Contribute")
+        self.contribute_button.Bind(wx.EVT_BUTTON, self.on_contribute)
+        self.contribute_button.SetToolTip(wx.ToolTip("Buy the developer a coffee"))
 
         # Create an abort thread button
         self.abort_thread_button = wx.Button(self.panel, label="Abort Current Process")
@@ -318,14 +346,17 @@ class MyFrame(wx.Frame):
         self.tab1 = wx.Panel(self.notebook)
         self.tab2 = wx.Panel(self.notebook)
         self.tab3 = wx.Panel(self.notebook)
+        self.tab4 = wx.Panel(self.notebook)
 
         self.notebook.AddPage(self.tab1, "Predictive Design")
         self.notebook.AddPage(self.tab2, "Asset Creator")
         self.notebook.AddPage(self.tab3, "DOCX")
+        self.notebook.AddPage(self.tab4, "Admin")
 
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Bind the tab change event
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
@@ -395,6 +426,25 @@ class MyFrame(wx.Frame):
 
         self.tab3.SetSizer(self.tab3_sizer)
 
+    def setup_tab4(self):
+        self.tab4_row1 = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab4_row1.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab4_row1.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab4_row1.AddStretchSpacer(1)
+        self.tab4_sizer.Add(self.tab4_row1, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab4_row2 = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab4_row2.Add(self.check_for_updates_button, 0, wx.ALL, 5)
+        self.tab4_sizer.Add(self.tab4_row2, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab4_row3 = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab4_row3.Add(self.feedback_button, 0, wx.ALL, 5)
+        self.tab4_row3.AddStretchSpacer(1)
+        self.tab4_row3.Add(self.contribute_button, 0, wx.ALL, 5)
+        self.tab4_sizer.Add(self.tab4_row3, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab4.SetSizer(self.tab4_sizer)
+
     def create_menu(self):
         menubar = wx.MenuBar()
 
@@ -439,8 +489,8 @@ class MyFrame(wx.Frame):
     def on_view_release_notes(event):
         webbrowser.open("https://github.com/nickjvturner/badgerwifi-git/activity")
 
-    @staticmethod
-    def on_feedback(event):
+    def on_feedback(self, event):
+        self.append_message(f"Opening feedback page... {nl}Please leave your feedback on the GitHub page.")
         webbrowser.open("https://github.com/nickjvturner/badgerwifi-git/issues")
 
     @staticmethod
@@ -448,10 +498,28 @@ class MyFrame(wx.Frame):
         # Implement the About dialog logic
         wx.MessageBox("This is a wxPython GUI application created by Nick Turner. Intended to make the lives of Wi-Fi engineers making reports a little bit easier. ", "About")
 
+    def load_module(self, module_subdir, module_name):
+        module_path = Path(__file__).resolve().parent / module_subdir / f"{module_name}.py"
+        spec = importlib.util.spec_from_file_location(module_name, str(module_path))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def on_admin_actions_dropdown_selection(self, event):
+        selected_index = self.admin_actions_dropdown.GetSelection()
+        action_module = self.available_admin_actions[selected_index]
+        self.current_admin_action_module = self.load_module(ADMIN_ACTIONS_DIR, action_module)
+
+    def on_perform_admin_action(self, event):
+        self.current_admin_action_module.run(self.append_message)
+
+    def on_check_for_updates(self, event):
+        check_for_updates(self.append_message)
+
     def on_project_detail_dropdown_selection(self, event):
         selected_index = self.project_detail_dropdown.GetSelection()
-        selected_project_detail_module = self.available_project_detail_views[selected_index]
-        self.current_project_detail_module = importlib.import_module(f"{PROJECT_DETAIL_DIR}.{selected_project_detail_module}")
+        project_detail_module = self.available_project_detail_views[selected_index]
+        self.current_project_detail_module = self.load_module(PROJECT_DETAIL_DIR, project_detail_module)
 
     def on_display_project_detail(self, event):
         if not self.basic_checks():
@@ -498,6 +566,7 @@ class MyFrame(wx.Frame):
             'selected_ap_rename_script_index': self.ap_rename_script_dropdown.GetSelection(),
             'selected_project_profile_index': self.project_profile_dropdown.GetSelection(),
             'selected_project_detail_index': self.project_detail_dropdown.GetSelection(),
+            'selected_admin_actions_index': self.admin_actions_dropdown.GetSelection(),
             'selected_tab_index': self.notebook.GetSelection(),
             'custom_ap_icon_size_text_box': self.custom_ap_icon_size_text_box.GetValue(),
             'zoomed_ap_crop_text_box': self.zoomed_ap_crop_text_box.GetValue()
@@ -530,6 +599,10 @@ class MyFrame(wx.Frame):
                 # Restore selected project detail index
                 self.project_detail_dropdown.SetSelection(state.get('selected_project_detail_index', 0))
                 self.on_project_detail_dropdown_selection(None)
+
+                # Restore selected admin action index
+                self.admin_actions_dropdown.SetSelection(state.get('selected_admin_actions_index', 0))
+                self.on_admin_actions_dropdown_selection(None)
 
                 # Restore selected tab index
                 self.notebook.SetSelection(state.get('selected_tab_index', 0))
@@ -710,7 +783,7 @@ class MyFrame(wx.Frame):
         return True
 
     def load_project_profile(self, profile_name):
-        profile_path = Path(__file__).resolve().parent / "project_profiles" / f"{profile_name}.py"
+        profile_path = Path(__file__).resolve().parent / PROJECT_PROFILES_DIR / f"{profile_name}.py"
         spec = importlib.util.spec_from_file_location(profile_name, str(profile_path))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
