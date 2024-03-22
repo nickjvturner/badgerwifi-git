@@ -471,6 +471,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_about, id=wx.ID_ABOUT)
         self.Bind(wx.EVT_MENU, self.on_add_file, id=wx.ID_ADD)
         self.Bind(wx.EVT_MENU, self.on_save, id=wx.ID_SAVE)
+        self.Bind(wx.EVT_MENU, self.on_exit, id=wx.ID_EXIT)
 
         self.Bind(wx.EVT_MENU, self.on_contribute, contribute_menu_item)
         self.Bind(wx.EVT_MENU, self.on_view_documentation, documentation_menu_item)
