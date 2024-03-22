@@ -33,7 +33,7 @@ def run(working_directory, project_name, message_callback):
 def display_floor_plans_dict(project_dir, message_callback):
     """Display the floor plans dictionary."""
 
-    custom_order = ['id', 'imageId', 'bitmapImageId']  # Update with your desired order
+    custom_order = ['width', 'height']  # Update with your desired order
 
     floor_plans_json = load_json(project_dir, 'floorPlans.json', message_callback)
     custom_floor_plans_dict = create_custom_floor_plans_dict(floor_plans_json)
