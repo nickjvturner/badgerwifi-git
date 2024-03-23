@@ -348,9 +348,9 @@ class MyFrame(wx.Frame):
         main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(self.button_row1_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, self.edge_margin)
         main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(self.button_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.button_row2_sizer, 0, wx.EXPAND | wx.ALL, self.edge_margin)
         main_sizer.Add(self.notebook, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(self.button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, self.edge_margin)
 
         self.panel.SetSizer(main_sizer)
 
