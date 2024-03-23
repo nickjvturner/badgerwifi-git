@@ -383,7 +383,7 @@ class MyFrame(wx.Frame):
         self.tab1_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
-        self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.TOP, 5)
 
         self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row2_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
@@ -409,7 +409,7 @@ class MyFrame(wx.Frame):
         self.tab2_row1_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
         self.tab2_row1_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
         self.tab2_row1_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
-        self.tab2_sizer.Add(self.tab2_row1_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab2_sizer.Add(self.tab2_row1_sizer, 0, wx.EXPAND | wx.TOP, 5)
 
         self.tab2_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab2_row2_sizer.AddStretchSpacer(1)
@@ -435,7 +435,7 @@ class MyFrame(wx.Frame):
         self.tab3_row1_sizer.AddStretchSpacer(1)
         self.tab3_row1_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
         self.tab3_row1_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
-        self.tab3_sizer.Add(self.tab3_row1_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab3_sizer.Add(self.tab3_row1_sizer, 0, wx.EXPAND | wx.TOP, 5)
 
         self.tab3.SetSizer(self.tab3_sizer)
 
@@ -444,7 +444,7 @@ class MyFrame(wx.Frame):
         self.tab4_row1.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab4_row1.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, 5)
         self.tab4_row1.AddStretchSpacer(1)
-        self.tab4_sizer.Add(self.tab4_row1, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab4_sizer.Add(self.tab4_row1, 0, wx.EXPAND | wx.TOP, 5)
 
         self.tab4_row2 = wx.BoxSizer(wx.HORIZONTAL)
         self.tab4_row2.Add(self.check_for_updates_button, 0, wx.ALL, 5)
