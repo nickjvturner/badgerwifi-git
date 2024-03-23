@@ -405,7 +405,7 @@ class MyFrame(wx.Frame):
     def setup_tab2(self):
         self.tab2_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab2_row1_sizer.AddStretchSpacer(1)
-        self.tab2_row1_sizer.Add(self.export_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        self.tab2_row1_sizer.Add(self.export_label, 0, wx.ALIGN_CENTER_VERTICAL, self.edge_margin)
         self.tab2_row1_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
         self.tab2_row1_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
         self.tab2_row1_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
