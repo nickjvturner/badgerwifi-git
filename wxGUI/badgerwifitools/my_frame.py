@@ -74,11 +74,11 @@ class MyFrame(wx.Frame):
         self.Show()
 
     def set_window_size(self):
-        self.SetMinSize((800, 600))
+        self.SetMinSize((800, 400))
 
         if platform.system() == 'Windows':
             # Set the frame size to the minimum size
-            self.SetSize((800, 600))
+            self.SetSize((700, 500))
 
     def initialize_variables(self):
         self.esx_project_unpacked = False
