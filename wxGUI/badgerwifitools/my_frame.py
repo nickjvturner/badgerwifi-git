@@ -51,7 +51,7 @@ from admin.check_for_updates import check_for_updates
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(1000, 800))
-        self.SetMinSize((800, 600))
+        self.set_window_size()
         self.panel = wx.Panel(self)
         self.initialize_variables()
         self.setup_list_box()
@@ -73,7 +73,9 @@ class MyFrame(wx.Frame):
         self.Center()
         self.Show()
 
-    def platform_detect(self):
+    def set_window_size(self):
+        self.SetMinSize((800, 600))
+
         if platform.system() == 'Windows':
             # Set the frame size to the minimum size
             self.SetSize((800, 600))
