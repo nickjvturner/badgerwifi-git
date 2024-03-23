@@ -7,6 +7,8 @@ import threading
 import webbrowser
 import subprocess
 import importlib.util
+import platform
+
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
 
@@ -70,6 +72,11 @@ class MyFrame(wx.Frame):
         self.load_application_state()
         self.Center()
         self.Show()
+
+    def platform_detect(self):
+        if platform.system() == 'Windows':
+            # Set the frame size to the minimum size
+            self.SetSize((800, 600))
 
     def initialize_variables(self):
         self.esx_project_unpacked = False
