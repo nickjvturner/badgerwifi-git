@@ -80,7 +80,7 @@ class MyFrame(wx.Frame):
             # Set the frame size to the minimum size
             self.SetSize((800, 700))
             self.edge_margin = 0
-            self.notebook_margin = 2
+            self.notebook_margin = 3
         if platform.system() == 'Darwin':
             # Set the frame size to the minimum size
             self.edge_margin = 5
