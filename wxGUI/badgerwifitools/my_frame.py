@@ -444,17 +444,17 @@ class MyFrame(wx.Frame):
         self.tab4_row1.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab4_row1.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, 5)
         self.tab4_row1.AddStretchSpacer(1)
-        self.tab4_sizer.Add(self.tab4_row1, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, self.edge_margin)
+        self.tab4_sizer.Add(self.tab4_row1, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.tab4_row2 = wx.BoxSizer(wx.HORIZONTAL)
         self.tab4_row2.Add(self.check_for_updates_button, 0, wx.ALL, 5)
-        self.tab4_sizer.Add(self.tab4_row2, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, self.edge_margin)
+        self.tab4_sizer.Add(self.tab4_row2, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.tab4_row3 = wx.BoxSizer(wx.HORIZONTAL)
         self.tab4_row3.Add(self.feedback_button, 0, wx.ALL, 5)
         self.tab4_row3.AddStretchSpacer(1)
         self.tab4_row3.Add(self.contribute_button, 0, wx.ALL, 5)
-        self.tab4_sizer.Add(self.tab4_row3, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, self.edge_margin)
+        self.tab4_sizer.Add(self.tab4_row3, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.tab4.SetSizer(self.tab4_sizer)
 
