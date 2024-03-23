@@ -1,4 +1,5 @@
 import wx
+import platform
 
 import matplotlib.image as mpimg
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -46,8 +47,13 @@ class MapDialog(wx.Dialog):
         self.init_ui()
 
     def set_window_size(self):
-        """Set the size of the window."""
-        self.SetSize((800, 700))
+        if platform.system() == 'Windows':
+            # Set the frame size to the minimum size
+            self.SetSize((1000, 700))
+            self.edge_margin = 0
+        if platform.system() == 'Darwin':
+            # Set the frame size to the minimum size
+            self.edge_margin = 5
 
     def init_ui(self):
         """Initialize the user interface."""
