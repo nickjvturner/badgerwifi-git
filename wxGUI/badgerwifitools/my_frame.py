@@ -79,7 +79,7 @@ class MyFrame(wx.Frame):
         if platform.system() == 'Windows':
             # Set the frame size to the minimum size
             self.SetSize((800, 700))
-            self.edge_margin = 10
+            self.edge_margin = 0
         if platform.system() == 'Darwin':
             # Set the frame size to the minimum size
             self.edge_margin = 5
