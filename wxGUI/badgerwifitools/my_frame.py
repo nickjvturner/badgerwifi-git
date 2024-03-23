@@ -79,6 +79,10 @@ class MyFrame(wx.Frame):
         if platform.system() == 'Windows':
             # Set the frame size to the minimum size
             self.SetSize((800, 700))
+            self.edge_margin = 10
+        if platform.system() == 'Darwin':
+            # Set the frame size to the minimum size
+            self.edge_margin = 5
 
     def initialize_variables(self):
         self.esx_project_unpacked = False
@@ -342,7 +346,7 @@ class MyFrame(wx.Frame):
     def setup_main_sizer(self):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(self.button_row1_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
+        main_sizer.Add(self.button_row1_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, self.edge_margin)
         main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(self.button_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
         main_sizer.Add(self.notebook, 0, wx.EXPAND | wx.ALL, 5)
