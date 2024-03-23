@@ -409,7 +409,7 @@ class MyFrame(wx.Frame):
         self.tab2_row1_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
         self.tab2_row1_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
         self.tab2_row1_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
-        self.tab2_sizer.Add(self.tab2_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab2_sizer.Add(self.tab2_row1_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
 
         self.tab2_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab2_row2_sizer.AddStretchSpacer(1)
@@ -418,7 +418,7 @@ class MyFrame(wx.Frame):
         self.tab2_row2_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
         self.tab2_row2_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
         self.tab2_row2_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
-        self.tab2_sizer.Add(self.tab2_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab2_sizer.Add(self.tab2_row2_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
 
         self.tab2_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab2_row3_sizer.AddStretchSpacer(1)
@@ -426,7 +426,7 @@ class MyFrame(wx.Frame):
         self.tab2_row3_sizer.Add(self.custom_ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
         self.tab2_row3_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab2_row3_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab2_sizer.Add(self.tab2_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab2_sizer.Add(self.tab2_row3_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
 
         self.tab2.SetSizer(self.tab2_sizer)
 
@@ -435,7 +435,7 @@ class MyFrame(wx.Frame):
         self.tab3_row1_sizer.AddStretchSpacer(1)
         self.tab3_row1_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
         self.tab3_row1_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
-        self.tab3_sizer.Add(self.tab3_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab3_sizer.Add(self.tab3_row1_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
 
         self.tab3.SetSizer(self.tab3_sizer)
 
