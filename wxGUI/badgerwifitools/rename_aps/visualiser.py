@@ -100,23 +100,23 @@ class MapDialog(wx.Dialog):
         """Setup the layout of the dialog."""
         self.row1 = wx.BoxSizer(wx.HORIZONTAL)
         self.row1.Add(self.map_choice, 0, wx.EXPAND | wx.ALL, 5)
-        self.row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, self.edge_margin)
+        self.row1.Add(self.rename_choice, 0, wx.EXPAND | wx.ALL, 5)
         self.row1.AddStretchSpacer()
 
         self.action_row = wx.BoxSizer(wx.HORIZONTAL)
         self.action_row.Add(self.rename_script_one_liner, 0, wx.EXPAND | wx.ALL, 5)
         self.action_row.AddStretchSpacer()
-        self.action_row.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, self.edge_margin)
+        self.action_row.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, 5)
 
         self.exit_row = wx.BoxSizer(wx.HORIZONTAL)
         self.exit_row.AddStretchSpacer()
-        self.exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, self.edge_margin)
+        self.exit_row.Add(self.dismiss_button, 0, wx.EXPAND | wx.ALL, 5)
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.main_sizer.Add(self.row1, 0, wx.EXPAND | wx.ALL, 5)
+        self.main_sizer.Add(self.row1, 0, wx.EXPAND | wx.TOP, self.edge_margin)
         self.main_sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 5)
-        self.main_sizer.Add(self.action_row, 0, wx.EXPAND | wx.ALL, 5)
-        self.main_sizer.Add(self.exit_row, 0, wx.EXPAND | wx.ALL, 5)
+        self.main_sizer.Add(self.action_row, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.main_sizer.Add(self.exit_row, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.panel.SetSizer(self.main_sizer)
         self.Centre()
