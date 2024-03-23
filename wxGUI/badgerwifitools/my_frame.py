@@ -383,7 +383,7 @@ class MyFrame(wx.Frame):
         self.tab1_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
         self.tab1_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
-        self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
 
         self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row2_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
@@ -392,13 +392,13 @@ class MyFrame(wx.Frame):
         self.tab1_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row2_sizer.Add(self.description_button, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row2_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
-        self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
 
         self.tab1_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row3_sizer.AddStretchSpacer(1)
         self.tab1_row3_sizer.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab1_row3_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
-        self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
 
         self.tab1.SetSizer(self.tab1_sizer)
 
