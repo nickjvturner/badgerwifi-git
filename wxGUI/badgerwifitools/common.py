@@ -18,9 +18,12 @@ DOCX_EXTENSION = '.docx'
 CONFIGURATION_DIR = 'configuration'
 PROJECT_PROFILES_DIR = 'project_profiles'
 RENAME_APS_DIR = 'rename_aps/rename_scripts'
+RENAMED_APS_PROJECT_APPENDIX = '__APs_RENAMED'
 BOUNDARY_SEPARATION_WIDGET = 'BOUNDARY_SEPARATOR'
 PROJECT_DETAIL_DIR = 'project_detail'
 ADMIN_ACTIONS_DIR = 'admin/actions'
+
+
 
 ekahau_color_dict = {
     '#00FF00': 'green',

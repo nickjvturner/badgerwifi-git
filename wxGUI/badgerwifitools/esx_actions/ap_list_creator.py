@@ -61,9 +61,13 @@ def create_ap_list(working_directory, project_name, message_callback, create_cus
     df = pd.DataFrame(custom_ap_list)
     output_filename = f'{project_dir} - AP List.xlsx'
 
-    writer = pd.ExcelWriter(output_filename, engine='xlsxwriter')
-    df.to_excel(writer, sheet_name='AP List', index=False)
-    adjust_column_widths(df, writer)
-    format_headers(df, writer)
-    writer.close()
-    message_callback(f'{nl}"{Path(output_filename).name}" created successfully{nl}{nl}### PROCESS COMPLETE ###')
+    try:
+        writer = pd.ExcelWriter(output_filename, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='AP List', index=False)
+        adjust_column_widths(df, writer)
+        format_headers(df, writer)
+        writer.close()
+        message_callback(f'{nl}"{Path(output_filename).name}" created successfully{nl}{nl}### PROCESS COMPLETE ###')
+    except Exception as e:
+        print(e)
+        message_callback(f'{nl}### ERROR: Unable to create "{output_filename}" ###{nl}file could be open in another application{nl}### PROCESS INCOMPLETE ###')

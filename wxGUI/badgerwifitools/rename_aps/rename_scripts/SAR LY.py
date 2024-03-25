@@ -8,10 +8,17 @@ from common import save_and_move_json
 from common import re_bundle_project
 from common import rename_process_completion_message as completion_message
 
+from common import RENAMED_APS_PROJECT_APPENDIX
+
 # Add an attribute to the module
 SAR = "This is a Stand Alone Rename module"
 
 ONE_LINER_DESCRIPTION = 'This code does not work in the visualiser yet'
+
+sort_order_override = {
+    'ADV': 'XXX',
+    'HARBOUR': 'ZZZ'
+}
 
 
 def create_tag_keys_dict(tag_keys_json):
@@ -22,49 +29,44 @@ def create_tag_keys_dict(tag_keys_json):
     return tag_keys_dict
 
 
-def sort_tag_value_getter(tags_list, sort_tag_key, tag_keys_dict):
-    """Retrieve the value of a specific tag for sorting purposes."""
-    undefined_tag_value = '-   ***   TagValue is empty   ***   -'
-    missing_tag_key = 'Z'
-    sort_tag_unique_id = tag_keys_dict.get(sort_tag_key)
-    if sort_tag_unique_id is None:
-        return missing_tag_key
-    for value in tags_list:
-        if value.get('tagKeyId') == sort_tag_unique_id:
-            tag_value = value.get('value')
-            if tag_value is None:
-                return undefined_tag_value
-            return tag_value
-    return missing_tag_key
+def get_sort_value(tags_list, tag_key, tag_keys_dict):
+    """Retrieves the sorting value for a given tag, applying custom sorting if specified."""
+    sort_tag_id = tag_keys_dict.get(tag_key, 'Z')
+    for tag in tags_list:
+        if tag.get('tagKeyId') == sort_tag_id:
+            return sort_order_override.get(tag.get('value'), tag.get('value', '-   ***   TagValue is empty   ***   -'))
+    return 'Z'
+
+
+def get_rename_value(tags_list, tag_key, tag_keys_dict):
+    """Retrieves the renaming value for a given tag, avoiding custom sorting overrides."""
+    rename_tag_id = tag_keys_dict.get(tag_key, 'Z')
+    for tag in tags_list:
+        if tag.get('tagKeyId') == rename_tag_id:
+            return tag.get('value', '-   ***   TagValue is empty   ***   -')
+    return 'Z'
 
 
 def sort_access_points(access_points, tag_keys_dict, floor_plans_dict):
-    """Sort access points based on various criteria."""
-    return sorted(access_points,
-                  key=lambda ap: (
-                      sort_tag_value_getter(ap.get('tags', []), 'UNIT', tag_keys_dict),
-                      sort_tag_value_getter(ap.get('tags', []), 'building-group', tag_keys_dict),
-                      floor_plans_dict.get(ap['location'].get('floorPlanId', 'missing_floorPlanId')),
-                      sort_tag_value_getter(ap.get('tags', []), 'sequence-override', tag_keys_dict),
-                      ap['location']['coord']['x']
-                  ))
+    """Sorts access points based on multiple criteria."""
+    return sorted(access_points, key=lambda ap: (
+        get_sort_value(ap.get('tags', []), 'UNIT', tag_keys_dict),
+        get_sort_value(ap.get('tags', []), 'building-group', tag_keys_dict),
+        floor_plans_dict.get(ap['location'].get('floorPlanId', 'missing_floorPlanId')),
+        get_sort_value(ap.get('tags', []), 'sequence-override', tag_keys_dict),
+        ap['location']['coord']['x']
+    ))
 
 
 def rename_aps(access_points, tag_keys_dict, floor_plans_dict, message_callback):
-    """Rename access points based on sorting and specific naming conventions."""
-    ap_sequence_number = 1
-    for ap in access_points:
-        new_ap_name = f"{sort_tag_value_getter(ap['tags'], 'UNIT', tag_keys_dict)}-AP{ap_sequence_number:03}"
-
-        message_callback(f"{ap['name']} ({ap['model']}) | {floor_plans_dict.get(ap['location']['floorPlanId']).get('name')} | renamed to {new_ap_name}")
-
+    """Renames access points based on sorting and specific naming conventions."""
+    for i, ap in enumerate(access_points, 1):
+        new_ap_name = f"{get_rename_value(ap['tags'], 'UNIT', tag_keys_dict)}-AP{i:03}"
+        message_callback(f"{ap['name']} ({ap['model']}) | {floor_plans_dict.get(ap['location']['floorPlanId'], {}).get('name', 'Unknown')} | renamed to {new_ap_name}")
         ap['name'] = new_ap_name
-        ap_sequence_number += 1
 
 
 def run(working_directory, project_name, message_callback):
-    message_callback(f'Renaming APs within project: {project_name}')
-
     project_dir = Path(working_directory) / project_name
 
     # Create directory to hold output directories
@@ -94,6 +96,7 @@ def run(working_directory, project_name, message_callback):
     updated_access_points_json = {'accessPoints': sorted_access_points}
     save_and_move_json(updated_access_points_json, project_dir / 'accessPoints.json')
 
+    output_project_name = f"{project_name}{RENAMED_APS_PROJECT_APPENDIX}"
     # Re-bundle into .esx File
-    re_bundle_project(project_dir, renamed_aps_project_dir, f"{project_name}_re-zip")
-    completion_message(message_callback, project_name)
+    re_bundle_project(project_dir, renamed_aps_project_dir, output_project_name)
+    completion_message(message_callback, output_project_name)

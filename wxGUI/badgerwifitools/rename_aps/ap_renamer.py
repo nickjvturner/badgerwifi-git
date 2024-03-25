@@ -11,6 +11,7 @@ from common import rename_aps
 
 from common import rename_process_completion_message as completion_message
 from common import BOUNDARY_SEPARATION_WIDGET
+from common import RENAMED_APS_PROJECT_APPENDIX
 
 
 def ap_renamer(working_directory, project_name, script_module, message_callback, boundary_separation=None):
@@ -54,8 +55,8 @@ def ap_renamer(working_directory, project_name, script_module, message_callback,
         updated_access_points_json = {'accessPoints': access_points_list_renamed}
         save_and_move_json(updated_access_points_json, working_directory / project_name / 'accessPoints.json')
 
-        renamed_aps_project_name = f"{project_name}_renamed_APs"
+        output_project_name = f"{project_name}{RENAMED_APS_PROJECT_APPENDIX}"
 
         # Re-bundle into .esx File
-        re_bundle_project(project_dir, renamed_aps_project_dir, renamed_aps_project_name)
-        completion_message(message_callback, renamed_aps_project_name)
+        re_bundle_project(project_dir, renamed_aps_project_dir, output_project_name)
+        completion_message(message_callback, output_project_name)
