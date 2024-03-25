@@ -67,6 +67,14 @@ def run(working_directory, project_name, message_callback):
 
     project_dir = Path(working_directory) / project_name
 
+    # Create directory to hold output directories
+    output_dir = working_directory / 'OUTPUT'
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create subdirectory for Blank floor plans
+    renamed_aps_project_dir = output_dir / 'RENAMED APs'
+    renamed_aps_project_dir.mkdir(parents=True, exist_ok=True)
+
     # Load JSON data
     floor_plans_json = load_json(project_dir, 'floorPlans.json', message_callback)
     access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
@@ -87,5 +95,5 @@ def run(working_directory, project_name, message_callback):
     save_and_move_json(updated_access_points_json, project_dir / 'accessPoints.json')
 
     # Re-bundle into .esx File
-    re_bundle_project(project_dir, f"{project_name}_re-zip")
+    re_bundle_project(project_dir, renamed_aps_project_dir, f"{project_name}_re-zip")
     completion_message(message_callback, project_name)

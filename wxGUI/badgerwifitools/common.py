@@ -195,9 +195,9 @@ def save_and_move_json(data, file_path):
         json.dump(data, outfile, indent=4)
 
 
-def re_bundle_project(project_dir, output_name):
+def re_bundle_project(project_dir, output_dir, output_name):
     """Re-bundle the project directory into an .esx file."""
-    output_esx_path = project_dir.parent / output_name
+    output_esx_path = output_dir / output_name
     shutil.make_archive(str(output_esx_path), 'zip', str(project_dir))
     output_zip_path = str(output_esx_path) + '.zip'
     output_esx_path = str(output_esx_path) + '.esx'
@@ -243,8 +243,8 @@ def rename_aps(sorted_ap_list, message_callback, floor_plans_dict):
     return sorted_ap_list
 
 
-def rename_process_completion_message(message_callback, project_name):
-    wx.CallAfter(message_callback, f"{nl}Modified accessPoints.json re-bundled into .esx file{nl}{project_name}_re-zip.esx within working directory{nl}{nl}### PROCESS COMPLETE ###")
+def rename_process_completion_message(message_callback, output_project_name):
+    wx.CallAfter(message_callback, f"{nl}Modified accessPoints.json re-bundled into {output_project_name}.esx{nl}File saved within the 'OUTPUT' directory{nl}{nl}### PROCESS COMPLETE ###")
 
 
 def discover_available_scripts(directory, ignore_files=("_", "common")):
