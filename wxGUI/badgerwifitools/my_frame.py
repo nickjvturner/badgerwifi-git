@@ -29,7 +29,7 @@ from rename_aps.ap_renamer import ap_renamer
 from exports import export_ap_images
 
 from docx_manipulation.insert_images import insert_images_threaded
-from docx_manipulation.docx_to_pdf import convert_docx_to_pdf_threaded
+from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
 
 from map_creator.extract_blank_maps import extract_blank_maps
 from map_creator.create_custom_ap_location_maps import create_custom_ap_location_maps_threaded
@@ -893,13 +893,7 @@ class MyFrame(wx.Frame):
 
     def on_convert_docx_to_pdf(self, event):
         docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        self.stop_event.clear()
-        if docx_files:
-            for file in docx_files:
-                if self.stop_event.is_set():
-                    wx.CallAfter(self.append_message, f'{nl}### PROCESS ABORTED ###')
-                    return
-                convert_docx_to_pdf_threaded(file, self.append_message)
+        convert_docx_to_pdf(docx_files, self.append_message)
 
     def on_export_note_images(self, event):
         self.placeholder(None)
