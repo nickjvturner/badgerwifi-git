@@ -80,7 +80,6 @@ def insert_images(docx_file, message_callback, progress_callback, stop_event):
 							message = f"{key} image inserted, with height: {image_search[key]['height']} mm  ({images_inserted}/{total_image_insertion_points})"
 							wx.CallAfter(message_callback, message)
 
-
 	text_replacements = []
 
 	wx.CallAfter(message_callback, f'{nl}Searching for text replacement strings{nl}')
@@ -99,8 +98,12 @@ def insert_images(docx_file, message_callback, progress_callback, stop_event):
 							# wx.CallAfter(progress_callback, f'text strings replaced: {len(text_replacements)}')
 							wx.CallAfter(message_callback, f'"{key}" replaced with "{text_search[key]}"')
 
+	# Create directory to hold output directories
+	output_dir = working_directory / 'OUTPUT'
+	output_dir.mkdir(parents=True, exist_ok=True)
+
 	wx.CallAfter(message_callback, f'{nl}{nl}### Please wait while file is saved ###{nl}')
-	document.save(working_directory / Path(file.stem + '-OUTPUT-IMAGES_ADDED.docx'))
+	document.save(output_dir / Path(file.stem + '-OUTPUT-IMAGES_ADDED.docx'))
 
 	message_callback(f'* {images_inserted} images inserted *')
 	message_callback(f'* {len(text_replacements)} text strings replaced *')

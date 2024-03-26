@@ -9,6 +9,7 @@ class DropTarget(wx.FileDropTarget):
         super(DropTarget, self).__init__()
         self.window = window
         self.allowed_extensions = allowed_extensions
+        self.ignored_extensions = ('.DS_Store')
         self.message_callback = message_callback
         self.esx_project_unpacked = esx_project_unpacked
         self.update_esx_project_unpacked_callback = update_esx_project_unpacked_callback
@@ -19,21 +20,25 @@ class DropTarget(wx.FileDropTarget):
         return wx.DragCopy
 
     def OnDropFiles(self, x, y, filenames):
-        existing_files = self.window.GetStrings()  # Get currently listed files
 
-        for filepath in filenames:
+        def process_file(filepath):
+            existing_files = self.window.GetStrings()  # Get currently listed files
+
             if "re-zip" in filepath:
                 self.message_callback(
                     f"{Path(filepath).name} cannot be added because it contains 're-zip' in the name.")
-                continue
+                return
+
+            if filepath.endswith(self.ignored_extensions):
+                return
 
             if not filepath.lower().endswith(self.allowed_extensions):
                 self.message_callback(f"{Path(filepath).name} has an unsupported extension.")
-                continue
+                return
 
             if filepath in existing_files:
                 self.message_callback(f"{Path(filepath).name} is already in the list.")
-                continue
+                return
 
             if filepath.lower().endswith('.esx'):
                 # Initialize a flag to track if the .esx file is replaced or added
@@ -71,6 +76,15 @@ class DropTarget(wx.FileDropTarget):
 
             if self.window.GetCount() > 0:
                 self.drop_target_label_callback(hide=True)
+
+        for dropped_item in filenames:
+            dropped_path = Path(dropped_item)
+            if dropped_path.is_dir():
+                # Recursively process all files in the dropped directory
+                for file in dropped_path.rglob('*'):
+                    process_file(str(file))
+            else:
+                process_file(dropped_item)
 
         return True
 
