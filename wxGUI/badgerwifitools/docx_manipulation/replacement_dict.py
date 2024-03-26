@@ -95,6 +95,9 @@ image_search = {
     'Aruba AP-514 +  AP-ANT-45 5GHz': {
         'image': 'AP-514.png',
         'height': 18},
+    'Aruba AP-514 +  AP-ANT-345': {
+        'image': 'AP-514.png',
+        'height': 18},
     'Aruba AP-514 + AP-ANT-345': {
         'image': 'AP-514.png',
         'height': 18},
