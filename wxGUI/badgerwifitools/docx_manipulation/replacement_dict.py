@@ -95,6 +95,9 @@ image_search = {
     'Aruba AP-514 +  AP-ANT-45 5GHz': {
         'image': 'AP-514.png',
         'height': 18},
+    'Aruba AP-514 +  Aruba AP-ANT-345': {
+        'image': 'AP-514.png',
+        'height': 18},
     'Aruba AP-514 +  AP-ANT-345': {
         'image': 'AP-514.png',
         'height': 18},
@@ -119,6 +122,7 @@ text_search = {
     # Access Points
     'Aruba AP-514 +  Aruba AP-ANT-45': 'Aruba AP-514',
     'Aruba AP-514 + AP-ANT-345': 'Aruba AP-514',
+    'Aruba AP-514 +  Aruba AP-ANT-345': 'Aruba AP-514',
 
     # Antennas
     'Aruba AP-ANT-45 5GHz 5.5dBi': 'AP-ANT-45\x0D(external, directional)',
