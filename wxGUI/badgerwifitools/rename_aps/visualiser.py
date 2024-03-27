@@ -315,8 +315,6 @@ class MapDialog(wx.Dialog):
 
     def on_rename_aps(self, event):
         ap_renamer(self.parent.working_directory, self.parent.esx_project_name, self.current_sorting_module, self.parent.append_message, self.boundary_separation)
-        self.EndModal(wx.ID_CANCEL)
-        self.Destroy()
 
 
 def create_custom_ap_dict(access_points_json, floor_plans_dict):
