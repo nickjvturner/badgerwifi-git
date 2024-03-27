@@ -90,15 +90,16 @@ def sort_logic(access_points_list, floor_plans_dict, y_axis_threshold, output_bo
             boundaries.append(current_group_start_y)
 
         elif (ap['location']['coord']['y'] - current_group_start_y) > y_axis_threshold:
-            # Current AP's y-coordinate is outside the threshold of the current group; start a new group.
-            y_coordinate_group += 1
-            current_group_start_y += y_axis_threshold
-            boundaries.append(current_group_start_y)
+            while (ap['location']['coord']['y'] - current_group_start_y) > y_axis_threshold:
+                # Current AP's y-coordinate is outside the threshold of the current group; start a new group.
+                y_coordinate_group += 1
+                current_group_start_y += y_axis_threshold
+                boundaries.append(current_group_start_y)
 
         # Assign group ID to the AP.
         ap['location']['coord']['y_group'] = y_coordinate_group
 
-    # Final sorting by floor, model, group ID and then x-coordinate within each group.
+    # Final sorting by group ID, then x-coordinate within each group.
     access_points_list_sorted = sorted(access_points_list_sorted,
                                        key=lambda i: (floor_plans_dict.get(i['location']['floorPlanId']).get('name'),
                                                       model_sort_order.get(i['model'], i['model']),
