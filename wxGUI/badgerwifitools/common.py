@@ -24,7 +24,6 @@ PROJECT_DETAIL_DIR = 'project_detail'
 ADMIN_ACTIONS_DIR = 'admin/actions'
 
 
-
 ekahau_color_dict = {
     '#00FF00': 'green',
     '#FFE600': 'yellow',
