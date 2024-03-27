@@ -56,7 +56,7 @@ def check_for_updates(message_callback):
                 # Execute git pull to update the code
                 subprocess.check_output(['git', 'pull', 'origin', 'main'], stderr=subprocess.STDOUT)
                 wx.MessageBox("The application has been updated. Please restart the application.", "Update Successful", wx.OK | wx.ICON_INFORMATION)
-                message_callback(f'The application has been updated successfully.')
+                message_callback(f'The application has been updated successfully.{nl}{nl}### Please restart the application. ###')
             except subprocess.CalledProcessError as e:
                 wx.MessageBox(f"Failed to update the application: {e}", "Update Failed", wx.OK | wx.ICON_ERROR)
                 message_callback(f'Failed to update the application: {e}')
