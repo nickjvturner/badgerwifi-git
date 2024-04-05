@@ -249,11 +249,11 @@ class MyFrame(wx.Frame):
 
         self.create_ap_location_maps_button = wx.Button(self.tab2, label="AP Location Maps")
         self.create_ap_location_maps_button.Bind(wx.EVT_BUTTON, self.on_create_ap_location_maps)
-        self.create_ap_location_maps_button.SetToolTip(wx.ToolTip("Generate AP location maps with custom AP icons"))
+        self.create_ap_location_maps_button.SetToolTip(wx.ToolTip("Generate AP location maps with Ekahau style AP icons"))
 
         self.create_zoomed_ap_maps_button = wx.Button(self.tab2, label="Zoomed AP Maps")
         self.create_zoomed_ap_maps_button.Bind(wx.EVT_BUTTON, self.on_create_zoomed_ap_maps)
-        self.create_zoomed_ap_maps_button.SetToolTip(wx.ToolTip("Generate zoomed per AP location maps with custom AP icons"))
+        self.create_zoomed_ap_maps_button.SetToolTip(wx.ToolTip("Generate zoomed per AP location maps with Ekahau style AP icons"))
 
         self.export_pds_maps_button = wx.Button(self.tab2, label="PDS Maps")
         self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
@@ -295,8 +295,8 @@ class MyFrame(wx.Frame):
         # Create a text input box for the zoomed AP image crop size
         self.zoomed_ap_crop_text_box = wx.TextCtrl(self.tab2, value="2000", style=wx.TE_PROCESS_ENTER)
 
-        # Create a text input box for the custom AP icon size
-        self.custom_ap_icon_size_text_box = wx.TextCtrl(self.tab2, value="50", style=wx.TE_PROCESS_ENTER)
+        # Create a text input box for the AP icon size
+        self.ap_icon_size_text_box = wx.TextCtrl(self.tab2, value="50", style=wx.TE_PROCESS_ENTER)
 
     def setup_text_labels(self):
         # Create a text label for the drop target with custom position
@@ -311,16 +311,16 @@ class MyFrame(wx.Frame):
         # Create a text label for the Create AP List function
         self.create_ap_list_label = wx.StaticText(self.tab1, label="Export to Excel:")
 
-        # Create a text label for the Create Custom AP Map functions
-        self.create_custom_ap_map_label = wx.StaticText(self.tab2, label="Create Custom:")
+        # Create a text label for the Create Asset functions
+        self.create_asset_label = wx.StaticText(self.tab2, label="Create:")
 
         # Create a text label for the zoomed AP crop size text box
         self.zoomed_ap_crop_label = wx.StaticText(self.tab2, label="Zoomed AP Crop Size:")
         self.zoomed_ap_crop_label.SetToolTip(wx.ToolTip("Enter the size of the zoomed AP crop in pixels"))
 
-        # Create a text label for the custom AP icon size
-        self.custom_ap_icon_size_label = wx.StaticText(self.tab2, label="Custom AP Icon Size:")
-        self.custom_ap_icon_size_label.SetToolTip(wx.ToolTip("Enter the size of the custom AP icon in pixels"))
+        # Create a text label for the AP icon size
+        self.ap_icon_size_label = wx.StaticText(self.tab2, label="AP Icon Size:")
+        self.ap_icon_size_label.SetToolTip(wx.ToolTip("Enter the size of the AP icon in pixels"))
 
         # Create a text label for Export functions
         self.export_label = wx.StaticText(self.tab2, label="Export:")
@@ -415,7 +415,7 @@ class MyFrame(wx.Frame):
 
         self.tab2_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab2_row2_sizer.AddStretchSpacer(1)
-        self.tab2_row2_sizer.Add(self.create_custom_ap_map_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        self.tab2_row2_sizer.Add(self.create_asset_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
         self.tab2_row2_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
         self.tab2_row2_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
         self.tab2_row2_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
@@ -423,8 +423,8 @@ class MyFrame(wx.Frame):
 
         self.tab2_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.tab2_row3_sizer.AddStretchSpacer(1)
-        self.tab2_row3_sizer.Add(self.custom_ap_icon_size_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab2_row3_sizer.Add(self.custom_ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab2_row3_sizer.Add(self.ap_icon_size_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        self.tab2_row3_sizer.Add(self.ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
         self.tab2_row3_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab2_row3_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.EXPAND | wx.ALL, 5)
         self.tab2_sizer.Add(self.tab2_row3_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
@@ -583,7 +583,7 @@ class MyFrame(wx.Frame):
             'selected_project_detail_index': self.project_detail_dropdown.GetSelection(),
             'selected_admin_actions_index': self.admin_actions_dropdown.GetSelection(),
             'selected_tab_index': self.notebook.GetSelection(),
-            'custom_ap_icon_size_text_box': self.custom_ap_icon_size_text_box.GetValue(),
+            'ap_icon_size_text_box': self.ap_icon_size_text_box.GetValue(),
             'zoomed_ap_crop_text_box': self.zoomed_ap_crop_text_box.GetValue()
         }
         # Save the state to the defined path
@@ -623,7 +623,7 @@ class MyFrame(wx.Frame):
                 self.notebook.SetSelection(state.get('selected_tab_index', 0))
 
                 # Restore the text box values
-                self.custom_ap_icon_size_text_box.SetValue(state.get('custom_ap_icon_size_text_box', "50"))
+                self.ap_icon_size_text_box.SetValue(state.get('ap_icon_size_text_box', "50"))
                 self.zoomed_ap_crop_text_box.SetValue(state.get('zoomed_ap_crop_text_box', "2000"))
 
         except FileNotFoundError:
@@ -636,7 +636,7 @@ class MyFrame(wx.Frame):
         self.display_log.SetValue("")  # Clear the contents of the display_log
         self.esx_project_unpacked = False  # Reset project_unpacked state
         self.drop_target_label.Show()  # Show the drop target label
-        self.custom_ap_icon_size_text_box.SetValue("50")  # Reset the custom AP icon size
+        self.ap_icon_size_text_box.SetValue("50")  # Reset the AP icon size
         self.zoomed_ap_crop_text_box.SetValue("2000")  # Reset the zoomed AP crop size
         self.stop_event.clear()  # Clear the stop event
 
@@ -830,6 +830,42 @@ class MyFrame(wx.Frame):
         self.ap_rename_script_dropdown.SetToolTip(wx.ToolTip(short_description))
         self.save_application_state(None)
 
+        # Add the boundary separator widgets only if the selected script has attribute "visualise_boundaries"
+        if hasattr(self.current_sorting_module, BOUNDARY_SEPARATION_WIDGET):
+            self.add_boundary_separation_widget()
+
+    def add_boundary_separation_widget(self):
+        """Add boundary separation widget based on the current sorting module."""
+        # Logic from on_rename_change for adding widgets
+        self.spin_ctrl_label = wx.StaticText(self.panel, label="Boundary Separator:")
+
+        self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
+        self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
+        self.spin_ctrl.SetValue(400)  # Set the initial value
+        self.spin_ctrl.SetIncrement(10)  # Set the increment value (step size)
+
+        self.update_button = wx.Button(self.panel, label='Update')
+        self.update_button.Bind(wx.EVT_BUTTON, self.on_spin)
+
+        self.row1.Add(self.spin_ctrl_label, 0, wx.ALL, 5)
+        self.row1.Add(self.spin_ctrl, 0, wx.ALIGN_CENTER_VERTICAL, 1)
+        self.row1.Add(self.update_button, 0, wx.ALL, 5)
+
+    def remove_boundary_separation_widget(self):
+        """Remove any existing boundary_separation widgets."""
+        # Logic from on_rename_change for removing widgets
+        self.row1.Detach(self.spin_ctrl)  # Detach from sizer
+        self.spin_ctrl.Destroy()  # Destroy the widget
+        del self.spin_ctrl  # Remove the attribute to avoid reusing it
+
+        self.row1.Detach(self.spin_ctrl_label)
+        self.spin_ctrl_label.Destroy()  # Destroy the widget
+        del self.spin_ctrl_label  # Remove the attribute to avoid reusing it
+
+        self.row1.Detach(self.update_button)
+        self.update_button.Destroy()
+        del self.update_button
+
     def get_ap_rename_script_descriptions(self, script_name):
         script_path = str(Path(__file__).resolve().parent / RENAME_APS_DIR / f"{script_name}.py")
         spec = importlib.util.spec_from_file_location(script_name, script_path)
@@ -903,14 +939,14 @@ class MyFrame(wx.Frame):
             return
 
         # Retrieve the number from the custom AP icon size text box
-        custom_ap_icon_size = self.custom_ap_icon_size_text_box.GetValue()
+        ap_icon_size = self.ap_icon_size_text_box.GetValue()
 
         # Clear the stop event flag before starting the thread
         self.stop_event.clear()
 
         try:
-            custom_ap_icon_size = int(custom_ap_icon_size)  # Convert the input to a float
-            create_pds_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, custom_ap_icon_size, self.stop_event)
+            ap_icon_size = int(ap_icon_size)  # Convert the input to a float
+            create_pds_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, ap_icon_size, self.stop_event)
 
         except ValueError:
             # Handle the case where the input is not a valid number
@@ -921,14 +957,14 @@ class MyFrame(wx.Frame):
             return
 
         # Retrieve the number from the custom AP icon size text box
-        custom_ap_icon_size = self.custom_ap_icon_size_text_box.GetValue()
+        ap_icon_size = self.ap_icon_size_text_box.GetValue()
 
         # Clear the stop event flag before starting the thread
         self.stop_event.clear()
 
         try:
-            custom_ap_icon_size = int(custom_ap_icon_size)  # Convert the input to a float
-            create_custom_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, custom_ap_icon_size, self.stop_event)
+            ap_icon_size = int(ap_icon_size)  # Convert the input to a float
+            create_custom_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, ap_icon_size, self.stop_event)
 
         except ValueError:
             # Handle the case where the input is not a valid number
@@ -942,12 +978,12 @@ class MyFrame(wx.Frame):
 
         # Retrieve the number from the zoomed AP crop size text box
         zoomed_ap_crop_size = self.zoomed_ap_crop_text_box.GetValue()
-        custom_ap_icon_size = self.custom_ap_icon_size_text_box.GetValue()
+        ap_icon_size = self.ap_icon_size_text_box.GetValue()
 
         try:
             zoomed_ap_crop_size = int(zoomed_ap_crop_size)  # Convert the input to a float
-            custom_ap_icon_size = int(custom_ap_icon_size)  # Convert the input to a float
-            create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, zoomed_ap_crop_size, custom_ap_icon_size, self.stop_event)
+            custom_ap_icon_size = int(ap_icon_size)  # Convert the input to a float
+            create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, zoomed_ap_crop_size, ap_icon_size, self.stop_event)
         except ValueError:
             # Handle the case where the input is not a valid number
             wx.MessageBox("Please enter a valid number", "Error", wx.OK | wx.ICON_ERROR)
