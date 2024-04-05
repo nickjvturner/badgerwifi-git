@@ -5,8 +5,8 @@ import matplotlib.image as mpimg
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.figure import Figure
 from pathlib import Path
-import importlib.util
 
+from common import import_module_from_path
 from common import load_json
 from common import create_floor_plans_dict
 from common import model_antenna_split
@@ -15,34 +15,25 @@ from common import discover_available_scripts
 from common import RENAME_APS_DIR
 from common import BOUNDARY_SEPARATION_WIDGET
 
-from rename_aps.ap_renamer import ap_renamer
-
-
-def import_module_from_path(module_name, path_to_module):
-    spec = importlib.util.spec_from_file_location(module_name, path_to_module)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
 
 class MapDialog(wx.Dialog):
     """A dialog for displaying maps and access point information."""
-    def __init__(self, parent, title, ap_data, map_data, floor_plans_dict, initial_dropdown_selection):
+    def __init__(self, parent, title, ap_data, map_data, floor_plans_dict):
         super().__init__(parent, title=title, size=(1000, 800))
         self.set_window_size()
         self.ap_data = ap_data
         self.map_data = map_data
         self.current_map = next(iter(map_data))
         self.floor_plans_dict = floor_plans_dict
-        self.current_dropdown_selection = initial_dropdown_selection
+        self.current_dropdown_selection = parent.ap_rename_script_dropdown.GetSelection()
 
         self.current_sorting_module = None
         self.image_cache = {}  # Cache for loaded images
-        self.boundary_separation = parent.rename_aps_boundary_separator
+        self.rename_aps_boundary_separator = parent.rename_aps_boundary_separator
         self.update_boundary_separator_value = parent.update_boundary_separator_value
+        self.refresh_boundary_separator_widgets = parent.refresh_boundary_separator_widgets
+        self.update_ap_rename_script_dropdown_selection = parent.update_ap_rename_script_dropdown_selection
         self.boundaries = None
-
-        self.parent = parent
 
         self.init_ui()
 
@@ -68,9 +59,6 @@ class MapDialog(wx.Dialog):
     def setup_buttons(self):
         self.dismiss_button = wx.Button(self.panel, label='Dismiss')
         self.dismiss_button.Bind(wx.EVT_BUTTON, self.on_dismiss)
-
-        self.rename_aps_button = wx.Button(self.panel, label='Rename APs')
-        self.rename_aps_button.Bind(wx.EVT_BUTTON, self.on_rename_aps)
 
     def setup_labels(self):
         """Setup the labels for the dialog."""
@@ -106,7 +94,6 @@ class MapDialog(wx.Dialog):
         self.action_row = wx.BoxSizer(wx.HORIZONTAL)
         self.action_row.Add(self.rename_script_one_liner, 0, wx.EXPAND | wx.ALL, 5)
         self.action_row.AddStretchSpacer()
-        self.action_row.Add(self.rename_aps_button, 0, wx.EXPAND | wx.ALL, 5)
 
         self.exit_row = wx.BoxSizer(wx.HORIZONTAL)
         self.exit_row.AddStretchSpacer()
@@ -130,6 +117,9 @@ class MapDialog(wx.Dialog):
         """Handle rename script selection changes."""
         self.boundaries = None
         selected_script = self.rename_choice.GetStringSelection()
+        # pass index back to parent
+        self.update_ap_rename_script_dropdown_selection(self.rename_choice.GetSelection())
+
         path_to_module = Path(__file__).resolve().parent.parent / RENAME_APS_DIR / f'{selected_script}.py'
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
 
@@ -137,7 +127,7 @@ class MapDialog(wx.Dialog):
         if hasattr(self.current_sorting_module, 'ONE_LINER_DESCRIPTION'):
             self.rename_script_one_liner.SetLabel(self.current_sorting_module.ONE_LINER_DESCRIPTION)
 
-        # Remove existing boundary_separation widgets if they exist
+        # Remove existing rename_aps_boundary_separator widgets if they exist
         if hasattr(self, 'spin_ctrl'):
             self.remove_boundary_separation_widget()
 
@@ -155,7 +145,7 @@ class MapDialog(wx.Dialog):
 
         self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
         self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
-        self.spin_ctrl.SetValue(400)  # Set the initial value
+        self.spin_ctrl.SetValue(self.rename_aps_boundary_separator)  # Set the initial value
         self.spin_ctrl.SetIncrement(10)  # Set the increment value (step size)
 
         self.update_button = wx.Button(self.panel, label='Update')
@@ -166,7 +156,7 @@ class MapDialog(wx.Dialog):
         self.row1.Add(self.update_button, 0, wx.ALL, 5)
 
     def remove_boundary_separation_widget(self):
-        """Remove any existing boundary_separation widgets."""
+        """Remove any existing rename_aps_boundary_separator widgets."""
         # Logic from on_rename_change for removing widgets
         self.row1.Detach(self.spin_ctrl)  # Detach from sizer
         self.spin_ctrl.Destroy()  # Destroy the widget
@@ -181,8 +171,9 @@ class MapDialog(wx.Dialog):
         del self.update_button
 
     def on_spin(self, event):
-        self.boundary_separation = int(self.spin_ctrl.GetValue())
-        self.update_boundary_separator_value(self.boundary_separation)
+        self.rename_aps_boundary_separator = int(self.spin_ctrl.GetValue())
+        self.update_boundary_separator_value(self.rename_aps_boundary_separator)
+        self.refresh_boundary_separator_widgets()
         self.update_plot()
 
     def on_show(self, event):
@@ -267,7 +258,7 @@ class MapDialog(wx.Dialog):
                 ap_list.append(ap)
 
         if self.current_sorting_module and hasattr(self.current_sorting_module, BOUNDARY_SEPARATION_WIDGET):
-            return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict, self.boundary_separation, True)
+            return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict, self.rename_aps_boundary_separator, True)
 
         elif self.current_sorting_module and hasattr(self.current_sorting_module, "sort_logic"):
             return self.current_sorting_module.sort_logic(ap_list, self.floor_plans_dict), None, None  # Adjust as per the sorting function's requirements
@@ -281,14 +272,14 @@ class MapDialog(wx.Dialog):
             for boundary in self.boundaries:
                 ax.axhline(y=boundary, color='b', linestyle='--', linewidth=1)
             # Skip drawing the last boundary if it's beyond the plot's limits
-            if self.boundaries[-1] + self.boundary_separation < ax.get_ylim()[1]:
-                ax.axhline(y=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1)  # Draw the last boundary
+            if self.boundaries[-1] + self.rename_aps_boundary_separator < ax.get_ylim()[1]:
+                ax.axhline(y=boundary + self.rename_aps_boundary_separator, color='b', linestyle='--', linewidth=1)  # Draw the last boundary
 
         elif self.boundary_orientation == 'vertical':
             self.draw_column_indicators(ax)
             for boundary in self.boundaries:
                 ax.axvline(x=boundary, color='b', linestyle='--', linewidth=1)
-            ax.axvline(x=boundary + self.boundary_separation, color='b', linestyle='--', linewidth=1)  # Draw the last boundary
+            ax.axvline(x=boundary + self.rename_aps_boundary_separator, color='b', linestyle='--', linewidth=1)  # Draw the last boundary
 
     def draw_row_indicators(self, ax):
         """Draw indicators for row numbers between boundary lines."""
@@ -298,7 +289,7 @@ class MapDialog(wx.Dialog):
         for i, y_position in enumerate(self.boundaries, start=1):
             # Place the row indicator. Adjust `x_position` and `y_position` as needed.
             # You might want to add or subtract a small value to `y_position` to avoid overlap with the lines
-            ax.text(x_position, y_position + (self.boundary_separation / 2), f"{i}", verticalalignment='center', horizontalalignment='left', color='blue', fontsize=10)
+            ax.text(x_position, y_position + (self.rename_aps_boundary_separator / 2), f"{i}", verticalalignment='center', horizontalalignment='left', color='blue', fontsize=10)
 
     def draw_column_indicators(self, ax):
         """Draw indicators for column numbers between boundary lines."""
@@ -307,14 +298,11 @@ class MapDialog(wx.Dialog):
 
         for i, x_position in enumerate(self.boundaries, start=1):
             # Similar to rows, but now we're adjusting the x positions for column indicators
-            ax.text(x_position + (self.boundary_separation / 2), y_position, f"{i}", verticalalignment='bottom', horizontalalignment='center', color='blue', fontsize=10)
+            ax.text(x_position + (self.rename_aps_boundary_separator / 2), y_position, f"{i}", verticalalignment='bottom', horizontalalignment='center', color='blue', fontsize=10)
 
     def on_dismiss(self, event):
         self.EndModal(wx.ID_CANCEL)
         self.Destroy()
-
-    def on_rename_aps(self, event):
-        ap_renamer(self.parent.working_directory, self.parent.esx_project_name, self.current_sorting_module, self.parent.append_message, self.boundary_separation)
 
 
 def create_custom_ap_dict(access_points_json, floor_plans_dict):
@@ -342,7 +330,7 @@ def create_reversed_floor_plans_dict(floor_plans_json):
     return floor_plans_dict
 
 
-def visualise_ap_renaming(working_directory, project_name, message_callback, current_dropdown_selection, parent_frame):
+def visualise_ap_renaming(working_directory, project_name, message_callback, parent_frame):
     floor_plans_json = load_json(working_directory / project_name, 'floorPlans.json', message_callback)
     access_points_json = load_json(working_directory / project_name, 'accessPoints.json', message_callback)
 
@@ -358,6 +346,6 @@ def visualise_ap_renaming(working_directory, project_name, message_callback, cur
         map_data.setdefault(value, []).append(working_directory / project_name / floor_file_id)
 
     # Launch the MapDialog as modal
-    dialog = MapDialog(parent_frame, "AP Visualization", ap_data, map_data, floor_plans_dict, current_dropdown_selection)
+    dialog = MapDialog(parent_frame, "AP Visualization", ap_data, map_data, floor_plans_dict)
     dialog.ShowModal()  # Display the dialog modally
     dialog.Destroy()  # Ensure to destroy the dialog after it's closed

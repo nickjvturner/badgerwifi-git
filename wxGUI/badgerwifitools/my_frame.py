@@ -43,7 +43,9 @@ from common import PROJECT_PROFILES_DIR
 from common import RENAME_APS_DIR
 from common import PROJECT_DETAIL_DIR
 from common import ADMIN_ACTIONS_DIR
+from common import BOUNDARY_SEPARATION_WIDGET
 from common import discover_available_scripts
+from common import import_module_from_path
 
 from admin.check_for_updates import check_for_updates
 
@@ -94,6 +96,7 @@ class MyFrame(wx.Frame):
         self.esx_project_name = None
         self.esx_filepath = None
         self.current_project_profile_module = None
+        self.rename_aps_boundary_separator = 200  # Initialize the boundary separator variable
         self.esx_required_tag_keys = {}
         self.esx_optional_tag_keys = {}
         self.docx_files = []
@@ -109,9 +112,6 @@ class MyFrame(wx.Frame):
 
         # Create a thread control variable
         self.stop_event = threading.Event()  # Initialize the stop event
-
-        # Define the default value for the renaming boundary separator
-        self.rename_aps_boundary_separator = 400
 
     def setup_list_box(self):
         # Set up your list box here
@@ -216,11 +216,6 @@ class MyFrame(wx.Frame):
         self.visualise_ap_renaming_button = wx.Button(self.tab1, label="Rename Pattern Visualiser")
         self.visualise_ap_renaming_button.Bind(wx.EVT_BUTTON, self.on_visualise_ap_renaming)
         self.visualise_ap_renaming_button.SetToolTip(wx.ToolTip("Preview the AP renaming pattern"))
-
-        # Create a button for showing long descriptions with a specified narrow size
-        self.description_button = wx.Button(self.tab1, label="?", size=(20, -1))  # Width of 40, default height
-        self.description_button.Bind(wx.EVT_BUTTON, self.on_description_button_click)
-        self.description_button.SetToolTip(wx.ToolTip("Show long description of the selected AP renaming script"))
 
         # Create a button to create an AP List Excel file in accordance with the selected project profile
         self.create_ap_list = wx.Button(self.tab1, label="AP List")
@@ -392,14 +387,21 @@ class MyFrame(wx.Frame):
         self.tab1_row2_sizer.AddStretchSpacer(1)
         self.tab1_row2_sizer.Add(self.ap_rename_script_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
         self.tab1_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_row2_sizer.Add(self.description_button, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row2_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
+        self.tab1_row3_sizer_lhs = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_row3_sizer_rhs = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.tab1_row3_sizer_rhs.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        self.tab1_row3_sizer_rhs.Add(self.create_ap_list, 0, wx.ALL, 5)
+
+        self.tab1_row3_sizer.AddSpacer(10)
+        self.tab1_row3_sizer.Add(self.tab1_row3_sizer_lhs, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row3_sizer.AddStretchSpacer(1)
-        self.tab1_row3_sizer.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab1_row3_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
+        self.tab1_row3_sizer.Add(self.tab1_row3_sizer_rhs, 0, wx.EXPAND | wx.ALL, 5)
+
         self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.tab1.SetSizer(self.tab1_sizer)
@@ -584,7 +586,8 @@ class MyFrame(wx.Frame):
             'selected_admin_actions_index': self.admin_actions_dropdown.GetSelection(),
             'selected_tab_index': self.notebook.GetSelection(),
             'ap_icon_size_text_box': self.ap_icon_size_text_box.GetValue(),
-            'zoomed_ap_crop_text_box': self.zoomed_ap_crop_text_box.GetValue()
+            'zoomed_ap_crop_text_box': self.zoomed_ap_crop_text_box.GetValue(),
+            'boundary_separator_value': self.rename_aps_boundary_separator
         }
         # Save the state to the defined path
         with open(self.app_state_file_path, 'w') as f:
@@ -602,6 +605,9 @@ class MyFrame(wx.Frame):
                         self.append_message(f"** WARNING ** {nl}The file {item} does not exist.")
                     self.list_box.Append(item)
                     self.drop_target_label.Hide()  # Hide the drop target label
+
+                # Restore the boundary separator value
+                self.rename_aps_boundary_separator = state.get('boundary_separator_value', 400)
 
                 # Restore selected ap rename script index
                 self.ap_rename_script_dropdown.SetSelection(state.get('selected_ap_rename_script_index', 0))
@@ -626,6 +632,7 @@ class MyFrame(wx.Frame):
                 self.ap_icon_size_text_box.SetValue(state.get('ap_icon_size_text_box', "50"))
                 self.zoomed_ap_crop_text_box.SetValue(state.get('zoomed_ap_crop_text_box', "2000"))
 
+
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
             self.on_project_profile_dropdown_selection(None)
@@ -638,6 +645,8 @@ class MyFrame(wx.Frame):
         self.drop_target_label.Show()  # Show the drop target label
         self.ap_icon_size_text_box.SetValue("50")  # Reset the AP icon size
         self.zoomed_ap_crop_text_box.SetValue("2000")  # Reset the zoomed AP crop size
+        self.rename_aps_boundary_separator = 400  # Reset the boundary separator value
+        self.refresh_boundary_separator_widgets()
         self.stop_event.clear()  # Clear the stop event
 
     def on_clear_log(self, event):
@@ -825,46 +834,60 @@ class MyFrame(wx.Frame):
         ap_renamer(self.working_directory, self.esx_project_name, script_module, self.append_message, self.rename_aps_boundary_separator)
 
     def on_ap_rename_script_dropdown_selection(self, event):
-        selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
+        """Handle rename script selection change."""
+        selected_script = self.ap_rename_script_dropdown.GetStringSelection()
+        path_to_module = Path(__file__).resolve().parent / RENAME_APS_DIR / f'{selected_script}.py'
+
         _, short_description, _ = self.get_ap_rename_script_descriptions(selected_script)  # Ignore script_name and long_description
+        self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
+
         self.ap_rename_script_dropdown.SetToolTip(wx.ToolTip(short_description))
+        self.refresh_boundary_separator_widgets()
         self.save_application_state(None)
+
+    def refresh_boundary_separator_widgets(self):
+        # Remove existing boundary_separation widgets if they exist
+        if hasattr(self, 'boundary_separator_display_label'):
+            self.remove_boundary_separator_display_widgets()
 
         # Add the boundary separator widgets only if the selected script has attribute "visualise_boundaries"
         if hasattr(self.current_sorting_module, BOUNDARY_SEPARATION_WIDGET):
-            self.add_boundary_separation_widget()
+            self.add_boundary_separator_display_widgets()
 
-    def add_boundary_separation_widget(self):
-        """Add boundary separation widget based on the current sorting module."""
-        # Logic from on_rename_change for adding widgets
-        self.spin_ctrl_label = wx.StaticText(self.panel, label="Boundary Separator:")
+        self.panel.Layout()  # Re-layout the panel to reflect changes
 
-        self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
-        self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
-        self.spin_ctrl.SetValue(400)  # Set the initial value
-        self.spin_ctrl.SetIncrement(10)  # Set the increment value (step size)
+    def add_boundary_separator_display_widgets(self):
+        """Create and display the boundary separator value display widgets."""
+        # Recreate the label for "Boundary Separator:"
+        self.boundary_separator_display_label = wx.StaticText(self.tab1, label="Row / Column Boundary Separator Value: ")
 
-        self.update_button = wx.Button(self.panel, label='Update')
-        self.update_button.Bind(wx.EVT_BUTTON, self.on_spin)
+        # Convert the integer to a string and create a new wx.StaticText to display it
+        self.boundary_separator_value_string = wx.StaticText(self.tab1, label=str(self.rename_aps_boundary_separator))
 
-        self.row1.Add(self.spin_ctrl_label, 0, wx.ALL, 5)
-        self.row1.Add(self.spin_ctrl, 0, wx.ALIGN_CENTER_VERTICAL, 1)
-        self.row1.Add(self.update_button, 0, wx.ALL, 5)
+        # Add widgets to the sizer
+        self.tab1_row3_sizer_lhs.Add(self.boundary_separator_display_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        self.tab1_row3_sizer_lhs.Add(self.boundary_separator_value_string, 0, wx.ALIGN_CENTER_VERTICAL, 5)
 
-    def remove_boundary_separation_widget(self):
-        """Remove any existing boundary_separation widgets."""
-        # Logic from on_rename_change for removing widgets
-        self.row1.Detach(self.spin_ctrl)  # Detach from sizer
-        self.spin_ctrl.Destroy()  # Destroy the widget
-        del self.spin_ctrl  # Remove the attribute to avoid reusing it
+        self.tab1.Layout()
 
-        self.row1.Detach(self.spin_ctrl_label)
-        self.spin_ctrl_label.Destroy()  # Destroy the widget
-        del self.spin_ctrl_label  # Remove the attribute to avoid reusing it
+    def remove_boundary_separator_display_widgets(self):
+        """Safely remove the boundary separator widgets if they exist."""
+        # Check if the label exists and is a part of any sizer
+        if hasattr(self, 'boundary_separator_display_label') and self.boundary_separator_display_label:
+            # Detach the widget from the sizer
+            self.tab1_row3_sizer_lhs.Detach(self.boundary_separator_display_label)
+            # Destroy the widget
+            self.boundary_separator_display_label.Destroy()
+            # Remove the attribute or set it to None to avoid future errors
+            self.boundary_separator_display_label = None
 
-        self.row1.Detach(self.update_button)
-        self.update_button.Destroy()
-        del self.update_button
+        # Do the same for the second label
+        if hasattr(self, 'boundary_separator_value_string') and self.boundary_separator_value_string:
+            self.tab1_row3_sizer_lhs.Detach(self.boundary_separator_value_string)
+            self.boundary_separator_value_string.Destroy()
+            self.boundary_separator_value_string = None
+
+        self.tab1.Layout()
 
     def get_ap_rename_script_descriptions(self, script_name):
         script_path = str(Path(__file__).resolve().parent / RENAME_APS_DIR / f"{script_name}.py")
@@ -874,40 +897,6 @@ class MyFrame(wx.Frame):
         short_description = getattr(module, 'SHORT_DESCRIPTION', "No short description available.")
         long_description = getattr(module, 'LONG_DESCRIPTION', "No long description available.")
         return script_name, short_description, long_description
-
-    def on_description_button_click(self, event):
-        selected_script = self.available_ap_rename_scripts[self.ap_rename_script_dropdown.GetSelection()]
-        script_name, short_description, long_description = self.get_ap_rename_script_descriptions(selected_script)
-        self.show_long_description_dialog(script_name, long_description)
-
-    def show_long_description_dialog(self, script_name, long_description):
-        # Create a dialog with a resize border
-        dialog = wx.Dialog(self, title=f"{script_name} Long Description", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-
-        # Create a sizer for the dialog content
-        dialog_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        # Add a text control with a minimum size set
-        text_ctrl = wx.TextCtrl(dialog, value=long_description, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        text_ctrl.SetMinSize((580, 350))  # Adjust the minimum size if needed
-        dialog_sizer.Add(text_ctrl, 1, wx.EXPAND | wx.ALL, 10)
-
-        # Add a dismiss button
-        dismiss_button = wx.Button(dialog, label="Dismiss")
-        dialog_sizer.Add(dismiss_button, 0, wx.ALL | wx.ALIGN_CENTER, 10)
-        dismiss_button.Bind(wx.EVT_BUTTON, lambda event: dialog.EndModal(wx.ID_OK))
-
-        # Apply the sizer to the dialog. This adjusts the dialog to fit the sizer's content.
-        dialog.SetSizer(dialog_sizer)
-
-        # Explicitly set the dialog's size after applying the sizer to ensure it's not just limited to the sizer's minimum size
-        dialog.SetSize((800, 400))
-
-        # Optionally, you can set a minimum size for the dialog to ensure it cannot be resized smaller than desired
-        dialog.SetMinSize((600, 400))
-
-        dialog.ShowModal()
-        dialog.Destroy()
 
     def update_esx_project_unpacked(self, unpacked):
         self.esx_project_unpacked = unpacked
@@ -1052,8 +1041,13 @@ class MyFrame(wx.Frame):
     def on_visualise_ap_renaming(self, event):
         if not self.basic_checks():
             return
-        visualise_ap_renaming(self.working_directory, self.esx_project_name, self.append_message, self.ap_rename_script_dropdown.GetSelection(), self)
+        visualise_ap_renaming(self.working_directory, self.esx_project_name, self.append_message, self)
 
     def update_boundary_separator_value(self, value):
         """Callback function to update the boundary_separator variable."""
         self.rename_aps_boundary_separator = value
+
+    def update_ap_rename_script_dropdown_selection(self, index):
+        self.ap_rename_script_dropdown.SetSelection(index)
+        self.on_ap_rename_script_dropdown_selection(None)
+

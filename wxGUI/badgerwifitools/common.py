@@ -5,6 +5,8 @@ import wx
 import json
 import shutil
 from pathlib import Path
+import importlib.util
+
 
 # Constants
 VERSION = '1.2'
@@ -260,3 +262,10 @@ def discover_available_scripts(directory, ignore_files=("_", "common")):
         if filename.endswith(".py") and not filename.startswith(ignore_files):
             available_scripts.append(filename[:-3])
     return sorted(available_scripts)
+
+
+def import_module_from_path(module_name, path_to_module):
+    spec = importlib.util.spec_from_file_location(module_name, path_to_module)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
