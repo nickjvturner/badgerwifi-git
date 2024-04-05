@@ -49,7 +49,7 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
     blank_plan_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for Annotated floor plans
-    pds_plan_dir = output_dir / 'pds'
+    pds_plan_dir = output_dir / 'PDS AP location maps'
     pds_plan_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for temporary files

@@ -59,7 +59,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
     zoom_faded_dir.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for Custom AP Location maps
-    custom_ap_location_maps = output_dir / 'custom AP location maps'
+    custom_ap_location_maps = output_dir / 'AP location maps'
     custom_ap_location_maps.mkdir(parents=True, exist_ok=True)
 
     # Create subdirectory for temporary files
