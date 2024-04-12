@@ -31,7 +31,6 @@ class MapDialog(wx.Dialog):
         self.image_cache = {}  # Cache for loaded images
         self.rename_aps_boundary_separator = parent.rename_aps_boundary_separator
         self.update_boundary_separator_value = parent.update_boundary_separator_value
-        self.refresh_boundary_separator_widgets = parent.refresh_boundary_separator_widgets
         self.update_ap_rename_script_dropdown_selection = parent.update_ap_rename_script_dropdown_selection
         self.boundaries = None
 
@@ -149,7 +148,7 @@ class MapDialog(wx.Dialog):
         self.spin_ctrl.SetIncrement(10)  # Set the increment value (step size)
 
         self.update_button = wx.Button(self.panel, label='Update')
-        self.update_button.Bind(wx.EVT_BUTTON, self.on_spin)
+        self.update_button.Bind(wx.EVT_BUTTON, self.on_update_boundary_separator)
 
         self.row1.Add(self.spin_ctrl_label, 0, wx.ALL, 5)
         self.row1.Add(self.spin_ctrl, 0, wx.ALIGN_CENTER_VERTICAL, 1)
@@ -170,11 +169,12 @@ class MapDialog(wx.Dialog):
         self.update_button.Destroy()
         del self.update_button
 
-    def on_spin(self, event):
-        self.rename_aps_boundary_separator = int(self.spin_ctrl.GetValue())
-        self.update_boundary_separator_value(self.rename_aps_boundary_separator)
-        self.refresh_boundary_separator_widgets()
-        self.update_plot()
+    def on_update_boundary_separator(self, event):
+        """Update the boundary separator value."""
+        if not self.rename_aps_boundary_separator == int(self.spin_ctrl.GetValue()):
+            self.rename_aps_boundary_separator = int(self.spin_ctrl.GetValue())
+            self.update_boundary_separator_value(self.rename_aps_boundary_separator)
+            self.update_plot()
 
     def on_show(self, event):
         self.map_choice.SetSelection(0)

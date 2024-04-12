@@ -390,18 +390,11 @@ class MyFrame(wx.Frame):
         self.tab1_row2_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
-        self.tab1_row3_sizer_lhs = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row3_sizer_rhs = wx.BoxSizer(wx.HORIZONTAL)
         self.tab1_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.tab1_row3_sizer_rhs.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab1_row3_sizer_rhs.Add(self.create_ap_list, 0, wx.ALL, 5)
-
-        self.tab1_row3_sizer.AddSpacer(10)
-        self.tab1_row3_sizer.Add(self.tab1_row3_sizer_lhs, 0, wx.EXPAND | wx.ALL, 5)
         self.tab1_row3_sizer.AddStretchSpacer(1)
-        self.tab1_row3_sizer.Add(self.tab1_row3_sizer_rhs, 0, wx.EXPAND | wx.ALL, 5)
-
+        self.tab1_row3_sizer.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
+        self.tab1_row3_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
         self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.tab1.SetSizer(self.tab1_sizer)
@@ -842,52 +835,17 @@ class MyFrame(wx.Frame):
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
 
         self.ap_rename_script_dropdown.SetToolTip(wx.ToolTip(short_description))
-        self.refresh_boundary_separator_widgets()
-        self.save_application_state(None)
 
-    def refresh_boundary_separator_widgets(self):
-        # Remove existing boundary_separation widgets if they exist
-        if hasattr(self, 'boundary_separator_display_label'):
-            self.remove_boundary_separator_display_widgets()
+        if event:
+            self.display_boundary_separator_message()
+            self.save_application_state(None)
 
-        # Add the boundary separator widgets only if the selected script has attribute "visualise_boundaries"
+    def display_boundary_separator_message(self):
         if hasattr(self.current_sorting_module, BOUNDARY_SEPARATION_WIDGET):
-            self.add_boundary_separator_display_widgets()
-
-        self.panel.Layout()  # Re-layout the panel to reflect changes
-
-    def add_boundary_separator_display_widgets(self):
-        """Create and display the boundary separator value display widgets."""
-        # Recreate the label for "Boundary Separator:"
-        self.boundary_separator_display_label = wx.StaticText(self.tab1, label="Row / Column Boundary Separator Value: ")
-
-        # Convert the integer to a string and create a new wx.StaticText to display it
-        self.boundary_separator_value_string = wx.StaticText(self.tab1, label=str(self.rename_aps_boundary_separator))
-
-        # Add widgets to the sizer
-        self.tab1_row3_sizer_lhs.Add(self.boundary_separator_display_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab1_row3_sizer_lhs.Add(self.boundary_separator_value_string, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-
-        self.tab1.Layout()
-
-    def remove_boundary_separator_display_widgets(self):
-        """Safely remove the boundary separator widgets if they exist."""
-        # Check if the label exists and is a part of any sizer
-        if hasattr(self, 'boundary_separator_display_label') and self.boundary_separator_display_label:
-            # Detach the widget from the sizer
-            self.tab1_row3_sizer_lhs.Detach(self.boundary_separator_display_label)
-            # Destroy the widget
-            self.boundary_separator_display_label.Destroy()
-            # Remove the attribute or set it to None to avoid future errors
-            self.boundary_separator_display_label = None
-
-        # Do the same for the second label
-        if hasattr(self, 'boundary_separator_value_string') and self.boundary_separator_value_string:
-            self.tab1_row3_sizer_lhs.Detach(self.boundary_separator_value_string)
-            self.boundary_separator_value_string.Destroy()
-            self.boundary_separator_value_string = None
-
-        self.tab1.Layout()
+            self.display_log.SetValue("")  # Clear the contents of the display_log
+            self.append_message(f"Selected AP renaming script contains a configurable boundary parameter{nl}Boundary separator value: {self.rename_aps_boundary_separator}")
+        else:
+            self.display_log.SetValue("")  # Clear the contents of the display_log
 
     def get_ap_rename_script_descriptions(self, script_name):
         script_path = str(Path(__file__).resolve().parent / RENAME_APS_DIR / f"{script_name}.py")
