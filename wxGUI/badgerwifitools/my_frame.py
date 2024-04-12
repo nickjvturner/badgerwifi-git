@@ -1046,6 +1046,7 @@ class MyFrame(wx.Frame):
     def update_boundary_separator_value(self, value):
         """Callback function to update the boundary_separator variable."""
         self.rename_aps_boundary_separator = value
+        self.append_message(f"Boundary separator value set to {value}")
 
     def update_ap_rename_script_dropdown_selection(self, index):
         self.ap_rename_script_dropdown.SetSelection(index)
