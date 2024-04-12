@@ -297,12 +297,6 @@ class MyFrame(wx.Frame):
         # Create a text label for the drop target with custom position
         self.drop_target_label = wx.StaticText(self.panel, label="Drag and Drop files here", pos=(22, 17))
 
-        # Create a text label for the AP renaming script dropdown
-        self.ap_rename_script_label = wx.StaticText(self.tab1, label="Rename APs:")
-
-        # Create a text label for the Project Profile dropdown
-        self.project_profile_label = wx.StaticText(self.tab1, label="Project Profile:")
-
         # Create a text label for the Create AP List function
         self.create_ap_list_label = wx.StaticText(self.tab1, label="Export to Excel:")
 
@@ -373,29 +367,44 @@ class MyFrame(wx.Frame):
 
     def setup_tab1(self):
         self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row1_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_row1_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_row1_sizer.AddStretchSpacer(1)
-        self.tab1_row1_sizer.Add(self.project_profile_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab1_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
-        self.tab1_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
+        self.tab1_lhs_box = wx.StaticBox(self.tab1, label="Project Profile")
+        self.tab1_lhs_box_sizer = wx.StaticBoxSizer(self.tab1_lhs_box, wx.VERTICAL)
+
+        self.tab1_lhs_box_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_lhs_box_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_lhs_box_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
+        self.tab1_lhs_box_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
+
+        self.tab1_lhs_box_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_lhs_box_row2_sizer.Add(self.create_ap_list_label, 0, wx.ALL, 5)
+        self.tab1_lhs_box_row2_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
+
+        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1_rhs_box = wx.StaticBox(self.tab1, label="Rename APs")
+        self.tab1_rhs_box_sizer = wx.StaticBoxSizer(self.tab1_rhs_box, wx.VERTICAL)
+
+        self.tab1_rhs_box_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_rhs_box_row1_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_rhs_box_row1_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
+
+        self.tab1_rhs_box_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_rhs_box_row2_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
+
+        self.tab1_rhs_box_sizer.Add(self.tab1_rhs_box_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_rhs_box_sizer.Add(self.tab1_rhs_box_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+
+        self.tab1_row1_sizer.Add(self.tab1_lhs_box_sizer, 1, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row1_sizer.Add(self.tab1_rhs_box_sizer, 1, wx.EXPAND | wx.ALL, 5)
+
         self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row2_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
-        self.tab1_row2_sizer.AddStretchSpacer(1)
-        self.tab1_row2_sizer.Add(self.ap_rename_script_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab1_row2_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_row2_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
+        self.tab1_row2_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_row2_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, 5)
+
         self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
-
-        self.tab1_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.tab1_row3_sizer.AddStretchSpacer(1)
-        self.tab1_row3_sizer.Add(self.create_ap_list_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab1_row3_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
-        self.tab1_sizer.Add(self.tab1_row3_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
 
         self.tab1.SetSizer(self.tab1_sizer)
 
