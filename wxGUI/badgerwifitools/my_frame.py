@@ -367,7 +367,9 @@ class MyFrame(wx.Frame):
 
     def setup_tab1(self):
         self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_lhs_box = wx.StaticBox(self.tab1, label="Project Profile")
+
+        # Set up the left-hand side (LHS) components
+        self.tab1_lhs_box = wx.StaticBox(self.tab1)
         self.tab1_lhs_box_sizer = wx.StaticBoxSizer(self.tab1_lhs_box, wx.VERTICAL)
 
         self.tab1_lhs_box_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -379,10 +381,11 @@ class MyFrame(wx.Frame):
         self.tab1_lhs_box_row2_sizer.Add(self.create_ap_list_label, 0, wx.ALL, 5)
         self.tab1_lhs_box_row2_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
 
-        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
+        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row1_sizer, 0, wx.EXPAND | wx.ALL, 0)
+        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row2_sizer, 0, wx.EXPAND | wx.ALL, 0)
 
-        self.tab1_rhs_box = wx.StaticBox(self.tab1, label="Rename APs")
+        # Set up the right-hand side (RHS) components
+        self.tab1_rhs_box = wx.StaticBox(self.tab1)
         self.tab1_rhs_box_sizer = wx.StaticBoxSizer(self.tab1_rhs_box, wx.VERTICAL)
 
         self.tab1_rhs_box_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
