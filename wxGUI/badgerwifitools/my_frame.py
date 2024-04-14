@@ -151,7 +151,7 @@ class MyFrame(wx.Frame):
         self.available_project_detail_views = discover_available_scripts(PROJECT_DETAIL_DIR)
 
         # Create a dropdown to select a Project Detail View
-        self.project_detail_dropdown = wx.Choice(self.tab1, choices=self.available_project_detail_views)
+        self.project_detail_dropdown = wx.Choice(self.tab4, choices=self.available_project_detail_views)
         self.project_detail_dropdown.SetSelection(0)  # Set default selection
         self.project_detail_dropdown.Bind(wx.EVT_CHOICE, self.on_project_detail_dropdown_selection)
 
@@ -189,7 +189,7 @@ class MyFrame(wx.Frame):
         self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
         self.clear_log_button.SetToolTip(wx.ToolTip("Clear the log"))
 
-        self.display_project_detail_button = wx.Button(self.tab1, label="Display")
+        self.display_project_detail_button = wx.Button(self.tab4, label="Display")
         self.display_project_detail_button.Bind(wx.EVT_BUTTON, self.on_display_project_detail)
         self.display_project_detail_button.SetToolTip(wx.ToolTip("Display detailed information about the current .esx project"))
 
@@ -300,9 +300,6 @@ class MyFrame(wx.Frame):
         # Create a text label for the Create AP List function
         self.create_ap_list_label = wx.StaticText(self.tab1, label="Export to Excel:")
 
-        # Create a text label for the Create Asset functions
-        self.create_asset_label = wx.StaticText(self.tab2, label="Create:")
-
         # Create a text label for the zoomed AP crop size text box
         self.zoomed_ap_crop_label = wx.StaticText(self.tab2, label="Zoomed AP Crop Size:")
         self.zoomed_ap_crop_label.SetToolTip(wx.ToolTip("Enter the size of the zoomed AP crop in pixels"))
@@ -310,9 +307,6 @@ class MyFrame(wx.Frame):
         # Create a text label for the AP icon size
         self.ap_icon_size_label = wx.StaticText(self.tab2, label="AP Icon Size:")
         self.ap_icon_size_label.SetToolTip(wx.ToolTip("Enter the size of the AP icon in pixels"))
-
-        # Create a text label for Export functions
-        self.export_label = wx.StaticText(self.tab2, label="Export:")
 
     def setup_panel_rows(self):
         self.button_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -366,105 +360,165 @@ class MyFrame(wx.Frame):
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
 
     def setup_tab1(self):
-        self.tab1_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab1_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        # Set up the left-hand side (LHS) components
-        self.tab1_lhs_box = wx.StaticBox(self.tab1)
-        self.tab1_lhs_box_sizer = wx.StaticBoxSizer(self.tab1_lhs_box, wx.VERTICAL)
+        self.setup_project_profile_section()
+        self.setup_rename_aps_section()
 
-        self.tab1_lhs_box_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_lhs_box_row1_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_lhs_box_row1_sizer.Add(self.validate_button, 0, wx.ALL, 5)
-        self.tab1_lhs_box_row1_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
+        self.tab1_row_sizer.Add(self.project_profile_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab1_row_sizer.Add(self.rename_aps_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
-        self.tab1_lhs_box_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_lhs_box_row2_sizer.Add(self.create_ap_list_label, 0, wx.ALL, 5)
-        self.tab1_lhs_box_row2_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
-
-        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row1_sizer, 0, wx.EXPAND | wx.ALL, 0)
-        self.tab1_lhs_box_sizer.Add(self.tab1_lhs_box_row2_sizer, 0, wx.EXPAND | wx.ALL, 0)
-
-        # Set up the right-hand side (RHS) components
-        self.tab1_rhs_box = wx.StaticBox(self.tab1)
-        self.tab1_rhs_box_sizer = wx.StaticBoxSizer(self.tab1_rhs_box, wx.VERTICAL)
-
-        self.tab1_rhs_box_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_rhs_box_row1_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_rhs_box_row1_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
-
-        self.tab1_rhs_box_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_rhs_box_row2_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
-
-        self.tab1_rhs_box_sizer.Add(self.tab1_rhs_box_row1_sizer, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_rhs_box_sizer.Add(self.tab1_rhs_box_row2_sizer, 0, wx.EXPAND | wx.ALL, 5)
-
-        self.tab1_row1_sizer.Add(self.tab1_lhs_box_sizer, 1, wx.EXPAND | wx.ALL, 5)
-        self.tab1_row1_sizer.Add(self.tab1_rhs_box_sizer, 1, wx.EXPAND | wx.ALL, 5)
-
-        self.tab1_sizer.Add(self.tab1_row1_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
-
-        self.tab1_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab1_row2_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab1_row2_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, 5)
-
-        self.tab1_sizer.Add(self.tab1_row2_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
-
+        self.tab1_sizer.Add(self.tab1_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
         self.tab1.SetSizer(self.tab1_sizer)
 
+    def setup_project_profile_section(self):
+        self.project_profile_box = wx.StaticBox(self.tab1, label="Project Profile")
+        self.project_profile_sizer = wx.StaticBoxSizer(self.project_profile_box, wx.VERTICAL)
+
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        row_sizer.Add(self.validate_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
+        self.project_profile_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+        # Row 2
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.create_ap_list_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        row_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
+        self.project_profile_sizer.Add(row_sizer, 0, wx.EXPAND)
+
+    def setup_rename_aps_section(self):
+        self.rename_aps_box = wx.StaticBox(self.tab1, label="Rename APs")
+        self.rename_aps_sizer = wx.StaticBoxSizer(self.rename_aps_box, wx.VERTICAL)
+
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        row_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
+        self.rename_aps_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+        # Row 2
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
+        self.rename_aps_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
     def setup_tab2(self):
-        self.tab2_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab2_row1_sizer.AddStretchSpacer(1)
-        self.tab2_row1_sizer.Add(self.export_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab2_row1_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
-        self.tab2_row1_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
-        self.tab2_row1_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
-        self.tab2_sizer.Add(self.tab2_row1_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab2_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.tab2_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab2_row2_sizer.AddStretchSpacer(1)
-        self.tab2_row2_sizer.Add(self.create_asset_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        self.tab2_row2_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
-        self.tab2_row2_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
-        self.tab2_row2_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
-        self.tab2_sizer.Add(self.tab2_row2_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.setup_export_section()
+        self.setup_create_section()
 
-        self.tab2_row3_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab2_row3_sizer.AddStretchSpacer(1)
-        self.tab2_row3_sizer.Add(self.ap_icon_size_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab2_row3_sizer.Add(self.ap_icon_size_text_box, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab2_row3_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALIGN_CENTER_VERTICAL, 5)
-        self.tab2_row3_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab2_sizer.Add(self.tab2_row3_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab2_row_sizer.Add(self.export_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab2_row_sizer.Add(self.create_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
+        self.tab2_sizer.Add(self.tab2_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
         self.tab2.SetSizer(self.tab2_sizer)
 
-    def setup_tab3(self):
-        self.tab3_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab3_row1_sizer.AddStretchSpacer(1)
-        self.tab3_row1_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
-        self.tab3_row1_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
-        self.tab3_sizer.Add(self.tab3_row1_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+    def setup_export_section(self):
+        self.export_box = wx.StaticBox(self.tab2, label="Export")
+        self.export_sizer = wx.StaticBoxSizer(self.export_box, wx.VERTICAL)
 
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
+        self.export_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+    def setup_create_section(self):
+        self.create_box = wx.StaticBox(self.tab2, label="Create Map Assets")
+        self.create_sizer = wx.StaticBoxSizer(self.create_box, wx.VERTICAL)
+
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
+        self.create_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+        # Row 2
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.ap_icon_size_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        row_sizer.Add(self.ap_icon_size_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        row_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        row_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        self.create_sizer.Add(row_sizer, 0, wx.EXPAND | wx.BOTTOM, -4)
+
+    def setup_tab3(self):
+        self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab3_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.setup_image_insertion_section()
+        self.setup_pdf_section()
+
+        self.tab3_row_sizer.Add(self.image_insertion_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab3_row_sizer.Add(self.pdf_sizer, 1, wx.EXPAND | wx.ALL, 2)
+
+        self.tab3_sizer.Add(self.tab3_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
         self.tab3.SetSizer(self.tab3_sizer)
 
+    def setup_image_insertion_section(self):
+        self.image_insertion_box = wx.StaticBox(self.tab3, label="Image Insertion")
+        self.image_insertion_sizer = wx.StaticBoxSizer(self.image_insertion_box, wx.VERTICAL)
+
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
+        self.image_insertion_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+    def setup_pdf_section(self):
+        self.pdf_box = wx.StaticBox(self.tab3, label="PDF")
+        self.pdf_sizer = wx.StaticBoxSizer(self.pdf_box, wx.VERTICAL)
+
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
+        self.pdf_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
     def setup_tab4(self):
-        self.tab4_row1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab4_row1.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab4_row1.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, 5)
-        self.tab4_row1.AddStretchSpacer(1)
-        self.tab4_sizer.Add(self.tab4_row1, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab4_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.tab4_row2 = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab4_row2.Add(self.check_for_updates_button, 0, wx.ALL, 5)
-        self.tab4_sizer.Add(self.tab4_row2, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.setup_general_section()
+        self.setup_feedback_section()
 
-        self.tab4_row3 = wx.BoxSizer(wx.HORIZONTAL)
-        self.tab4_row3.Add(self.feedback_button, 0, wx.ALL, 5)
-        self.tab4_row3.AddStretchSpacer(1)
-        self.tab4_row3.Add(self.contribute_button, 0, wx.ALL, 5)
-        self.tab4_sizer.Add(self.tab4_row3, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab4_row_sizer.Add(self.general_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab4_row_sizer.Add(self.feedback_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
+        self.tab4_sizer.Add(self.tab4_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
         self.tab4.SetSizer(self.tab4_sizer)
+
+    def setup_general_section(self):
+        self.general_box = wx.StaticBox(self.tab4, label="General")
+        self.general_section_sizer = wx.StaticBoxSizer(self.general_box, wx.VERTICAL)
+
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.check_for_updates_button, 0, wx.ALL, 5)
+        self.general_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+        # Row 2
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        row_sizer.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, 5)
+        self.general_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+    def setup_feedback_section(self):
+        self.feedback_box = wx.StaticBox(self.tab4, label="-")
+        self.feedback_sizer = wx.StaticBoxSizer(self.feedback_box, wx.VERTICAL)
+
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.feedback_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.contribute_button, 0, wx.ALL, 5)
+        self.feedback_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+
+        # Row 2
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, 5)
+        row_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, 5)
+        self.feedback_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
 
     def create_menu(self):
         menubar = wx.MenuBar()
