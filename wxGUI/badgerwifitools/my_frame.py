@@ -81,12 +81,16 @@ class MyFrame(wx.Frame):
         if platform.system() == 'Windows':
             # Set the frame size to the minimum size
             self.SetSize((800, 700))
-            self.edge_margin = 0
+            self.sizer_edge_margin = 0
             self.notebook_margin = 3
+            self.dropdown_row_sizer_margin = 0
+            self.label_row_sizer_margin = 0
         if platform.system() == 'Darwin':
             # Set the frame size to the minimum size
-            self.edge_margin = 5
+            self.sizer_edge_margin = 5
             self.notebook_margin = 5
+            self.dropdown_row_sizer_margin = -5
+            self.label_row_sizer_margin = -5
 
     def initialize_variables(self):
         self.esx_project_unpacked = False
@@ -331,11 +335,11 @@ class MyFrame(wx.Frame):
     def setup_main_sizer(self):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(self.button_row1_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, self.edge_margin)
+        main_sizer.Add(self.button_row1_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, self.sizer_edge_margin)
         main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(self.button_row2_sizer, 0, wx.EXPAND | wx.ALL, self.edge_margin)
+        main_sizer.Add(self.button_row2_sizer, 0, wx.EXPAND | wx.ALL, self.sizer_edge_margin)
         main_sizer.Add(self.notebook, 0, wx.EXPAND | wx.ALL, self.notebook_margin)
-        main_sizer.Add(self.button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, self.edge_margin)
+        main_sizer.Add(self.button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, self.sizer_edge_margin)
 
         self.panel.SetSizer(main_sizer)
 
@@ -369,7 +373,7 @@ class MyFrame(wx.Frame):
         self.tab1_row_sizer.Add(self.project_profile_sizer, 1, wx.EXPAND | wx.ALL, 2)
         self.tab1_row_sizer.Add(self.rename_aps_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
-        self.tab1_sizer.Add(self.tab1_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab1_sizer.Add(self.tab1_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab1.SetSizer(self.tab1_sizer)
 
     def setup_project_profile_section(self):
@@ -381,13 +385,13 @@ class MyFrame(wx.Frame):
         row_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
         row_sizer.Add(self.validate_button, 0, wx.ALL, 5)
         row_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
-        self.project_profile_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, -5)
+        self.project_profile_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.dropdown_row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.create_ap_list_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
         row_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
-        self.project_profile_sizer.Add(row_sizer, 0, wx.EXPAND)
+        self.project_profile_sizer.Add(row_sizer, 0, wx.LEFT, self.label_row_sizer_margin)
 
     def setup_rename_aps_section(self):
         self.rename_aps_box = wx.StaticBox(self.tab1, label="Rename APs")
@@ -414,7 +418,7 @@ class MyFrame(wx.Frame):
         self.tab2_row_sizer.Add(self.export_sizer, 1, wx.EXPAND | wx.ALL, 2)
         self.tab2_row_sizer.Add(self.create_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
-        self.tab2_sizer.Add(self.tab2_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab2_sizer.Add(self.tab2_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab2.SetSizer(self.tab2_sizer)
 
     def setup_export_section(self):
@@ -457,7 +461,7 @@ class MyFrame(wx.Frame):
         self.tab3_row_sizer.Add(self.image_insertion_sizer, 1, wx.EXPAND | wx.ALL, 2)
         self.tab3_row_sizer.Add(self.pdf_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
-        self.tab3_sizer.Add(self.tab3_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab3_sizer.Add(self.tab3_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab3.SetSizer(self.tab3_sizer)
 
     def setup_image_insertion_section(self):
@@ -486,7 +490,7 @@ class MyFrame(wx.Frame):
         self.tab4_row_sizer.Add(self.general_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
         self.tab4_row_sizer.Add(self.feedback_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
-        self.tab4_sizer.Add(self.tab4_row_sizer, 0, wx.EXPAND | wx.TOP, self.edge_margin)
+        self.tab4_sizer.Add(self.tab4_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab4.SetSizer(self.tab4_sizer)
 
     def setup_general_section(self):
