@@ -145,6 +145,11 @@ class MapDialog(wx.Dialog):
         # Logic from on_rename_change for adding widgets
         self.spin_ctrl_label = wx.StaticText(self.panel, label="Boundary Separator:")
 
+        # Update the label tooltips with an explanation from the selected module
+        if hasattr(self.current_sorting_module, 'BOUNDARY_SEPARATOR_TOOLTIP'):
+            boundary_separator_tooltip = self.current_sorting_module.BOUNDARY_SEPARATOR_TOOLTIP
+            self.spin_ctrl_label.SetToolTip(wx.ToolTip(boundary_separator_tooltip))
+
         self.spin_ctrl = wx.SpinCtrl(self.panel, value='0')
         self.spin_ctrl.SetRange(0, 10000)  # Set minimum and maximum values
         self.spin_ctrl.SetValue(self.rename_aps_boundary_separator)  # Set the initial value

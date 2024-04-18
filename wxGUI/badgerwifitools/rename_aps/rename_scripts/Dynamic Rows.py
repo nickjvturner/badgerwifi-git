@@ -8,22 +8,16 @@ BOUNDARY_ORIENTATION = 'horizontal'  # flag attribute
 
 ONE_LINER_DESCRIPTION = 'APs sorted by: floor, model, y-axis in rows, x-axis value'
 
+BOUNDARY_SEPARATOR_TOOLTIP = ('Dynamic Rows divides the map into horizontal rows.\n'
+                              'The Boundary Separator value defines the height in pixels of the rows\n'
+                              'APs within each row are sorted and numbered from left to right')
+
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 
 Sorts APs by:
     floor name,
     model,
     y-axis in rows,
-    x-axis value
-
-AP-001, AP-002, AP-003..."""
-
-LONG_DESCRIPTION = f"""Intended for simulated APs
-
-Sorts APs by:
-    floor name,
-    model,
-    y-axis in 'rows',
     x-axis value
 
 AP-001, AP-002, AP-003..."""

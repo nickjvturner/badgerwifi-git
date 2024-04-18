@@ -8,6 +8,10 @@ BOUNDARY_ORIENTATION = 'vertical'  # flag attribute
 
 ONE_LINER_DESCRIPTION = 'APs sorted by: floor, model, x-axis in columns, y-axis value'
 
+BOUNDARY_SEPARATOR_TOOLTIP = ('Dynamic Columns divides the map into vertical columns.\n'
+                              'The Boundary Separator value defines the width in pixels of the columns\n'
+                              'APs within each column are sorted and numbered from top to bottom')
+
 SHORT_DESCRIPTION = f"""Intended for simulated APs
 
 Sorts APs by:
