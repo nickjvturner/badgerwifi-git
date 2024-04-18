@@ -211,9 +211,23 @@ class MapDialog(wx.Dialog):
     def plot_aps(self, ax):
         """Plot APs on the map."""
         self.sorted_aps_list, self.boundaries, self.boundary_orientation = self.get_sorted_aps_list()
-        for i, ap in enumerate(self.sorted_aps_list, start=1):
-            ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=250, zorder=5)
-            ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center', va='center', zorder=6)
+
+        # Calculate the number of APs per floor
+        aps_per_floor = self.count_aps_per_floor(self.ap_data)
+
+        # Calculate the total number of preceding APs for the current floor
+        preceding_aps = sum(count for floor, count in aps_per_floor.items() if floor < self.current_map)
+
+        for i, ap in enumerate(self.sorted_aps_list, start=1 + preceding_aps):
+            ax.scatter(ap['location']['coord']['x'], ap['location']['coord']['y'], color=ap['color'], s=280, zorder=5)
+            ax.text(ap['location']['coord']['x'], ap['location']['coord']['y'], str(i), color='black', ha='center', va='center', fontsize=9, zorder=6)
+
+    def count_aps_per_floor(self, ap_data):
+        aps_per_floor = {}
+        for ap in ap_data.values():
+            floor = ap['floor']
+            aps_per_floor[floor] = aps_per_floor.get(floor, 0) + 1
+        return aps_per_floor
 
     def draw_connections(self, ax):
         """Draw connections between APs and any additional markers, with each segment in a different color."""
