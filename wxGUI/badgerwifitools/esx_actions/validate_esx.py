@@ -75,6 +75,18 @@ def validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, messa
     return True
 
 
+def validate_view_as_mobile_disabled(project_configuration_json, message_callback):
+    view_as_mobile = None
+    for item in project_configuration_json["projectConfiguration"]["displayOptions"]:
+        if item["key"] == "view_as_mobile_device_selected":
+            view_as_mobile = item["value"]
+            break
+
+    if view_as_mobile == "true":
+        bar = f"{nl}{nl}{'#' * 50}{nl}{nl}"
+        message_callback(f"{bar}View as mobile is enabled, this is a DISASTER{bar}")
+        return False
+
 def validate_esx(working_directory, project_name, message_callback, required_tag_keys, optional_tag_keys):
     message_callback(f'Performing Validation for: {project_name}')
 
@@ -85,6 +97,7 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
     access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
     simulated_radios_json = load_json(project_dir, 'simulatedRadios.json', message_callback)
     tag_keys_json = load_json(project_dir, 'tagKeys.json', message_callback)
+    project_configuration_json = load_json(project_dir, 'projectConfiguration.json', message_callback)
 
     # Process data
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
@@ -132,7 +145,8 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
         validate_height_manipulation(offenders, total_ap_count, message_callback),
         validate_required_tags(offenders, total_ap_count, total_required_tag_keys_count, required_tag_keys, message_callback),
         validate_antenna_tilt(offenders, total_ap_count, message_callback),
-        validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, message_callback)
+        validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, message_callback),
+        validate_view_as_mobile_disabled(project_configuration_json, message_callback),
     ]
 
     # Print pass/fail states
