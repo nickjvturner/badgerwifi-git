@@ -53,7 +53,7 @@ from admin.check_for_updates import check_for_updates
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(1000, 800))
-        self.set_window_size()
+        self.set_window()
         self.panel = wx.Panel(self)
         self.initialize_variables()
         self.setup_list_box()
@@ -75,8 +75,9 @@ class MyFrame(wx.Frame):
         self.Center()
         self.Show()
 
-    def set_window_size(self):
+    def set_window(self):
         self.SetMinSize((500, 600))
+        self.widget_margin = 5
 
         if platform.system() == 'Windows':
             # Set the frame size to the minimum size
@@ -312,29 +313,29 @@ class MyFrame(wx.Frame):
 
     def setup_panel_rows(self):
         self.button_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.button_row1_sizer.Add(self.add_files_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row1_sizer.Add(self.add_files_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
         self.button_row1_sizer.AddStretchSpacer(1)
-        self.button_row1_sizer.Add(self.open_working_directory_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-        self.button_row1_sizer.Add(self.reset_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row1_sizer.Add(self.open_working_directory_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
+        self.button_row1_sizer.Add(self.reset_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
 
         self.button_row2_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.button_row2_sizer.Add(self.copy_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-        self.button_row2_sizer.Add(self.clear_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row2_sizer.Add(self.copy_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
+        self.button_row2_sizer.Add(self.clear_log_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
         self.button_row2_sizer.AddStretchSpacer(1)
-        self.button_row2_sizer.Add(self.unpack_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-        self.button_row2_sizer.Add(self.rebundle_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-        self.button_row2_sizer.Add(self.backup_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+        self.button_row2_sizer.Add(self.unpack_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
+        self.button_row2_sizer.Add(self.rebundle_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
+        self.button_row2_sizer.Add(self.backup_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, self.widget_margin)
 
         self.button_exit_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_exit_row_sizer.AddStretchSpacer(1)
-        self.button_exit_row_sizer.Add(self.abort_thread_button, 0, wx.ALL, 5)
-        self.button_exit_row_sizer.Add(self.exit_button, 0, wx.ALL, 5)
+        self.button_exit_row_sizer.Add(self.abort_thread_button, 0, wx.ALL, self.widget_margin)
+        self.button_exit_row_sizer.Add(self.exit_button, 0, wx.ALL, self.widget_margin)
 
     def setup_main_sizer(self):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.list_box, 0, wx.EXPAND | wx.ALL, self.widget_margin)
         main_sizer.Add(self.button_row1_sizer, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, self.sizer_edge_margin)
-        main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, 5)
+        main_sizer.Add(self.display_log, 1, wx.EXPAND | wx.ALL, self.widget_margin)
         main_sizer.Add(self.button_row2_sizer, 0, wx.EXPAND | wx.ALL, self.sizer_edge_margin)
         main_sizer.Add(self.notebook, 0, wx.EXPAND | wx.ALL, self.notebook_margin)
         main_sizer.Add(self.button_exit_row_sizer, 0, wx.EXPAND | wx.ALL, self.sizer_edge_margin)
@@ -380,15 +381,15 @@ class MyFrame(wx.Frame):
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        row_sizer.Add(self.validate_button, 0, wx.ALL, 5)
-        row_sizer.Add(self.summarise_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.project_profile_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
+        row_sizer.Add(self.validate_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.summarise_button, 0, wx.ALL, self.widget_margin)
         self.project_profile_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.create_ap_list_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-        row_sizer.Add(self.create_ap_list, 0, wx.ALL, 5)
+        row_sizer.Add(self.create_ap_list_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
+        row_sizer.Add(self.create_ap_list, 0, wx.ALL, self.widget_margin)
         self.project_profile_sizer.Add(row_sizer, 0, wx.LEFT, self.row_sizer_margin)
 
     def setup_rename_aps_section(self):
@@ -397,13 +398,13 @@ class MyFrame(wx.Frame):
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        row_sizer.Add(self.rename_aps_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.ap_rename_script_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
+        row_sizer.Add(self.rename_aps_button, 0, wx.ALL, self.widget_margin)
         self.rename_aps_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, self.widget_margin)
         self.rename_aps_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_tab2(self):
@@ -425,9 +426,9 @@ class MyFrame(wx.Frame):
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.export_ap_images_button, 0, wx.ALL, 5)
-        row_sizer.Add(self.export_note_images_button, 0, wx.ALL, 5)
-        row_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.export_ap_images_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.export_note_images_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.extract_blank_maps_button, 0, wx.ALL, self.widget_margin)
         self.export_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_create_section(self):
@@ -436,17 +437,17 @@ class MyFrame(wx.Frame):
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, 5)
-        row_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, 5)
-        row_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.create_ap_location_maps_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.create_zoomed_ap_maps_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.export_pds_maps_button, 0, wx.ALL, self.widget_margin)
         self.create_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.ap_icon_size_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-        row_sizer.Add(self.ap_icon_size_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-        row_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-        row_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        row_sizer.Add(self.ap_icon_size_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
+        row_sizer.Add(self.ap_icon_size_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
+        row_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
+        row_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
         self.create_sizer.Add(row_sizer, 0, wx.EXPAND, wx.LEFT, self.row_sizer_margin)
 
     def setup_tab3(self):
@@ -467,7 +468,7 @@ class MyFrame(wx.Frame):
         self.image_insertion_sizer = wx.StaticBoxSizer(self.image_insertion_box, wx.VERTICAL)
 
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.insert_images_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.insert_images_button, 0, wx.ALL, self.widget_margin)
         self.image_insertion_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_pdf_section(self):
@@ -475,7 +476,7 @@ class MyFrame(wx.Frame):
         self.pdf_sizer = wx.StaticBoxSizer(self.pdf_box, wx.VERTICAL)
 
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, self.widget_margin)
         self.pdf_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_tab4(self):
@@ -497,13 +498,13 @@ class MyFrame(wx.Frame):
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.check_for_updates_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.check_for_updates_button, 0, wx.ALL, self.widget_margin)
         self.general_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        row_sizer.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, 5)
+        row_sizer.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
+        row_sizer.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, self.widget_margin)
         self.general_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_feedback_section(self):
@@ -512,14 +513,14 @@ class MyFrame(wx.Frame):
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.feedback_button, 0, wx.ALL, 5)
-        row_sizer.Add(self.contribute_button, 0, wx.ALL, 5)
+        row_sizer.Add(self.feedback_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.contribute_button, 0, wx.ALL, self.widget_margin)
         self.feedback_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, 5)
-        row_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, 5)
+        row_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
+        row_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, self.widget_margin)
         self.feedback_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def create_menu(self):
@@ -899,7 +900,7 @@ class MyFrame(wx.Frame):
         selected_script = self.ap_rename_script_dropdown.GetStringSelection()
         path_to_module = Path(__file__).resolve().parent / RENAME_APS_DIR / f'{selected_script}.py'
 
-        _, short_description, _ = self.get_ap_rename_script_descriptions(selected_script)  # Ignore script_name and long_description
+        _, short_description = self.get_ap_rename_tooltips(selected_script)  # Ignore script_name
         self.current_sorting_module = import_module_from_path(selected_script, path_to_module)
 
         self.ap_rename_script_dropdown.SetToolTip(wx.ToolTip(short_description))
@@ -915,14 +916,13 @@ class MyFrame(wx.Frame):
         else:
             self.display_log.SetValue("")  # Clear the contents of the display_log
 
-    def get_ap_rename_script_descriptions(self, script_name):
+    def get_ap_rename_tooltips(self, script_name):
         script_path = str(Path(__file__).resolve().parent / RENAME_APS_DIR / f"{script_name}.py")
         spec = importlib.util.spec_from_file_location(script_name, script_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         short_description = getattr(module, 'SHORT_DESCRIPTION', "No short description available.")
-        long_description = getattr(module, 'LONG_DESCRIPTION', "No long description available.")
-        return script_name, short_description, long_description
+        return script_name, short_description
 
     def update_esx_project_unpacked(self, unpacked):
         self.esx_project_unpacked = unpacked
@@ -1072,7 +1072,7 @@ class MyFrame(wx.Frame):
     def update_boundary_separator_value(self, value):
         """Callback function to update the boundary_separator variable."""
         self.rename_aps_boundary_separator = value
-        self.append_message(f"Boundary separator value set to {value}")
+        self.append_message(f"Boundary separator value changed to: {value}")
 
     def update_ap_rename_script_dropdown_selection(self, index):
         self.ap_rename_script_dropdown.SetSelection(index)

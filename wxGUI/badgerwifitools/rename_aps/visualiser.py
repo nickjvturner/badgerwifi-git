@@ -15,6 +15,8 @@ from common import discover_available_scripts
 from common import RENAME_APS_DIR
 from common import BOUNDARY_SEPARATION_WIDGET
 
+from common import nl
+
 
 class MapDialog(wx.Dialog):
     """A dialog for displaying maps and access point information."""
@@ -32,6 +34,7 @@ class MapDialog(wx.Dialog):
         self.rename_aps_boundary_separator = parent.rename_aps_boundary_separator
         self.update_boundary_separator_value = parent.update_boundary_separator_value
         self.update_ap_rename_script_dropdown_selection = parent.update_ap_rename_script_dropdown_selection
+        self.message_callback = parent.append_message
         self.boundaries = None
 
         self.init_ui()
@@ -301,6 +304,9 @@ class MapDialog(wx.Dialog):
             ax.text(x_position + (self.rename_aps_boundary_separator / 2), y_position, f"{i}", verticalalignment='bottom', horizontalalignment='center', color='blue', fontsize=10)
 
     def on_dismiss(self, event):
+        if self.current_sorting_module and hasattr(self.current_sorting_module, BOUNDARY_SEPARATION_WIDGET):
+            self.message_callback(f"{nl}Boundary separator value configured at: {self.rename_aps_boundary_separator}{nl}AP renaming function will use this value")
+
         self.EndModal(wx.ID_CANCEL)
         self.Destroy()
 
