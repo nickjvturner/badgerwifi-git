@@ -9,6 +9,8 @@ from common import UNKNOWN, FIVE_GHZ_RADIO_ID
 requiredTagKeys = ("ap-bracket", "antenna-bracket", "rf-group")
 optionalTagKeys = ()
 
+preferred_ap_rename_script = 'Dynamic Rows'
+
 project_specific_conventions = {
     "AP-514": {
         "color": "red",

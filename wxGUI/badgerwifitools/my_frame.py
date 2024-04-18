@@ -883,6 +883,9 @@ class MyFrame(wx.Frame):
         # Update the object variables with the configuration from the selected module
         self.esx_required_tag_keys = getattr(project_profile_module, 'requiredTagKeys', None)
         self.esx_optional_tag_keys = getattr(project_profile_module, 'optionalTagKeys', None)
+        if hasattr(project_profile_module, 'preferred_ap_rename_script'):
+            self.ap_rename_script_dropdown.SetStringSelection(project_profile_module.preferred_ap_rename_script)
+            self.on_ap_rename_script_dropdown_selection(None)
         self.save_application_state(None)
 
     def on_rename_aps(self, event):
