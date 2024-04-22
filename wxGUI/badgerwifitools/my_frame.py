@@ -27,6 +27,7 @@ from rename_aps.visualiser import visualise_ap_renaming
 from rename_aps.ap_renamer import ap_renamer
 
 from exports import export_ap_images
+from exports import export_note_images
 
 from docx_manipulation.insert_images import insert_images_threaded
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
@@ -950,7 +951,9 @@ class MyFrame(wx.Frame):
         convert_docx_to_pdf(docx_files, self.append_message)
 
     def on_export_note_images(self, event):
-        self.placeholder(None)
+        if not self.basic_checks():
+            return
+        export_note_images.export_note_images(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_export_pds_maps(self, event):
         if not self.basic_checks():

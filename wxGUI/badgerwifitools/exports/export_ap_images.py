@@ -14,9 +14,9 @@ Working as of 01-FEB-2023
 """
 
 from common import load_json
-import shutil
+from common import nl
 
-nl = '\n'
+import shutil
 
 
 def export_ap_images(working_directory, project_name, message_callback):
