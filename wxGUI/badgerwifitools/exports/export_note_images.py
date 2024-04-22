@@ -73,7 +73,7 @@ def export_note_images(working_directory, project_name, message_callback):
 					image_extraction_counter.append(note_image_name)
 
 					shutil.copy(image_full_path, dst)
-					message_callback(f"{image} Image extracted as {note_image_name}")
+					message_callback(f"{image} extracted as {note_image_name}")
 
 					image_count += 1
 

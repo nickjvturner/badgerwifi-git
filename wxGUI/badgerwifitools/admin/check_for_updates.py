@@ -30,22 +30,6 @@ def get_git_commit_sha():
         return None
 
 
-# def check_for_updates(message_callback):
-#     message_callback('Checking for updated code on GitHub...')
-#     latest_sha = get_latest_commit_sha()
-#     local_commit_sha = get_git_commit_sha()
-#
-#     if latest_sha and latest_sha != local_commit_sha:
-#         wx.MessageBox("A new update is available!", "Update Available", wx.OK | wx.ICON_INFORMATION)
-#         message_callback(f'New code is available on GitHub')
-#     elif latest_sha:
-#         wx.MessageBox("You are up to date.", "No Updates", wx.OK | wx.ICON_INFORMATION)
-#         message_callback(f'No new code available')
-#     else:
-#         wx.MessageBox("Unable to check for updates.", "Error", wx.OK | wx.ICON_ERROR)
-#         message_callback(f'Unable to check for updates')
-
-
 def check_for_updates(message_callback):
     message_callback('Checking for updated code on GitHub...')
     latest_sha = get_latest_commit_sha()

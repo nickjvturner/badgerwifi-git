@@ -48,7 +48,7 @@ from common import BOUNDARY_SEPARATION_WIDGET
 from common import discover_available_scripts
 from common import import_module_from_path
 
-from admin.check_for_updates import check_for_updates
+from admin import check_for_updates
 
 
 class MyFrame(wx.Frame):
@@ -594,7 +594,7 @@ class MyFrame(wx.Frame):
         self.current_admin_action_module.run(self.append_message)
 
     def on_check_for_updates(self, event):
-        check_for_updates(self.append_message)
+        check_for_updates.check_for_updates(self.append_message)
 
     def on_project_detail_dropdown_selection(self, event):
         selected_index = self.project_detail_dropdown.GetSelection()
@@ -1084,3 +1084,12 @@ class MyFrame(wx.Frame):
         self.ap_rename_script_dropdown.SetSelection(index)
         self.on_ap_rename_script_dropdown_selection(None)
 
+    def check_for_updates_on_startup(self):
+            try:
+                latest_sha = check_for_updates.get_latest_commit_sha()
+                local_commit_sha = check_for_updates.get_git_commit_sha()
+                if latest_sha != local_commit_sha:
+                    self.append_message(f"** Update available **{nl}")
+            except Exception as e:
+                # Check for updates failed
+                pass
