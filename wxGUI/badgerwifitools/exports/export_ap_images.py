@@ -23,9 +23,13 @@ def export_ap_images(working_directory, project_name, message_callback):
 
 	project_dir = working_directory / project_name
 
-	# Create a backup folder if it doesn't exist
-	ap_image_dir = working_directory / "AP Images"
-	ap_image_dir.mkdir(parents=True, exist_ok=True)
+	# Create directory to hold output directories
+	output_dir = working_directory / 'OUTPUT'
+	output_dir.mkdir(parents=True, exist_ok=True)
+
+	# Create subdirectory for note images
+	ap_images_dir = output_dir / 'AP images'
+	ap_images_dir.mkdir(parents=True, exist_ok=True)
 
 	access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
 	notes_json = load_json(project_dir, 'notes.json', message_callback)
@@ -57,7 +61,7 @@ def export_ap_images(working_directory, project_name, message_callback):
 									else:
 										ap_image_name = f"{ap['name']}.png"
 
-									dst = ap_image_dir / ap_image_name
+									dst = ap_images_dir / ap_image_name
 
 									# count total number of APs extracted
 									image_extraction_counter.append(ap_image_name)

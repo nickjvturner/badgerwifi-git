@@ -75,6 +75,7 @@ class MyFrame(wx.Frame):
         self.load_application_state()
         self.Center()
         self.Show()
+        self.check_for_updates_on_startup()
 
     def set_window(self):
         self.SetMinSize((500, 600))
