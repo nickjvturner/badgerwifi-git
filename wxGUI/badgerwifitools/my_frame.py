@@ -8,6 +8,7 @@ import webbrowser
 import subprocess
 import importlib.util
 import platform
+import random
 
 from pathlib import Path
 from importlib.machinery import SourceFileLoader
@@ -45,6 +46,9 @@ from common import RENAME_APS_DIR
 from common import PROJECT_DETAIL_DIR
 from common import ADMIN_ACTIONS_DIR
 from common import BOUNDARY_SEPARATION_WIDGET
+from common import WHIMSY_WELCOME_MESSAGES
+from common import CALL_TO_DONATE_MESSAGE
+
 from common import discover_available_scripts
 from common import import_module_from_path
 
@@ -76,6 +80,7 @@ class MyFrame(wx.Frame):
         self.Center()
         self.Show()
         self.check_for_updates_on_startup()
+        self.display_welcome_message()
 
     def set_window(self):
         self.SetMinSize((500, 600))
@@ -296,7 +301,7 @@ class MyFrame(wx.Frame):
         self.zoomed_ap_crop_text_box = wx.TextCtrl(self.tab2, value="2000", style=wx.TE_PROCESS_ENTER)
 
         # Create a text input box for the AP icon size
-        self.ap_icon_size_text_box = wx.TextCtrl(self.tab2, value="50", style=wx.TE_PROCESS_ENTER)
+        self.ap_icon_size_text_box = wx.TextCtrl(self.tab2, value="25", style=wx.TE_PROCESS_ENTER)
 
     def setup_text_labels(self):
         # Create a text label for the drop target with custom position
@@ -579,6 +584,16 @@ class MyFrame(wx.Frame):
         # Implement the About dialog logic
         wx.MessageBox("This is a wxPython GUI application created by Nick Turner. Intended to make the lives of Wi-Fi engineers making reports a little bit easier. ", "About")
 
+    def display_welcome_message(self):
+        if random.random() < 0.5:  # 50% chance of displaying the welcome message
+            welcome_message = random.choice(WHIMSY_WELCOME_MESSAGES)  # Select a random welcome message
+
+            # Append the welcome message to the display log
+            self.append_message(welcome_message)
+
+        if random.random() < 0.3:
+            self.append_message(CALL_TO_DONATE_MESSAGE)
+
     def load_module(self, module_subdir, module_name):
         module_path = Path(__file__).resolve().parent / module_subdir / f"{module_name}.py"
         spec = importlib.util.spec_from_file_location(module_name, str(module_path))
@@ -693,7 +708,7 @@ class MyFrame(wx.Frame):
                 self.notebook.SetSelection(state.get('selected_tab_index', 0))
 
                 # Restore the text box values
-                self.ap_icon_size_text_box.SetValue(state.get('ap_icon_size_text_box', "50"))
+                self.ap_icon_size_text_box.SetValue(state.get('ap_icon_size_text_box', "25"))
                 self.zoomed_ap_crop_text_box.SetValue(state.get('zoomed_ap_crop_text_box', "2000"))
 
 
@@ -707,7 +722,7 @@ class MyFrame(wx.Frame):
         self.display_log.SetValue("")  # Clear the contents of the display_log
         self.esx_project_unpacked = False  # Reset project_unpacked state
         self.drop_target_label.Show()  # Show the drop target label
-        self.ap_icon_size_text_box.SetValue("50")  # Reset the AP icon size
+        self.ap_icon_size_text_box.SetValue("25")  # Reset the AP icon size
         self.zoomed_ap_crop_text_box.SetValue("2000")  # Reset the zoomed AP crop size
         self.rename_aps_boundary_separator = 400  # Reset the boundary separator value
         self.refresh_boundary_separator_widgets()

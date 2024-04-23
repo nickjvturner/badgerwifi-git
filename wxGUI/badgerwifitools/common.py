@@ -25,6 +25,14 @@ BOUNDARY_SEPARATION_WIDGET = 'BOUNDARY_SEPARATOR'
 PROJECT_DETAIL_DIR = 'project_detail'
 ADMIN_ACTIONS_DIR = 'admin/actions'
 
+WHIMSY_WELCOME_MESSAGES = [
+    'Welcome to BadgerWiFi Tools',
+    "Fancy seeing you here!",
+    "If you're reading this, you're probably a WiFi professional",
+    "Let's get started!",
+    ]
+
+CALL_TO_DONATE_MESSAGE = f"{'#' * 30}{nl}{nl}If you are finding this tool useful, please consider supporting the developer!{nl}Please consider buying @nickjvturner a coffee{nl}{nl}https://ko-fi.com/badgerwifitools{nl}{nl}{'#' * 30}"
 
 ekahau_color_dict = {
     '#00FF00': 'green',
