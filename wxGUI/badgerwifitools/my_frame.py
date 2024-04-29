@@ -54,6 +54,8 @@ from common import import_module_from_path
 
 from admin import check_for_updates
 
+from survey import surveyed_ap_list
+
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, title):
@@ -72,6 +74,7 @@ class MyFrame(wx.Frame):
         self.setup_tab2()
         self.setup_tab3()
         self.setup_tab4()
+        self.setup_tab5()
         self.setup_panel_rows()
         self.setup_main_sizer()
         self.create_menu()
@@ -161,7 +164,7 @@ class MyFrame(wx.Frame):
         self.available_project_detail_views = discover_available_scripts(PROJECT_DETAIL_DIR)
 
         # Create a dropdown to select a Project Detail View
-        self.project_detail_dropdown = wx.Choice(self.tab4, choices=self.available_project_detail_views)
+        self.project_detail_dropdown = wx.Choice(self.tab5, choices=self.available_project_detail_views)
         self.project_detail_dropdown.SetSelection(0)  # Set default selection
         self.project_detail_dropdown.Bind(wx.EVT_CHOICE, self.on_project_detail_dropdown_selection)
 
@@ -169,7 +172,7 @@ class MyFrame(wx.Frame):
         self.available_admin_actions = discover_available_scripts(ADMIN_ACTIONS_DIR)
 
         # Create a dropdown to select an Admin action
-        self.admin_actions_dropdown = wx.Choice(self.tab4, choices=self.available_admin_actions)
+        self.admin_actions_dropdown = wx.Choice(self.tab5, choices=self.available_admin_actions)
         self.admin_actions_dropdown.SetSelection(0)  # Set default selection
         self.admin_actions_dropdown.Bind(wx.EVT_CHOICE, self.on_admin_actions_dropdown_selection)
 
@@ -199,7 +202,7 @@ class MyFrame(wx.Frame):
         self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
         self.clear_log_button.SetToolTip(wx.ToolTip("Clear the log"))
 
-        self.display_project_detail_button = wx.Button(self.tab4, label="Display")
+        self.display_project_detail_button = wx.Button(self.tab5, label="Display")
         self.display_project_detail_button.Bind(wx.EVT_BUTTON, self.on_display_project_detail)
         self.display_project_detail_button.SetToolTip(wx.ToolTip("Display detailed information about the current .esx project"))
 
@@ -272,19 +275,23 @@ class MyFrame(wx.Frame):
         self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
         self.convert_docx_to_pdf_button.SetToolTip(wx.ToolTip("Convert .docx file(s) to PDF"))
 
-        self.perform_admin_action_button = wx.Button(self.tab4, label="Perform Action")
+        self.create_surveyed_ap_list_button = wx.Button(self.tab4, label="Create Surveyed AP List")
+        self.create_surveyed_ap_list_button.Bind(wx.EVT_BUTTON, self.on_create_surveyed_ap_list)
+        self.create_surveyed_ap_list_button.SetToolTip(wx.ToolTip("Generate a dump of surveyed AP details"))
+
+        self.perform_admin_action_button = wx.Button(self.tab5, label="Perform Action")
         self.perform_admin_action_button.Bind(wx.EVT_BUTTON, self.on_perform_admin_action)
         self.perform_admin_action_button.SetToolTip(wx.ToolTip("Perform the selected Admin action"))
 
-        self.check_for_updates_button = wx.Button(self.tab4, label="Check for Updates")
+        self.check_for_updates_button = wx.Button(self.tab5, label="Check for Updates")
         self.check_for_updates_button.Bind(wx.EVT_BUTTON, self.on_check_for_updates)
         self.check_for_updates_button.SetToolTip(wx.ToolTip("Check for new commits on GitHub"))
 
-        self.feedback_button = wx.Button(self.tab4, label="Feedback")
+        self.feedback_button = wx.Button(self.tab5, label="Feedback")
         self.feedback_button.Bind(wx.EVT_BUTTON, self.on_feedback)
         self.feedback_button.SetToolTip(wx.ToolTip("Send feedback to the developer"))
 
-        self.contribute_button = wx.Button(self.tab4, label="Contribute")
+        self.contribute_button = wx.Button(self.tab5, label="Contribute")
         self.contribute_button.Bind(wx.EVT_BUTTON, self.on_contribute)
         self.contribute_button.SetToolTip(wx.ToolTip("Buy the developer a coffee"))
 
@@ -355,16 +362,19 @@ class MyFrame(wx.Frame):
         self.tab2 = wx.Panel(self.notebook)
         self.tab3 = wx.Panel(self.notebook)
         self.tab4 = wx.Panel(self.notebook)
+        self.tab5 = wx.Panel(self.notebook)
 
         self.notebook.AddPage(self.tab1, "Predictive Design")
         self.notebook.AddPage(self.tab2, "Asset Creator")
         self.notebook.AddPage(self.tab3, "DOCX")
-        self.notebook.AddPage(self.tab4, "Admin")
+        self.notebook.AddPage(self.tab4, "Survey")
+        self.notebook.AddPage(self.tab5, "Admin")
 
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab5_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Bind the tab change event
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
@@ -490,17 +500,48 @@ class MyFrame(wx.Frame):
         self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab4_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.setup_general_section()
-        self.setup_feedback_section()
+        self.setup_survey_section_a()
+        self.setup_survey_section_b()
 
-        self.tab4_row_sizer.Add(self.general_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
-        self.tab4_row_sizer.Add(self.feedback_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab4_row_sizer.Add(self.a_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab4_row_sizer.Add(self.b_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
         self.tab4_sizer.Add(self.tab4_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab4.SetSizer(self.tab4_sizer)
 
+    def setup_survey_section_a(self):
+        self.a_box = wx.StaticBox(self.tab4, label="Section A")
+        self.a_section_sizer = wx.StaticBoxSizer(self.a_box, wx.VERTICAL)
+
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.create_surveyed_ap_list_button, 0, wx.ALL, self.widget_margin)
+        self.a_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+
+    def setup_survey_section_b(self):
+        self.b_box = wx.StaticBox(self.tab4, label="Section B")
+        self.b_section_sizer = wx.StaticBoxSizer(self.b_box, wx.VERTICAL)
+
+        # Row 1
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.b_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+
+
+    def setup_tab5(self):
+        self.tab5_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab5_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.setup_general_section()
+        self.setup_feedback_section()
+
+        self.tab5_row_sizer.Add(self.general_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab5_row_sizer.Add(self.feedback_sizer, 1, wx.EXPAND | wx.ALL, 2)
+
+        self.tab5_sizer.Add(self.tab5_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
+        self.tab5.SetSizer(self.tab5_sizer)
+
     def setup_general_section(self):
-        self.general_box = wx.StaticBox(self.tab4, label="General")
+        self.general_box = wx.StaticBox(self.tab5, label="General")
         self.general_section_sizer = wx.StaticBoxSizer(self.general_box, wx.VERTICAL)
 
         # Row 1
@@ -515,7 +556,7 @@ class MyFrame(wx.Frame):
         self.general_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_feedback_section(self):
-        self.feedback_box = wx.StaticBox(self.tab4, label="-")
+        self.feedback_box = wx.StaticBox(self.tab5, label="-")
         self.feedback_sizer = wx.StaticBoxSizer(self.feedback_box, wx.VERTICAL)
 
         # Row 1
@@ -594,9 +635,6 @@ class MyFrame(wx.Frame):
         if random.random() < 0.3:
             self.append_message(CALL_TO_DONATE_MESSAGE)
 
-            # Append the welcome message to the display log
-            self.append_message(welcome_message)
-
     def display_message_on_reset(self):
         if random.random() < 0.1:  # 10% chance of displaying a welcome message
             welcome_message = random.choice(WHIMSY_WELCOME_MESSAGES)  # Select a random welcome message
@@ -610,6 +648,11 @@ class MyFrame(wx.Frame):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
+
+    def on_create_surveyed_ap_list(self, event):
+        if not self.basic_checks():
+            return
+        surveyed_ap_list.create_surveyed_ap_list(self.working_directory, self.esx_project_name, self.append_message)
 
     def on_admin_actions_dropdown_selection(self, event):
         selected_index = self.admin_actions_dropdown.GetSelection()

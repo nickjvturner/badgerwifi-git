@@ -57,6 +57,9 @@ model_sort_order = {
 
 acceptable_antenna_tilt_angles = (0, -10, -20, -30, -40, -45, -50, -60, -70, -80, -90)
 
+range_two = (2400, 2500)
+range_five = (5000, 5900)
+range_six = (5901, 7200)
 
 def load_json(project_dir, filename, message_callback):
     """Load JSON data from a file."""
@@ -272,8 +275,120 @@ def discover_available_scripts(directory, ignore_files=("_", "common")):
     return sorted(available_scripts)
 
 
+def create_access_point_measurements_dict(access_point_measurements_json):
+    access_point_measurements_dict = {}  # Initialize an empty dictionary
+
+    # Loop through each radio inside access_point_measurements_json['accessPointMeasurements']
+    for ap in access_point_measurements_json['accessPointMeasurements']:
+        # Check if the top-level key exists, if not, create it
+        if ap['id'] not in access_point_measurements_dict:
+            access_point_measurements_dict[ap['id']] = {}
+
+        # Assign the radio object to the nested key
+        access_point_measurements_dict[ap['id']] = ap
+
+    return access_point_measurements_dict
+
+
+def create_measured_radios_dict(measured_radios_json, access_point_measurements_dict):
+    measured_radios_dict = {}  # Initialize an empty dictionary
+
+    for radio in measured_radios_json['measuredRadios']:
+        # Check if the top-level key exists, if not, create it
+        if radio['accessPointId'] not in measured_radios_dict:
+            measured_radios_dict[radio['accessPointId']] = {}
+
+        for measurement_id in radio.get('accessPointMeasurementIds', []):
+            access_point_measurement = access_point_measurements_dict.get(measurement_id)
+            if access_point_measurement:
+                lowest_center_frequency = access_point_measurement.get('channelByCenterFrequencyDefinedNarrowChannels')[0]
+                mac = access_point_measurement.get('mac')
+                access_point_id = radio['accessPointId']
+
+                if range_two[0] <= lowest_center_frequency <= range_two[1]:
+                    if 'two' not in measured_radios_dict[access_point_id]:
+                        measured_radios_dict[access_point_id]['two'] = {}
+                    measured_radios_dict[access_point_id]['two'][mac] = access_point_measurement
+
+                elif range_five[0] <= lowest_center_frequency <= range_five[1]:
+                    if 'five' not in measured_radios_dict[access_point_id]:
+                        measured_radios_dict[access_point_id]['five'] = {}
+                    measured_radios_dict[access_point_id]['five'][mac] = access_point_measurement
+
+                elif range_six[0] <= lowest_center_frequency <= range_six[1]:
+                    if 'six' not in measured_radios_dict[access_point_id]:
+                        measured_radios_dict[access_point_id]['six'] = {}
+                    measured_radios_dict[access_point_id]['six'][mac] = access_point_measurement
+
+    return measured_radios_dict
+
+
 def import_module_from_path(module_name, path_to_module):
     spec = importlib.util.spec_from_file_location(module_name, path_to_module)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def create_custom_measured_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, measured_radios_dict, notes_dict):
+    """Process access points to a structured list."""
+
+    surveyed_ap_list = []
+
+    for ap in access_points_json['accessPoints']:
+
+        mini_tags_dict = {tag_keys_dict.get(tag['tagKeyId'], UNKNOWN): tag['value'] for tag in ap.get('tags', [])}
+
+        measured_radios = measured_radios_dict.get(ap['id'], {})
+
+        ap_details = {
+            'Name': ap['name'],
+            'Vendor': ap.get('vendor', UNKNOWN),
+            '2.4 Freq': extract_frequency_channel_and_width(measured_radios, 'two')[0][1],
+            '2.4 Ch Width': extract_frequency_channel_and_width(measured_radios, 'two')[0][2],
+            '2.4 GHz SSIDs': get_ssid_and_mac(measured_radios.get('two', {})),
+            '5 Ch Freq': extract_frequency_channel_and_width(measured_radios, 'five')[0][1],
+            '5 Ch Width': extract_frequency_channel_and_width(measured_radios, 'five')[0][2],
+            '5 GHz SSIDs': get_ssid_and_mac(measured_radios.get('five', {})),
+            '6 Ch Freq': extract_frequency_channel_and_width(measured_radios, 'six')[0][1],
+            '6 Ch Width': extract_frequency_channel_and_width(measured_radios, 'six')[0][2],
+            '6 GHz SSIDs': get_ssid_and_mac(measured_radios.get('six', {})),
+            'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
+            'Floor': floor_plans_dict.get(ap.get('location', {}).get('floorPlanId'), {}).get('name', UNKNOWN),
+            'flagged as My AP': ap.get('mine', UNKNOWN),
+            'hidden': ap.get('hidden', UNKNOWN),
+            'manually positioned': ap.get('userDefinedPosition', UNKNOWN),
+            'Notes': note_text_processor(ap['noteIds'], notes_dict)
+        }
+        surveyed_ap_list.append(ap_details)
+    return sorted(surveyed_ap_list, key=lambda x: x['Name'])
+
+
+def get_ssid_and_mac(measured_radios):
+    # Extract MAC addresses and SSIDs from the dictionary
+    access_points = []
+
+    for radio in measured_radios.values():
+        access_points.append((radio['mac'], radio['ssid']))
+
+    # Sort the access points by MAC address
+    sorted_access_points = sorted(access_points)
+
+    # Format the output string
+    return '\n'.join(f"{ssid} ({mac})" for mac, ssid in sorted_access_points)
+
+
+def extract_frequency_channel_and_width(data, band):
+    channels_and_widths = []
+    if band in data:
+        access_points = data[band]
+        first_ap_data = next(iter(access_points.values()))
+        frequencies = first_ap_data['channelByCenterFrequencyDefinedNarrowChannels']
+        first_frequency = frequencies[0]
+        width = 20 * len(frequencies)
+        channels_and_widths.append((first_frequency, frequencies, width))
+
+    else:
+        channels_and_widths.append(('', '', ''))
+
+    return tuple(channels_and_widths)
