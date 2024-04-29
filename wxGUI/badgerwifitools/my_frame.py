@@ -594,6 +594,16 @@ class MyFrame(wx.Frame):
         if random.random() < 0.3:
             self.append_message(CALL_TO_DONATE_MESSAGE)
 
+            # Append the welcome message to the display log
+            self.append_message(welcome_message)
+
+    def display_message_on_reset(self):
+        if random.random() < 0.1:  # 10% chance of displaying a welcome message
+            welcome_message = random.choice(WHIMSY_WELCOME_MESSAGES)  # Select a random welcome message
+
+            # Append the welcome message to the display log
+            self.append_message(welcome_message)
+
     def load_module(self, module_subdir, module_name):
         module_path = Path(__file__).resolve().parent / module_subdir / f"{module_name}.py"
         spec = importlib.util.spec_from_file_location(module_name, str(module_path))
@@ -720,12 +730,12 @@ class MyFrame(wx.Frame):
     def on_reset(self, event):
         self.list_box.Clear()  # Reset list_box contents
         self.display_log.SetValue("")  # Clear the contents of the display_log
+        self.display_message_on_reset()
         self.esx_project_unpacked = False  # Reset project_unpacked state
         self.drop_target_label.Show()  # Show the drop target label
         self.ap_icon_size_text_box.SetValue("25")  # Reset the AP icon size
         self.zoomed_ap_crop_text_box.SetValue("2000")  # Reset the zoomed AP crop size
-        self.rename_aps_boundary_separator = 400  # Reset the boundary separator value
-        self.refresh_boundary_separator_widgets()
+        self.rename_aps_boundary_separator = 200  # Reset the boundary separator value
         self.stop_event.clear()  # Clear the stop event
 
     def on_clear_log(self, event):
