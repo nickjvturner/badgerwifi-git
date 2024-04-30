@@ -8,11 +8,11 @@ from common import create_access_point_measurements_dict
 from common import create_measured_radios_dict
 from common import create_notes_dict
 
-from common import create_custom_measured_ap_list
-
 from common import nl
 
-right_align = ['2.4 GHz SSIDs', '2.4 Freq', '5 GHz SSIDs', '5 Freq', '6 GHz SSIDs', '6 Freq']
+
+right_align = ['2.4 SSIDs', '2.4 GHz', '2.4 Security / Standards', '5 SSIDs', '5 GHz', '5 Security / Standards', '6 SSIDs', '6 GHz']
+fixed_width = ['2.4 Ch Primary', '2.4 Width', '5 Ch Primary', '5 Width', '6 Ch Primary', '6 Width']
 
 
 def adjust_column_widths(df, writer):
@@ -27,18 +27,22 @@ def adjust_column_widths(df, writer):
     top_align_format = writer.book.add_format({'valign': 'top'})
 
     for idx, col in enumerate(df.columns):
+        column_len = max(df[col].astype(str).map(len).max(), len(col)) + 1
 
         # Check if the current column is one we want to wrap
         if col in right_align:
             max_line_len = df[col].astype(str).apply(lambda x: max(len(line) for line in x.split('\n'))).max()
-            column_len = max(max_line_len, len(col)) + 1
+            column_len = max(max_line_len, len(col)) - 1
+            worksheet.set_column(idx, idx, column_len, right_align_format)
+
+        elif col in fixed_width:
+            column_len = 18
             worksheet.set_column(idx, idx, column_len, right_align_format)
 
         elif col == 'Notes':
-            worksheet.set_column(idx, idx, (max(df[col].astype(str).map(len).max(), len(col)) + 1), wrap_format)
+            worksheet.set_column(idx, idx, column_len, wrap_format)
 
         else:
-            column_len = max(df[col].astype(str).map(len).max(), len(col)) + 1
             worksheet.set_column(idx, idx, column_len, top_align_format)
 
 
@@ -56,7 +60,7 @@ def format_headers(df, writer):
     worksheet.freeze_panes(1, 1)
 
 
-def create_surveyed_ap_list(working_directory, project_name, message_callback):
+def create_surveyed_ap_list(working_directory, project_name, create_custom_measured_ap_list, message_callback):
     message_callback(f'Generating surveyed AP list for: {project_name}\n')
     project_dir = Path(working_directory) / project_name
 

@@ -54,7 +54,7 @@ from common import import_module_from_path
 
 from admin import check_for_updates
 
-from survey import surveyed_ap_list
+from survey.surveyed_ap_list import create_surveyed_ap_list
 
 
 class MyFrame(wx.Frame):
@@ -655,9 +655,13 @@ class MyFrame(wx.Frame):
         return module
 
     def on_create_surveyed_ap_list(self, event):
-        if not self.basic_checks():
+        if not hasattr(self.current_profile_ap_list_module, 'create_custom_measured_ap_list'):
+            self.append_message("Currently selected project profile has no survey ap list export definition.")
             return
-        surveyed_ap_list.create_surveyed_ap_list(self.working_directory, self.esx_project_name, self.append_message)
+        elif not self.basic_checks():
+            return
+        else:
+            create_surveyed_ap_list(self.working_directory, self.esx_project_name, self.current_profile_ap_list_module.create_custom_measured_ap_list, self.append_message)
 
     def on_admin_actions_dropdown_selection(self, event):
         selected_index = self.admin_actions_dropdown.GetSelection()
@@ -752,6 +756,7 @@ class MyFrame(wx.Frame):
 
                 # Restore selected project profile index
                 self.project_profile_dropdown.SetSelection(state.get('selected_project_profile_index', 0))
+                self.survey_project_profile_dropdown.SetSelection(state.get('selected_project_profile_index', 0))
                 self.on_project_profile_dropdown_selection(None)
 
                 # Restore selected project detail index
@@ -956,7 +961,6 @@ class MyFrame(wx.Frame):
         # Load the selected project profile module for simulated AP list creation
         project_profile_module = self.load_project_profile(selected_profile)
         self.current_profile_ap_list_module = project_profile_module
-
 
         # Update the object variables with the configuration from the selected module
         self.esx_required_tag_keys = getattr(project_profile_module, 'requiredTagKeys', None)

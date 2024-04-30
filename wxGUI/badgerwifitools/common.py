@@ -61,6 +61,110 @@ range_two = (2400, 2500)
 range_five = (5000, 5900)
 range_six = (5901, 7200)
 
+wifi_channel_dict = {
+    2412: 1,
+    2417: 2,
+    2422: 3,
+    2427: 4,
+    2432: 5,
+    2437: 6,
+    2442: 7,
+    2447: 8,
+    2452: 9,
+    2457: 10,
+    2462: 11,
+    2467: 12,
+    2472: 13,
+    2484: 14,
+
+    5180: 36,
+    5200: 40,
+    5220: 44,
+    5240: 48,
+    5260: 52,
+    5280: 56,
+    5300: 60,
+    5320: 64,
+    5500: 100,
+    5520: 104,
+    5540: 108,
+    5560: 112,
+    5580: 116,
+    5600: 120,
+    5620: 124,
+    5640: 128,
+    5660: 132,
+    5680: 136,
+    5700: 140,
+    5720: 144,
+    5745: 149,
+    5765: 153,
+    5785: 157,
+    5805: 161,
+    5825: 165,
+
+    5955: 1,
+    5975: 5,
+    5995: 9,
+    6015: 13,
+    6035: 17,
+    6055: 21,
+    6075: 25,
+    6095: 29,
+    6115: 33,
+    6135: 37,
+    6155: 41,
+    6175: 45,
+    6195: 49,
+    6215: 53,
+    6235: 57,
+    6255: 61,
+    6275: 65,
+    6295: 69,
+    6315: 73,
+    6335: 77,
+    6355: 81,
+    6375: 85,
+    6395: 89,
+    6415: 93,
+    6435: 97,
+    6455: 101,
+    6475: 105,
+    6495: 109,
+    6515: 113,
+    6535: 117,
+    6555: 121,
+    6575: 125,
+    6595: 129,
+    6615: 133,
+    6635: 137,
+    6655: 141,
+    6675: 145,
+    6695: 149,
+    6715: 153,
+    6735: 157,
+    6755: 161,
+    6775: 165,
+    6795: 169,
+    6815: 173,
+    6835: 177,
+    6855: 181,
+    6875: 185,
+    6895: 189,
+    6915: 193,
+    6935: 197,
+    6955: 201,
+    6975: 205,
+    6995: 209,
+    7015: 213,
+    7035: 217,
+    7055: 221,
+    7075: 225,
+    7095: 229
+}
+
+
+
 def load_json(project_dir, filename, message_callback):
     """Load JSON data from a file."""
     try:
@@ -330,40 +434,6 @@ def import_module_from_path(module_name, path_to_module):
     return module
 
 
-def create_custom_measured_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, measured_radios_dict, notes_dict):
-    """Process access points to a structured list."""
-
-    surveyed_ap_list = []
-
-    for ap in access_points_json['accessPoints']:
-
-        mini_tags_dict = {tag_keys_dict.get(tag['tagKeyId'], UNKNOWN): tag['value'] for tag in ap.get('tags', [])}
-
-        measured_radios = measured_radios_dict.get(ap['id'], {})
-
-        ap_details = {
-            'Name': ap['name'],
-            'Vendor': ap.get('vendor', UNKNOWN),
-            '2.4 Freq': extract_frequency_channel_and_width(measured_radios, 'two')[0][1],
-            '2.4 Ch Width': extract_frequency_channel_and_width(measured_radios, 'two')[0][2],
-            '2.4 GHz SSIDs': get_ssid_and_mac(measured_radios.get('two', {})),
-            '5 Ch Freq': extract_frequency_channel_and_width(measured_radios, 'five')[0][1],
-            '5 Ch Width': extract_frequency_channel_and_width(measured_radios, 'five')[0][2],
-            '5 GHz SSIDs': get_ssid_and_mac(measured_radios.get('five', {})),
-            '6 Ch Freq': extract_frequency_channel_and_width(measured_radios, 'six')[0][1],
-            '6 Ch Width': extract_frequency_channel_and_width(measured_radios, 'six')[0][2],
-            '6 GHz SSIDs': get_ssid_and_mac(measured_radios.get('six', {})),
-            'Colour': ekahau_color_dict.get(ap.get('color', 'None'), UNKNOWN),
-            'Floor': floor_plans_dict.get(ap.get('location', {}).get('floorPlanId'), {}).get('name', UNKNOWN),
-            'flagged as My AP': ap.get('mine', UNKNOWN),
-            'hidden': ap.get('hidden', UNKNOWN),
-            'manually positioned': ap.get('userDefinedPosition', UNKNOWN),
-            'Notes': note_text_processor(ap['noteIds'], notes_dict)
-        }
-        surveyed_ap_list.append(ap_details)
-    return sorted(surveyed_ap_list, key=lambda x: x['Name'])
-
-
 def get_ssid_and_mac(measured_radios):
     # Extract MAC addresses and SSIDs from the dictionary
     access_points = []
@@ -376,6 +446,20 @@ def get_ssid_and_mac(measured_radios):
 
     # Format the output string
     return '\n'.join(f"{ssid} ({mac})" for mac, ssid in sorted_access_points)
+
+
+def get_security_and_technologies(measured_radios):
+    # Extract MAC addresses and SSIDs from the dictionary
+    access_points = []
+
+    for radio in measured_radios.values():
+        access_points.append((radio['mac'], radio['security'], radio['technologies']))
+
+    # Sort the access points by MAC address
+    sorted_access_points = sorted(access_points)
+
+    # Format the output string
+    return '\n'.join(f"{security} {technologies}" for mac, security, technologies in sorted_access_points)
 
 
 def extract_frequency_channel_and_width(data, band):
