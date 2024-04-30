@@ -11,7 +11,7 @@ from common import create_notes_dict
 from common import nl
 
 
-right_align = ['2.4 SSIDs', '2.4 GHz', '2.4 Security / Standards', '5 SSIDs', '5 GHz', '5 Security / Standards', '6 SSIDs', '6 GHz']
+right_align = ['2.4 SSIDs', '2.4 GHz', '2.4 Security / Standards', '5 SSIDs', '5 GHz', '5 Security / Standards', '6 SSIDs', '6 GHz', '6 Security / Standards']
 fixed_width = ['2.4 Ch Primary', '2.4 Width', '5 Ch Primary', '5 Width', '6 Ch Primary', '6 Width']
 
 

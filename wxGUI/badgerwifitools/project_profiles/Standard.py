@@ -4,6 +4,9 @@ from common import note_text_processor
 
 from common import UNKNOWN, FIVE_GHZ_RADIO_ID
 
+from common import extract_frequency_channel_and_width
+from common import get_ssid_and_mac
+
 requiredTagKeys = ()
 optionalTagKeys = ()
 
