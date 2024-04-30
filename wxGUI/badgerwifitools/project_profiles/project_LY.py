@@ -1,5 +1,3 @@
-# project_IK.py
-
 from common import model_antenna_split
 from common import ekahau_color_dict
 from common import note_text_processor

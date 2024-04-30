@@ -952,8 +952,11 @@ class MyFrame(wx.Frame):
 
     def on_project_profile_dropdown_selection(self, event):
         selected_profile = self.project_profile_dropdown.GetStringSelection()
+
+        # Load the selected project profile module for simulated AP list creation
         project_profile_module = self.load_project_profile(selected_profile)
         self.current_profile_ap_list_module = project_profile_module
+
 
         # Update the object variables with the configuration from the selected module
         self.esx_required_tag_keys = getattr(project_profile_module, 'requiredTagKeys', None)
