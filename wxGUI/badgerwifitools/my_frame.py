@@ -155,10 +155,15 @@ class MyFrame(wx.Frame):
         # Discover available project Profiles 'project_profiles' directory
         self.available_project_profiles = discover_available_scripts(PROJECT_PROFILES_DIR)
 
-        # Create a dropdown to select a Project Profile
+        # Create a dropdown to select a Project Profile on the Predictive Design tab
         self.project_profile_dropdown = wx.Choice(self.tab1, choices=self.available_project_profiles)
         self.project_profile_dropdown.SetSelection(0)  # Set default selection
-        self.project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_project_profile_dropdown_selection)
+        self.project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_design_project_profile_dropdown_selection)
+
+        # Create a dropdown to select a Project Profile on the Survey tab
+        self.survey_project_profile_dropdown = wx.Choice(self.tab4, choices=self.available_project_profiles)
+        self.survey_project_profile_dropdown.SetSelection(0)  # Set default selection
+        self.survey_project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_survey_project_profile_dropdown_selection)
 
         # Discover available Project Detail Views
         self.available_project_detail_views = discover_available_scripts(PROJECT_DETAIL_DIR)
@@ -383,7 +388,7 @@ class MyFrame(wx.Frame):
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab1_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.setup_project_profile_section()
+        self.setup_design_project_profile_section()
         self.setup_rename_aps_section()
 
         self.tab1_row_sizer.Add(self.project_profile_sizer, 1, wx.EXPAND | wx.ALL, 2)
@@ -392,7 +397,7 @@ class MyFrame(wx.Frame):
         self.tab1_sizer.Add(self.tab1_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab1.SetSizer(self.tab1_sizer)
 
-    def setup_project_profile_section(self):
+    def setup_design_project_profile_section(self):
         self.project_profile_box = wx.StaticBox(self.tab1, label="Project Profile")
         self.project_profile_sizer = wx.StaticBoxSizer(self.project_profile_box, wx.VERTICAL)
 
@@ -500,23 +505,24 @@ class MyFrame(wx.Frame):
         self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab4_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.setup_survey_section_a()
+        self.setup_survey_project_profile_section()
         self.setup_survey_section_b()
 
-        self.tab4_row_sizer.Add(self.a_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab4_row_sizer.Add(self.survey_project_profile_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
         self.tab4_row_sizer.Add(self.b_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
         self.tab4_sizer.Add(self.tab4_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab4.SetSizer(self.tab4_sizer)
 
-    def setup_survey_section_a(self):
-        self.a_box = wx.StaticBox(self.tab4, label="Section A")
-        self.a_section_sizer = wx.StaticBoxSizer(self.a_box, wx.VERTICAL)
+    def setup_survey_project_profile_section(self):
+        self.survey_project_profile_box = wx.StaticBox(self.tab4, label="Project Profile")
+        self.survey_project_profile_section_sizer = wx.StaticBoxSizer(self.survey_project_profile_box, wx.VERTICAL)
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.survey_project_profile_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
         row_sizer.Add(self.create_surveyed_ap_list_button, 0, wx.ALL, self.widget_margin)
-        self.a_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+        self.survey_project_profile_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_survey_section_b(self):
         self.b_box = wx.StaticBox(self.tab4, label="Section B")
@@ -525,7 +531,6 @@ class MyFrame(wx.Frame):
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.b_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
-
 
     def setup_tab5(self):
         self.tab5_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -957,6 +962,14 @@ class MyFrame(wx.Frame):
             self.ap_rename_script_dropdown.SetStringSelection(project_profile_module.preferred_ap_rename_script)
             self.on_ap_rename_script_dropdown_selection(None)
         self.save_application_state(None)
+
+    def on_design_project_profile_dropdown_selection(self, event):
+        self.survey_project_profile_dropdown.SetSelection(self.project_profile_dropdown.GetSelection())
+        self.on_project_profile_dropdown_selection(event)
+
+    def on_survey_project_profile_dropdown_selection(self, event):
+        self.project_profile_dropdown.SetSelection(self.survey_project_profile_dropdown.GetSelection())
+        self.on_project_profile_dropdown_selection(event)
 
     def on_rename_aps(self, event):
         if not self.basic_checks():
