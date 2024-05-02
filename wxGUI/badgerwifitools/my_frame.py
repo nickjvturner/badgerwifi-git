@@ -48,11 +48,14 @@ from common import ADMIN_ACTIONS_DIR
 from common import BOUNDARY_SEPARATION_WIDGET
 from common import WHIMSY_WELCOME_MESSAGES
 from common import CALL_TO_DONATE_MESSAGE
+from common import DIR_STRUCTURE_PROFILES_DIR
 
 from common import discover_available_scripts
 from common import import_module_from_path
 
 from admin import check_for_updates
+from admin.dir_creator import select_root_and_create_directory_structure
+from admin.dir_creator import preview_directory_structure
 
 from survey.surveyed_ap_list import create_surveyed_ap_list
 
@@ -181,6 +184,15 @@ class MyFrame(wx.Frame):
         self.admin_actions_dropdown.SetSelection(0)  # Set default selection
         self.admin_actions_dropdown.Bind(wx.EVT_CHOICE, self.on_admin_actions_dropdown_selection)
 
+        # Discover available directory structure profiles
+        self.available_dir_structure_profiles = discover_available_scripts(DIR_STRUCTURE_PROFILES_DIR)
+
+        # Create a dropdown to select a directory structure profile
+        self.dir_structure_profile_dropdown = wx.Choice(self.tab5, choices=self.available_dir_structure_profiles)
+        self.dir_structure_profile_dropdown.SetSelection(0)  # Set default selection
+        self.dir_structure_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_dir_structure_profile_dropdown_selection)
+
+
     def setup_buttons(self):
         # Create add file button
         self.add_files_button = wx.Button(self.panel, label="Add Files")
@@ -299,6 +311,14 @@ class MyFrame(wx.Frame):
         self.contribute_button = wx.Button(self.tab5, label="Contribute")
         self.contribute_button.Bind(wx.EVT_BUTTON, self.on_contribute)
         self.contribute_button.SetToolTip(wx.ToolTip("Buy the developer a coffee"))
+
+        self.preview_directory_structure_button = wx.Button(self.tab5, label="Preview")
+        self.preview_directory_structure_button.Bind(wx.EVT_BUTTON, self.on_preview_directory_structure)
+        self.preview_directory_structure_button.SetToolTip(wx.ToolTip("Preview selected directory structure profile"))
+
+        self.create_directory_structure_button = wx.Button(self.tab5, label="Create Directory Structure")
+        self.create_directory_structure_button.Bind(wx.EVT_BUTTON, self.on_create_directory_structure)
+        self.create_directory_structure_button.SetToolTip(wx.ToolTip("Specify a root dir, create selected directory structure, presumably for a new project"))
 
         # Create an abort thread button
         self.abort_thread_button = wx.Button(self.panel, label="Abort Current Process")
@@ -536,45 +556,49 @@ class MyFrame(wx.Frame):
         self.tab5_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab5_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.setup_general_section()
-        self.setup_feedback_section()
+        self.setup_application_section()
+        self.setup_misc_section()
 
-        self.tab5_row_sizer.Add(self.general_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
-        self.tab5_row_sizer.Add(self.feedback_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab5_row_sizer.Add(self.application_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab5_row_sizer.Add(self.misc_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
         self.tab5_sizer.Add(self.tab5_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
         self.tab5.SetSizer(self.tab5_sizer)
 
-    def setup_general_section(self):
-        self.general_box = wx.StaticBox(self.tab5, label="General")
-        self.general_section_sizer = wx.StaticBoxSizer(self.general_box, wx.VERTICAL)
+    def setup_application_section(self):
+        self.application_box = wx.StaticBox(self.tab5, label="Application")
+        self.application_section_sizer = wx.StaticBoxSizer(self.application_box, wx.VERTICAL)
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.check_for_updates_button, 0, wx.ALL, self.widget_margin)
-        self.general_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+        row_sizer.AddStretchSpacer(1)
+        row_sizer.Add(self.feedback_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.contribute_button, 0, wx.ALL, self.widget_margin)
+        self.application_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.admin_actions_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
         row_sizer.Add(self.perform_admin_action_button, 0, wx.EXPAND | wx.ALL, self.widget_margin)
-        self.general_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+        self.application_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
-    def setup_feedback_section(self):
-        self.feedback_box = wx.StaticBox(self.tab5, label="-")
-        self.feedback_sizer = wx.StaticBoxSizer(self.feedback_box, wx.VERTICAL)
+    def setup_misc_section(self):
+        self.misc_box = wx.StaticBox(self.tab5, label="Misc")
+        self.misc_sizer = wx.StaticBoxSizer(self.misc_box, wx.VERTICAL)
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.feedback_button, 0, wx.ALL, self.widget_margin)
-        row_sizer.Add(self.contribute_button, 0, wx.ALL, self.widget_margin)
-        self.feedback_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+        row_sizer.Add(self.dir_structure_profile_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
+        row_sizer.Add(self.preview_directory_structure_button, 0, wx.ALL, self.widget_margin)
+        row_sizer.Add(self.create_directory_structure_button, 0, wx.ALL, self.widget_margin)
+        self.misc_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
         # Row 2
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.project_detail_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
         row_sizer.Add(self.display_project_detail_button, 0, wx.EXPAND | wx.ALL, self.widget_margin)
-        self.feedback_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+        self.misc_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def create_menu(self):
         menubar = wx.MenuBar()
@@ -684,6 +708,11 @@ class MyFrame(wx.Frame):
             return
         self.current_project_detail_module.run(self.working_directory, self.esx_project_name, self.append_message)
 
+    def on_dir_structure_profile_dropdown_selection(self, event):
+        selected_index = self.dir_structure_profile_dropdown.GetSelection()
+        dir_structure_profile = self.available_dir_structure_profiles[selected_index]
+        self.current_dir_structure_profile = self.load_module(DIR_STRUCTURE_PROFILES_DIR, dir_structure_profile)
+
     def on_save(self, event):
         self.save_application_state(event)
         message = f'Application state saved on exit, file list and dropdown options should be the same next time you launch the app.'
@@ -725,6 +754,7 @@ class MyFrame(wx.Frame):
             'selected_project_profile_index': self.project_profile_dropdown.GetSelection(),
             'selected_project_detail_index': self.project_detail_dropdown.GetSelection(),
             'selected_admin_actions_index': self.admin_actions_dropdown.GetSelection(),
+            'selected_dir_structure_profile_index': self.dir_structure_profile_dropdown.GetSelection(),
             'selected_tab_index': self.notebook.GetSelection(),
             'ap_icon_size_text_box': self.ap_icon_size_text_box.GetValue(),
             'zoomed_ap_crop_text_box': self.zoomed_ap_crop_text_box.GetValue(),
@@ -774,6 +804,9 @@ class MyFrame(wx.Frame):
                 self.ap_icon_size_text_box.SetValue(state.get('ap_icon_size_text_box', "25"))
                 self.zoomed_ap_crop_text_box.SetValue(state.get('zoomed_ap_crop_text_box', "2000"))
 
+                # Restore the directory structure profile index
+                self.dir_structure_profile_dropdown.SetSelection(state.get('selected_dir_structure_profile_index', 0))
+                self.on_dir_structure_profile_dropdown_selection(None)
 
         except FileNotFoundError:
             self.on_ap_rename_script_dropdown_selection(None)
@@ -1174,11 +1207,18 @@ class MyFrame(wx.Frame):
         self.on_ap_rename_script_dropdown_selection(None)
 
     def check_for_updates_on_startup(self):
-            try:
-                latest_sha = check_for_updates.get_latest_commit_sha()
-                local_commit_sha = check_for_updates.get_git_commit_sha()
-                if latest_sha != local_commit_sha:
-                    self.append_message(f"** Update available **{nl}")
-            except Exception as e:
-                # Check for updates failed
-                pass
+        try:
+            latest_sha = check_for_updates.get_latest_commit_sha()
+            local_commit_sha = check_for_updates.get_git_commit_sha()
+            if latest_sha != local_commit_sha:
+                self.append_message(f"** Update available **{nl}")
+        except Exception as e:
+            print(e)  # Check for updates failed
+
+    def on_create_directory_structure(self, event):
+        self.on_clear_log(None)
+        select_root_and_create_directory_structure(self)
+
+    def on_preview_directory_structure(self, event):
+        self.on_clear_log(None)
+        preview_directory_structure(self)
