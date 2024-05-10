@@ -9,3 +9,4 @@ app_state.json
 *.iml
 .idea/*
 *.egg*
+*.spec*
