@@ -14,11 +14,9 @@ from common import model_antenna_split
 from common import FIVE_GHZ_RADIO_ID
 
 # Static PIL Parameters
-RECT_TEXT_OFFSET = 15  # gap between text and box edge
 EDGE_BUFFER = 80  # gap between rounded rectangle and cropped image edge
 OPACITY = 0.5  # Value from 0 -> 1, defines the opacity of the 'other' APs on zoomed AP images
 
-FONT_SIZE = 30  # Font size for AP names on the map
 WINDOWS_FONT = 'Consola.ttf'
 MACOS_FONT = 'Menlo.ttc'
 
@@ -26,13 +24,17 @@ MACOS_FONT = 'Menlo.ttc'
 ASSETS_DIR = Path(__file__).parent / 'assets'
 
 
-def set_font():
+def set_font(font_size):
     # Define text, font and size
     if platform.system() == 'Windows':
         font_path = os.path.join(os.environ['SystemRoot'], 'Fonts', WINDOWS_FONT)
-        return ImageFont.truetype(font_path, FONT_SIZE)
+        return ImageFont.truetype(font_path, font_size)
     else:
-        return ImageFont.truetype(MACOS_FONT, FONT_SIZE)
+        return ImageFont.truetype(MACOS_FONT, font_size)
+
+
+def get_rrect_text_border_space(font_size):
+    return (font_size // 3) + 2
 
 
 def vector_source_check(floor, message_callback):
@@ -69,8 +71,8 @@ def get_y_offset(arrow, angle):
         return abs(adjacent) + (arrow_length / 40)
 
 
-def text_width_and_height_getter(text):
-    font = set_font()
+def text_width_and_height_getter(text, font_size):
+    font = set_font(font_size)
 
     # Create a working space image and draw object
     working_space = Image.new('RGB', (500, 500), color='white')
@@ -136,8 +138,9 @@ def crop_map(map_image, ap, scaling_ratio, zoomed_ap_crop_size):
     return cropped_map_image
 
 
-def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict):
-    font = set_font()
+def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, simulated_radio_dict, message_callback, floor_plans_dict):
+    font = set_font(font_size)
+    rrect_text_border_space = get_rrect_text_border_space(font_size)
 
     ap_color = ap['color'] if 'color' in ap else 'FFFFFF'
 
@@ -183,14 +186,14 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
         map_image.paste(rotated_arrow, top_left, mask=rotated_arrow)
 
     # Calculate the height and width of the AP Name rounded rectangle
-    text_width, text_height = text_width_and_height_getter(ap['name'])
+    text_width, text_height = text_width_and_height_getter(ap['name'], font_size)
 
     # Establish coordinates for the rounded rectangle
-    x1 = x - (text_width / 2) - RECT_TEXT_OFFSET
+    x1 = x - (text_width / 2) - rrect_text_border_space
     y1 = y + y_offset
 
-    x2 = x + (text_width / 2) + RECT_TEXT_OFFSET
-    y2 = y + y_offset + text_height + (RECT_TEXT_OFFSET * 2)
+    x2 = x + (text_width / 2) + rrect_text_border_space
+    y2 = y + y_offset + text_height + (rrect_text_border_space * 2)
 
     r = (y2 - y1) / 3
 
@@ -201,13 +204,14 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_ra
     draw_map_image.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
 
     # draw the text for 'AP Name'
-    draw_map_image.text((x, y + y_offset + RECT_TEXT_OFFSET), ap['name'], anchor='mt', fill='black', font=font)
+    draw_map_image.text((x, y + y_offset + rrect_text_border_space), ap['name'], anchor='mt', fill='black', font=font)
 
     return map_image
 
 
-def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_callback, floor_plans_dict):
-    font = set_font()
+def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, message_callback, floor_plans_dict):
+    font = set_font(font_size)
+    rrect_text_border_space = get_rrect_text_border_space(font_size)
 
     # establish x and y
     x, y = (ap['location']['coord']['x'] * scaling_ratio,
@@ -234,11 +238,11 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_
     text_width, text_height = text_width_and_height_getter(ap['name'])
 
     # Establish coordinates for the rounded rectangle
-    x1 = x - (text_width / 2) - RECT_TEXT_OFFSET
+    x1 = x - (text_width / 2) - rrect_text_border_space
     y1 = y + y_offset
 
-    x2 = x + (text_width / 2) + RECT_TEXT_OFFSET
-    y2 = y + y_offset + text_height + (RECT_TEXT_OFFSET * 2)
+    x2 = x + (text_width / 2) + rrect_text_border_space
+    y2 = y + y_offset + text_height + (rrect_text_border_space * 2)
 
     r = (y2 - y1) / 3
 
@@ -249,6 +253,6 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, message_
     draw_map_image.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
 
     # draw the text for 'AP Name'
-    draw_map_image.text((x, y + y_offset + RECT_TEXT_OFFSET), ap['name'], anchor='mt', fill='black', font=font)
+    draw_map_image.text((x, y + y_offset + rrect_text_border_space), ap['name'], anchor='mt', fill='black', font=font)
 
     return map_image

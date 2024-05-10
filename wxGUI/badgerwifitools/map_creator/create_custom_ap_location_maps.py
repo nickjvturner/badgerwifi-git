@@ -18,15 +18,15 @@ from map_creator.map_creator_comon import annotate_map
 CUSTOM_AP_ICON_SIZE_ADJUSTER = 4.87
 
 
-def create_custom_ap_location_maps_threaded(working_directory, project_name, message_callback, custom_ap_icon_size, stop_event):
+def create_custom_ap_location_maps_threaded(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event):
     # Wrapper function to run insert_images in a separate thread
     def run_in_thread():
-        create_custom_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, stop_event)
+        create_custom_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event)
     # Start the long-running task in a separate thread
     threading.Thread(target=run_in_thread).start()
 
 
-def create_custom_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, stop_event):
+def create_custom_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event):
     wx.CallAfter(message_callback, f'Creating custom AP location maps for: {project_name}{nl}'
                                    f'Custom AP icon size: {custom_ap_icon_size}{nl}')
 
@@ -101,7 +101,7 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
                 if stop_event.is_set():
                     wx.CallAfter(message_callback, "### PROCESS ABORTED ###")
                     return
-                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
+                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, ap_name_label_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
         # If map was cropped within Ekahau, crop the all_AP map
         if map_cropped_within_ekahau:

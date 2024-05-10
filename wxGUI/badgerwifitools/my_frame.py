@@ -24,7 +24,7 @@ from esx_actions.rebundle_esx import rebundle_project
 
 from project_detail.Summarise import run as summarise_esx
 
-from rename_aps.visualiser import visualise_ap_renaming
+from rename_aps.rename_visualiser import visualise_ap_renaming
 from rename_aps.ap_renamer import ap_renamer
 
 from exports import export_ap_images
@@ -329,11 +329,14 @@ class MyFrame(wx.Frame):
         self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
 
     def setup_text_input_boxes(self):
-        # Create a text input box for the zoomed AP image crop size
-        self.zoomed_ap_crop_text_box = wx.TextCtrl(self.tab2, value="2000", style=wx.TE_PROCESS_ENTER)
-
         # Create a text input box for the AP icon size
         self.ap_icon_size_text_box = wx.TextCtrl(self.tab2, value="25", style=wx.TE_PROCESS_ENTER)
+
+        # Create a text input box for the AP name label size
+        self.ap_name_label_size_text_box = wx.TextCtrl(self.tab2, value="30", style=wx.TE_PROCESS_ENTER)
+
+        # Create a text input box for the zoomed AP image crop size
+        self.zoomed_ap_crop_text_box = wx.TextCtrl(self.tab2, value="2000", style=wx.TE_PROCESS_ENTER)
 
     def setup_text_labels(self):
         # Create a text label for the drop target with custom position
@@ -342,13 +345,17 @@ class MyFrame(wx.Frame):
         # Create a text label for the Create AP List function
         self.create_ap_list_label = wx.StaticText(self.tab1, label="Export to Excel:")
 
-        # Create a text label for the zoomed AP crop size text box
-        self.zoomed_ap_crop_label = wx.StaticText(self.tab2, label="Zoomed AP Crop Size:")
-        self.zoomed_ap_crop_label.SetToolTip(wx.ToolTip("Enter the size of the zoomed AP crop in pixels"))
-
         # Create a text label for the AP icon size
         self.ap_icon_size_label = wx.StaticText(self.tab2, label="AP Icon Size:")
         self.ap_icon_size_label.SetToolTip(wx.ToolTip("Enter the size of the AP icon in pixels"))
+
+        # Create a text label for the ap name label size
+        self.ap_name_label_size_label = wx.StaticText(self.tab2, label="Text Size:")
+        self.ap_name_label_size_label.SetToolTip(wx.ToolTip("Enter the font size for the AP name label"))
+
+        # Create a text label for the zoomed AP crop size text box
+        self.zoomed_ap_crop_label = wx.StaticText(self.tab2, label="Zoomed AP Crop Size:")
+        self.zoomed_ap_crop_label.SetToolTip(wx.ToolTip("Enter the size of the zoomed AP crop in pixels"))
 
     def setup_panel_rows(self):
         self.button_row1_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -488,6 +495,8 @@ class MyFrame(wx.Frame):
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.ap_icon_size_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
         row_sizer.Add(self.ap_icon_size_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
+        row_sizer.Add(self.ap_name_label_size_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
+        row_sizer.Add(self.ap_name_label_size_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
         row_sizer.Add(self.zoomed_ap_crop_label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
         row_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
         self.create_sizer.Add(row_sizer, 0, wx.EXPAND, wx.LEFT, self.row_sizer_margin)
@@ -1101,13 +1110,15 @@ class MyFrame(wx.Frame):
 
         # Retrieve the number from the custom AP icon size text box
         ap_icon_size = self.ap_icon_size_text_box.GetValue()
+        ap_name_label_size = self.ap_name_label_size_text_box.GetValue()
 
         # Clear the stop event flag before starting the thread
         self.stop_event.clear()
 
         try:
-            ap_icon_size = int(ap_icon_size)  # Convert the input to a float
-            create_custom_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, ap_icon_size, self.stop_event)
+            ap_icon_size = int(ap_icon_size)  # Ensure the AP icon size value is an integer
+            ap_name_label_size = int(ap_name_label_size)  # Ensure the AP name label size value is an integer
+            create_custom_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, ap_icon_size, ap_name_label_size, self.stop_event)
 
         except ValueError:
             # Handle the case where the input is not a valid number
