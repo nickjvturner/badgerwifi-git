@@ -152,13 +152,14 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, s
 
     spot = get_ap_icon(ap, custom_ap_icon_size)
 
-    angle = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaDirection']
+    antenna_direction_angle = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaDirection']
+    antenna_tilt_angle = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaTilt']
 
     arrow = Image.open(ASSETS_DIR / 'ekahau_style' / 'ekahau-AP-arrow.png')
     arrow = arrow.resize((custom_ap_icon_size, custom_ap_icon_size))
 
     # Calculate AP icon rounded rectangle offset value for text below the AP icon
-    y_offset = get_y_offset(arrow, angle)
+    y_offset = get_y_offset(arrow, antenna_direction_angle)
 
     # Define the centre point of the spot
     spot_centre_point = (spot.width // 2, spot.height // 2)
@@ -171,10 +172,16 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, s
 
     antenna_mounting = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaMounting']
 
-    if angle != 0.0 or antenna_mounting == 'WALL':
-        wx.CallAfter(message_callback, f'AP has rotational angle of: {round(angle)}')
+    if antenna_mounting == 'WALL' or antenna_tilt_angle != 0:
+        wx.CallAfter(message_callback, f'AP directional arrow is considered relevant')
 
-        rotated_arrow = arrow.rotate(-angle, expand=True)
+        if antenna_mounting == 'WALL':
+            wx.CallAfter(message_callback, f'AP is WALL mounted')
+
+        if antenna_tilt_angle != 0:
+            wx.CallAfter(message_callback, f'AP has antenna tilt angle of: {round(antenna_tilt_angle)}')
+
+        rotated_arrow = arrow.rotate(-antenna_direction_angle, expand=True)
 
         # Define the centre point of the rotated icon
         rotated_arrow_centre_point = (rotated_arrow.width // 2, rotated_arrow.height // 2)
