@@ -46,7 +46,8 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
             'Antenna Tilt': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
             'Simulated Tx power (5 GHz)': round(simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('transmitPower', 0), 1),
             'RF-Group': mini_tags_dict.get('rf-group', UNKNOWN),
-            'Notes': note_text_processor(ap['noteIds'], notes_dict)
+            'Notes': note_text_processor(ap['noteIds'], notes_dict),
+            'Ekahau Unique ID': ap['id'],
         }
         custom_ap_list.append(ap_details)
     return sorted(custom_ap_list, key=lambda x: x['Name'])
