@@ -110,6 +110,12 @@ image_search = {
     'Aruba AP-567': {
         'image': 'AP-567.png',
         'height': 18},
+    'Aruba AP-634': {
+        'image': 'AP-634.png',
+        'height': 18},
+    'Aruba AP-635': {
+        'image': 'AP-635.png',
+        'height': 18},
     'Aruba AP-655 5GHz': {
         'image': 'AP-655.png',
         'height': 18},
@@ -119,19 +125,21 @@ image_search = {
 }
 
 text_search = {
-    # Access Points
-    'Aruba AP-514 +  Aruba AP-ANT-45': 'Aruba AP-514',
-    'Aruba AP-514 + AP-ANT-345': 'Aruba AP-514',
-    'Aruba AP-514 +  Aruba AP-ANT-345': 'Aruba AP-514',
-
     # Antennas
+    'Aruba AP-635 5GHz': 'integrated, omnidirectional',
+    'Aruba AP-655 5GHz': 'integrated, omnidirectional',
+
+    'Aruba AP-565 5GHz': 'integrated, omnidirectional',
+    'Aruba AP-567 5GHz': 'integrated, directional',
+
+    'Aruba AP-585 5GHz': 'integrated, omnidirectional',
+    'Aruba AP-587 5GHz': 'integrated, directional',
+
     'Aruba AP-ANT-45 5GHz 5.5dBi': 'AP-ANT-45\x0D(external, directional)',
     'Aruba AP-ANT-345 5GHz': 'AP-ANT-345\x0D(external, directional)',
 
-    'Aruba AP-655 5GHz': 'integrated, omnidirectional',
-    'Aruba AP-565 5GHz': 'integrated, omnidirectional',
-    'Aruba AP-567 5GHz': 'integrated, directional',
-    'Aruba AP-585 5GHz': 'integrated, omnidirectional',
-    'Aruba AP-635 5GHz': 'integrated, omnidirectional',
-    'Aruba AP-587 5GHz': 'integrated, directional'
+    # Access Point model correction
+    'Aruba AP-514 +  Aruba AP-ANT-45': 'Aruba AP-514',
+    'Aruba AP-514 + AP-ANT-345': 'Aruba AP-514',
+    'Aruba AP-514 +  Aruba AP-ANT-345': 'Aruba AP-514',
 }
