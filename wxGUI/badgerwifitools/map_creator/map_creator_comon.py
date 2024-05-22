@@ -242,7 +242,7 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_siz
     map_image.paste(spot, top_left, mask=spot)
 
     # Calculate the height and width of the AP Name rounded rectangle
-    text_width, text_height = text_width_and_height_getter(ap['name'])
+    text_width, text_height = text_width_and_height_getter(ap['name'], font_size)
 
     # Establish coordinates for the rounded rectangle
     x1 = x - (text_width / 2) - rrect_text_border_space

@@ -1092,13 +1092,15 @@ class MyFrame(wx.Frame):
 
         # Retrieve the number from the custom AP icon size text box
         ap_icon_size = self.ap_icon_size_text_box.GetValue()
+        ap_name_label_size = self.ap_name_label_size_text_box.GetValue()
 
         # Clear the stop event flag before starting the thread
         self.stop_event.clear()
 
         try:
             ap_icon_size = int(ap_icon_size)  # Convert the input to a float
-            create_pds_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, ap_icon_size, self.stop_event)
+            ap_name_label_size = int(ap_name_label_size)  # Ensure the AP name label size value is an integer
+            create_pds_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, ap_icon_size, ap_name_label_size, self.stop_event)
 
         except ValueError:
             # Handle the case where the input is not a valid number
