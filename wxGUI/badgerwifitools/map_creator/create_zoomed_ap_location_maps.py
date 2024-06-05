@@ -15,21 +15,22 @@ from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
 from map_creator.map_creator_comon import annotate_map
 from map_creator.map_creator_comon import crop_map
+from map_creator.map_creator_comon import oversize_map_check
 
 from map_creator.map_creator_comon import OPACITY
 
 CUSTOM_AP_ICON_SIZE_ADJUSTER = 4.87
 
 
-def create_zoomed_ap_location_maps_threaded(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, stop_event):
+def create_zoomed_ap_location_maps_threaded(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, ap_name_label_size, stop_event):
     # Wrapper function to run insert_images in a separate thread
     def run_in_thread():
-        create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, stop_event)
+        create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, ap_name_label_size, stop_event)
     # Start the long-running task in a separate thread
     threading.Thread(target=run_in_thread).start()
 
 
-def create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, stop_event):
+def create_zoomed_ap_location_maps(working_directory, project_name, message_callback, zoomed_ap_crop_size, custom_ap_icon_size, ap_name_label_size, stop_event):
     wx.CallAfter(message_callback, f'Creating zoomed per AP location maps for {project_name}:{nl}'
                                    f'Custom AP icon size: {custom_ap_icon_size}{nl}'
                                    f'Zoomed AP crop size: {zoomed_ap_crop_size}{nl}')
@@ -107,7 +108,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
                 if stop_event.is_set():
                     wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
                     return
-                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
+                all_aps = annotate_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, ap_name_label_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
             # Save the output images
             wx.CallAfter(message_callback, f"{nl}Saving annotated floor plan: {floor['name']}{nl}")
@@ -115,6 +116,10 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
 
             # Zoom faded AP map generation
             wx.CallAfter(message_callback, f"{nl}Creating zoomed per AP images for: {floor['name']}{nl}")
+
+            # Check if the map is oversized
+            oversize_map_check(source_floor_plan_image, message_callback)
+
             all_aps_faded = all_aps.copy().convert('RGBA')
             faded_ap_background_map_image = source_floor_plan_image.convert('RGBA')
             all_aps_faded = Image.alpha_composite(faded_ap_background_map_image, Image.blend(faded_ap_background_map_image, all_aps_faded, OPACITY))
@@ -124,7 +129,7 @@ def create_zoomed_ap_location_maps(working_directory, project_name, message_call
                     wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
                     return
 
-                per_ap_map_image = annotate_map(all_aps_faded.copy(), ap, scaling_ratio, custom_ap_icon_size, simulated_radio_dict, message_callback, floor_plans_dict)
+                per_ap_map_image = annotate_map(all_aps_faded.copy(), ap, scaling_ratio, custom_ap_icon_size, ap_name_label_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
                 cropped_per_ap_map_image = crop_map(per_ap_map_image, ap, scaling_ratio, zoomed_ap_crop_size)
 

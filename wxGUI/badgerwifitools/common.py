@@ -25,6 +25,7 @@ BOUNDARY_SEPARATION_WIDGET = 'BOUNDARY_SEPARATOR'
 PROJECT_DETAIL_DIR = 'project_detail'
 ADMIN_ACTIONS_DIR = 'admin/actions'
 DIR_STRUCTURE_PROFILES_DIR = 'admin/dir_structure_profiles'
+OVERSIZE_MAP_LIMIT = 8000
 
 WHIMSY_WELCOME_MESSAGES = [
     'Welcome to BadgerWiFi Tools',

@@ -34,7 +34,7 @@ from docx_manipulation.insert_images import insert_images_threaded
 from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
 
 from map_creator.extract_blank_maps import extract_blank_maps
-from map_creator.create_custom_ap_location_maps import create_custom_ap_location_maps_threaded
+from map_creator.create_ap_location_maps import create_custom_ap_location_maps_threaded
 from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_location_maps_threaded
 from map_creator.create_pds_maps import create_pds_maps_threaded
 
@@ -1135,11 +1135,12 @@ class MyFrame(wx.Frame):
         # Retrieve the number from the zoomed AP crop size text box
         zoomed_ap_crop_size = self.zoomed_ap_crop_text_box.GetValue()
         ap_icon_size = self.ap_icon_size_text_box.GetValue()
+        ap_name_label_size = int(self.ap_name_label_size_text_box.GetValue())
 
         try:
             zoomed_ap_crop_size = int(zoomed_ap_crop_size)  # Convert the input to a float
             custom_ap_icon_size = int(ap_icon_size)  # Convert the input to a float
-            create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, zoomed_ap_crop_size, ap_icon_size, self.stop_event)
+            create_zoomed_ap_location_maps_threaded(self.working_directory, self.esx_project_name, self.append_message, zoomed_ap_crop_size, custom_ap_icon_size, ap_name_label_size, self.stop_event)
         except ValueError:
             # Handle the case where the input is not a valid number
             wx.MessageBox("Please enter a valid number", "Error", wx.OK | wx.ICON_ERROR)

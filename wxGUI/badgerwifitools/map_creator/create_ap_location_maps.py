@@ -14,6 +14,8 @@ from common import create_simulated_radios_dict
 from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
 from map_creator.map_creator_comon import annotate_map
+from map_creator.map_creator_comon import oversize_map_check
+
 
 CUSTOM_AP_ICON_SIZE_ADJUSTER = 4.87
 
@@ -21,12 +23,12 @@ CUSTOM_AP_ICON_SIZE_ADJUSTER = 4.87
 def create_custom_ap_location_maps_threaded(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event):
     # Wrapper function to run insert_images in a separate thread
     def run_in_thread():
-        create_custom_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event)
+        create_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event)
     # Start the long-running task in a separate thread
     threading.Thread(target=run_in_thread).start()
 
 
-def create_custom_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event):
+def create_ap_location_maps(working_directory, project_name, message_callback, custom_ap_icon_size, ap_name_label_size, stop_event):
     wx.CallAfter(message_callback, f'Creating custom AP location maps for: {project_name}{nl}'
                                    f'Custom AP icon size: {custom_ap_icon_size}{nl}')
 
@@ -64,7 +66,7 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
             wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
             return
 
-        wx.CallAfter(message_callback, f"{nl}Processing floor: {floor['name']}{nl}")
+        wx.CallAfter(message_callback, f"{nl}{nl}Processing floor: {floor['name']}{nl}")
 
         floor_id = vector_source_check(floor, message_callback)
 
@@ -73,6 +75,9 @@ def create_custom_ap_location_maps(working_directory, project_name, message_call
 
         # Open the floor plan to be used for AP placement activities
         source_floor_plan_image = Image.open(temp_dir / floor_id)
+
+        # Check if the map is oversized
+        oversize_map_check(source_floor_plan_image, message_callback)
 
         map_cropped_within_ekahau, scaling_ratio, crop_bitmap = crop_assessment(floor, source_floor_plan_image, project_dir, floor_id, blank_plan_dir)
 

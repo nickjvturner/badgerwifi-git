@@ -10,8 +10,10 @@ from PIL import Image, ImageDraw, ImageFont
 
 from common import ekahau_color_dict
 from common import model_antenna_split
-
 from common import FIVE_GHZ_RADIO_ID
+
+from common import OVERSIZE_MAP_LIMIT
+from common import nl
 
 # Static PIL Parameters
 EDGE_BUFFER = 80  # gap between rounded rectangle and cropped image edge
@@ -136,6 +138,11 @@ def crop_map(map_image, ap, scaling_ratio, zoomed_ap_crop_size):
     cropped_map_image = map_image.crop(crop_box)
 
     return cropped_map_image
+
+
+def oversize_map_check(map_image, message_callback):
+    if map_image.width > OVERSIZE_MAP_LIMIT or map_image.height > OVERSIZE_MAP_LIMIT:
+        wx.CallAfter(message_callback, f"{'#' * 20} WARNING {'#' * 20}{nl}Map is larger than {OVERSIZE_MAP_LIMIT} pixels.{nl}This may cause undesirable output artefacts.{nl}{'#' * 49}{nl}")
 
 
 def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, simulated_radio_dict, message_callback, floor_plans_dict):

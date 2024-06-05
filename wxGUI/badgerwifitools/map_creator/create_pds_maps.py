@@ -13,6 +13,7 @@ from common import create_floor_plans_dict
 from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
 from map_creator.map_creator_comon import annotate_pds_map
+from map_creator.map_creator_comon import oversize_map_check
 
 CUSTOM_AP_ICON_SIZE_ADJUSTER = 5.3
 
@@ -74,6 +75,9 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
         aps_on_this_floor = []
 
         wx.CallAfter(message_callback, f"{nl}Processing floor: {floor['name']}{nl}")
+
+        # Check if the map is oversized
+        oversize_map_check(source_floor_plan_image, message_callback)
 
         for ap in sorted(access_points_json['accessPoints'], key=lambda i: i['name']):
             if stop_event.is_set():
