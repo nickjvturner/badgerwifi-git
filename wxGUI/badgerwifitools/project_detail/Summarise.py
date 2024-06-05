@@ -11,6 +11,7 @@ from common import ekahau_color_dict
 
 # CONSTANTS
 nl = '\n'
+SPACER = '\n\n'
 
 
 def run(working_directory, project_name, message_callback):
@@ -55,23 +56,24 @@ def run(working_directory, project_name, message_callback):
 
         model_counts[ap['model']] += 1
 
-    # Prepare the summary message
-    summary_message = f"{nl}Count of each model type:{nl}"
-    for model, count in sorted(model_counts.items()):
-        summary_message += f"{model}: {count}{nl}"
+    message_callback(f"{SPACER}AP TOTAL: {len(custom_ap_dict)}")
 
-    summary_message += f"{nl}Count of each color:{nl}"
+    message_callback(f"{SPACER}AP Models:{nl}{'-' * 10}")
+    for model, count in sorted(model_counts.items()):
+        message_callback(f"{model}: {count}")
+
+    message_callback(f"{SPACER}Colour:{nl}{'-' * 7}")
     color_counts_sorted = sorted(color_counts.items(), key=lambda item: ekahau_color_dict.get(item[0], item[0]))
     for color, count in color_counts_sorted:
-        summary_message += f"{ekahau_color_dict.get(color)}: {count}{nl}"
+        message_callback(f"{ekahau_color_dict.get(color)}: {count}")
 
-    summary_message += f"{nl}Count of each AP height:{nl}"
+    message_callback(f"{SPACER}AP Heights:{nl}{'-' * 11}")
     for height, count in sorted(antenna_height_counts.items()):
-        summary_message += f"{height}: {count}{nl}"
+        message_callback(f"{height}: {count}")
 
     if tag_keys_json is not None:
         # Print the count of each tag key and value pair, sorted
-        summary_message += f"{nl}Count of each tag key and value pair:{nl}"
+        message_callback(f"{SPACER}Tag key and value pairs:{nl}{'-' * 24}")
 
         previous_tag_key = None  # Initialize previous tag_key with None
         for (tag_key, tag_value), count in sorted(tag_counts.items()):
@@ -79,10 +81,10 @@ def run(working_directory, project_name, message_callback):
             if tag_key != previous_tag_key:
                 # Add a blank line if it's not the first tag_key
                 if previous_tag_key is not None:
-                    summary_message += f"{nl}"
+                    message_callback("")
                 previous_tag_key = tag_key  # Update the previous tag_key
 
             # Append the current tag information
-            summary_message += f"{tag_key} - {tag_value}: {count}{nl}"
+            message_callback(f"{tag_key} - {tag_value}: {count}")
 
-    message_callback(f"{summary_message}{nl}{nl}### SUMMARY COMPLETE ###")
+    message_callback(f"{SPACER}### SUMMARY COMPLETE ###")
