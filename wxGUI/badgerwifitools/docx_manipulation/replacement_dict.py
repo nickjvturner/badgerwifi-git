@@ -109,7 +109,7 @@ image_search = {
         'height': 18},
     'Aruba AP-567': {
         'image': 'AP-567.png',
-        'height': 18},
+        'height': 15},
     'Aruba AP-634': {
         'image': 'AP-634.png',
         'height': 18},
