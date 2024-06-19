@@ -30,6 +30,7 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
             'Mount': mini_tags_dict.get('ap-bracket'),
             'ind/out': mini_tags_dict.get('ind/out'),
             'power source': mini_tags_dict.get('power'),
+            'backhaul': mini_tags_dict.get('backhaul'),
             'building-group': mini_tags_dict.get('building-group'),
             'Notes': note_text_processor(ap['noteIds'], notes_dict)
         }
