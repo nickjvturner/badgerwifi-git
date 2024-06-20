@@ -42,31 +42,46 @@ def export_ap_images(working_directory, project_name, message_callback):
 
 	image_extraction_counter = []
 
+	# Loop through all the APs in the project
 	for ap in access_points_json['accessPoints']:
+		image_count = 1
+
+		# Check if the AP has any notes
 		if 'noteIds' in ap.keys():
+
+			# Check if the AP is placed on a map
 			if 'location' in ap.keys():
-				if 'noteIds' in ap.keys():
+
+				for ap_note in ap['noteIds']:
+
+					# Loop through all the notes stored within the project
 					for note in notes_json['notes']:
-						if len(ap['noteIds']) > 0:
-							if note['id'] == ap['noteIds'][0] and len(note['imageIds']) > 0:
-								image_count = 1
 
+						# Filter out notes that do not contain images
+						if len(note['imageIds']) > 0:
+
+							# Check if the note id matches the current AP note id
+							if note['id'] == ap_note:
+
+								# Loop through all the images attached to the note
 								for image in note['imageIds']:
-									image = 'image-' + image
-									image_full_path = project_dir / image
 
+									source_image_file = 'image-' + image
+									source_image_full_path = project_dir / source_image_file
+
+									# Check if there is more than 1 note containing an image
 									if len(note['imageIds']) > 1:
-										# there must be more than 1 image, add '-1', '-2', '-3', etc
+										# there must be more than 1 image, we should add '-1', '-2', '-3', etc
 										ap_image_name = f"{ap['name']}-{str(image_count)}.png"
 									else:
 										ap_image_name = f"{ap['name']}.png"
 
-									dst = ap_images_dir / ap_image_name
+									output_destination = ap_images_dir / ap_image_name
 
 									# count total number of APs extracted
-									image_extraction_counter.append(ap_image_name)
+									image_extraction_counter.append(source_image_file)
 
-									shutil.copy(image_full_path, dst)
+									shutil.copy(source_image_full_path, output_destination)
 									message_callback(f"{ap['name']} Image extracted")
 
 									image_count += 1
