@@ -166,6 +166,8 @@ wifi_channel_dict = {
 }
 
 
+antenna_band_references = (' BLE', ' 2.4GHz', ' 5GHz', ' 6GHz')
+
 
 def load_json(project_dir, filename, message_callback):
     """Load JSON data from a file."""
@@ -493,3 +495,16 @@ def extract_frequency_channel_and_width(data, band):
         channels_and_widths.append(('', '', ''))
 
     return tuple(channels_and_widths)
+
+
+def antenna_name_cleanup(antenna_name):
+    """
+        Removes all occurrences of the band_references from the antenna_name.
+
+        Returns:
+        str: The modified antenna_name with all substrings removed.
+        """
+    for ref in antenna_band_references:
+        antenna_name = antenna_name.replace(ref, "")
+
+    return antenna_name

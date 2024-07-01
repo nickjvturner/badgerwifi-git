@@ -6,6 +6,7 @@ from common import create_floor_plans_dict
 from common import create_tag_keys_dict
 from common import create_simulated_radios_dict
 from common import create_notes_dict
+from common import create_antenna_types_dict
 
 nl = '\n'
 
@@ -44,6 +45,7 @@ def create_ap_list(working_directory, project_name, message_callback, create_cus
     floor_plans_json = load_json(project_dir, 'floorPlans.json', message_callback)
     access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
     simulated_radios_json = load_json(project_dir, 'simulatedRadios.json', message_callback)
+    antenna_types_json = load_json(project_dir, 'antennaTypes.json', message_callback)
     tag_keys_json = load_json(project_dir, 'tagKeys.json', message_callback)
     notes_json = load_json(project_dir, 'notes.json', message_callback)
 
@@ -51,9 +53,10 @@ def create_ap_list(working_directory, project_name, message_callback, create_cus
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
     tag_keys_dict = create_tag_keys_dict(tag_keys_json)
     simulated_radio_dict = create_simulated_radios_dict(simulated_radios_json)
+    antenna_types_dict = create_antenna_types_dict(antenna_types_json)
     notes_dict = create_notes_dict(notes_json)
 
-    custom_ap_list = create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, notes_dict)
+    custom_ap_list = create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, antenna_types_dict, notes_dict)
 
     # Create a pandas dataframe and export to Excel
     df = pd.DataFrame(custom_ap_list)
