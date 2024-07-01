@@ -13,7 +13,7 @@ requiredTagKeys = ()
 optionalTagKeys = ()
 
 
-def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, notes_dict):
+def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, antenna_types_dict, notes_dict):
     """Process access points to a structured list."""
     custom_ap_list = []
     for ap in access_points_json['accessPoints']:
