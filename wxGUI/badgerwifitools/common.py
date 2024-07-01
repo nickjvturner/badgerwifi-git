@@ -253,6 +253,21 @@ def create_simulated_radios_dict(simulated_radios_json):
     return simulated_radio_dict
 
 
+def create_antenna_types_dict(antenna_types_json):
+    antenna_types_dict = {}  # Initialize an empty dictionary
+
+    # Loop through each antenna inside antennaTypesJSON['antennaTypes']
+    for antenna in antenna_types_json['antennaTypes']:
+        # Check if the top-level key exists, if not, create it
+        if antenna['id'] not in antenna_types_dict:
+            antenna_types_dict[antenna['id']] = {}
+
+        # Assign the antenna object to the nested key
+        antenna_types_dict[antenna['id']] = antenna
+
+    return antenna_types_dict
+
+
 def model_antenna_split(string):
     """Split external antenna information."""
     # Split the input string by the '+' sign
