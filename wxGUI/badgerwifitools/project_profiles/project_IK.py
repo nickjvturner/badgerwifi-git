@@ -43,7 +43,7 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
             'Antenna': antenna_name if antenna_type_detail.get('apCoupling') == 'EXTERNAL_ANTENNA' else 'not-required',
             'Antenna Description': antenna_type_detail.get('apCoupling'),
             'Antenna Bracket': mini_tags_dict.get('antenna-bracket', UNKNOWN),
-            'Antenna Height': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', ''),
+            'Antenna Height (m)': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', ''),
             'Antenna Tilt (degrees)': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
             'Simulated Tx power (5 GHz), dBm': round(simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('transmitPower', 0), 1),
             'RF-Group': mini_tags_dict.get('rf-group', UNKNOWN),
