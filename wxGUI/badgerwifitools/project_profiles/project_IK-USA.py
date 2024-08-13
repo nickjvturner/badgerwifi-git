@@ -30,7 +30,7 @@ def meters_to_feet_inches(meters):
     total_inches = meters * 39.3701
     feet = int(total_inches // 12)
     inches = total_inches % 12
-    return f'''{feet}' {inches:2f}" '''
+    return f'''{feet}' {inches:0f}" '''
 
 # Custom AP List Constructor
 def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, antenna_types_dict, notes_dict):
