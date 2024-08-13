@@ -25,6 +25,13 @@ project_specific_conventions = {
 }
 
 
+def meters_to_feet_inches(meters):
+    # 1 meter = 3.28084 feet
+    total_inches = meters * 39.3701
+    feet = int(total_inches // 12)
+    inches = total_inches % 12
+    return f'''{feet}' {inches:2f}" '''
+
 # Custom AP List Constructor
 def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, antenna_types_dict, notes_dict):
     """Process access points to a structured list."""
@@ -43,7 +50,7 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
             'Antenna': antenna_name if antenna_type_detail.get('apCoupling') == 'EXTERNAL_ANTENNA' else 'not-required',
             'Antenna Description': antenna_type_detail.get('apCoupling'),
             'Antenna Bracket': mini_tags_dict.get('antenna-bracket', UNKNOWN),
-            'Antenna Height (ft)': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', '') * 3.28084,
+            'Antenna Height (ft)': meters_to_feet_inches((simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaHeight', ''))),
             'Antenna Tilt (degrees)': simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('antennaTilt', ''),
             'Simulated Tx power (5 GHz), dBm': round(simulated_radio_dict.get(ap['id'], {}).get(FIVE_GHZ_RADIO_ID, {}).get('transmitPower', 0), 1),
             'RF-Group': mini_tags_dict.get('rf-group', UNKNOWN),
