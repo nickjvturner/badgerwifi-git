@@ -1,4 +1,5 @@
 directory_structure = {
+    'AP location maps': {},
     'BoM': {
         'archive': {},
     },
@@ -14,9 +15,7 @@ directory_structure = {
     'notes': {},
     'pictures': {},
     'REPORT': {
-        'AP location maps': {},
         'archive': {},
-        'per AP installer report': {}
     },
     'templates': {}
 }

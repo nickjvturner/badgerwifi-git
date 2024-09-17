@@ -1,16 +1,14 @@
 directory_structure = {
-    'ekahau': {
-        'archive': {},
+    'dir 1': {
+        'sub dir 1': {},
+        'sub dir 2': {},
     },
-    'floor plans': {
-        'DWG': {},
-        'PDF': {},
-        'PNG': {},
-        'archive': {}
+    'dir 2': {
+        'sub dir 1': {},
+        'sub dir 2': {},
     },
-    'REPORT': {
-        'AP location maps': {},
-        'archive': {},
-        'per AP installer report': {}
+    'dir 3': {
+        'sub dir 1': {},
+        'sub dir 2': {},
     }
 }

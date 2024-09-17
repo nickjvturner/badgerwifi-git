@@ -30,16 +30,12 @@ from rename_aps.ap_renamer import ap_renamer
 from exports import export_ap_images
 from exports import export_note_images
 
-from docx_manipulation.insert_images import insert_images_threaded
-from docx_manipulation.docx_to_pdf import convert_docx_to_pdf
-
 from map_creator.extract_blank_maps import extract_blank_maps
 from map_creator.create_ap_location_maps import create_custom_ap_location_maps_threaded
 from map_creator.create_zoomed_ap_location_maps import create_zoomed_ap_location_maps_threaded
 from map_creator.create_pds_maps import create_pds_maps_threaded
 
 from common import nl
-from common import DOCX_EXTENSION
 from common import CONFIGURATION_DIR
 from common import PROJECT_PROFILES_DIR
 from common import RENAME_APS_DIR
@@ -75,7 +71,6 @@ class MyFrame(wx.Frame):
         self.setup_text_input_boxes()
         self.setup_tab1()
         self.setup_tab2()
-        self.setup_tab3()
         self.setup_tab4()
         self.setup_tab5()
         self.setup_panel_rows()
@@ -115,7 +110,6 @@ class MyFrame(wx.Frame):
         self.rename_aps_boundary_separator = 200  # Initialize the boundary separator variable
         self.esx_required_tag_keys = {}
         self.esx_optional_tag_keys = {}
-        self.docx_files = []
 
         # Define the configuration directory path
         self.config_dir = Path(__file__).resolve().parent / CONFIGURATION_DIR
@@ -197,7 +191,7 @@ class MyFrame(wx.Frame):
         # Create add file button
         self.add_files_button = wx.Button(self.panel, label="Add Files")
         self.add_files_button.Bind(wx.EVT_BUTTON, self.on_add_file)
-        self.add_files_button.SetToolTip(wx.ToolTip("Add .esx or .docx files to the file list"))
+        self.add_files_button.SetToolTip(wx.ToolTip("Add .esx files to the file list"))
 
         # Create open working directory button
         self.open_working_directory_button = wx.Button(self.panel, label="Open Working Directory")
@@ -283,14 +277,6 @@ class MyFrame(wx.Frame):
         self.export_pds_maps_button = wx.Button(self.tab2, label="PDS Maps")
         self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
         self.export_pds_maps_button.SetToolTip(wx.ToolTip("Generate maps with red circle AP markers for use during Post Deployment Surveys"))
-
-        self.insert_images_button = wx.Button(self.tab3, label="Insert Images to .docx")
-        self.insert_images_button.Bind(wx.EVT_BUTTON, self.on_insert_images)
-        self.insert_images_button.SetToolTip(wx.ToolTip("Perform image insertion and text string replacement for .docx file(s)"))
-
-        self.convert_docx_to_pdf_button = wx.Button(self.tab3, label="Convert .docx to PDF")
-        self.convert_docx_to_pdf_button.Bind(wx.EVT_BUTTON, self.on_convert_docx_to_pdf)
-        self.convert_docx_to_pdf_button.SetToolTip(wx.ToolTip("Convert .docx file(s) to PDF"))
 
         self.create_surveyed_ap_list_button = wx.Button(self.tab4, label="Create Surveyed AP List")
         self.create_surveyed_ap_list_button.Bind(wx.EVT_BUTTON, self.on_create_surveyed_ap_list)
@@ -392,19 +378,16 @@ class MyFrame(wx.Frame):
         self.notebook = wx.Notebook(self.panel)
         self.tab1 = wx.Panel(self.notebook)
         self.tab2 = wx.Panel(self.notebook)
-        self.tab3 = wx.Panel(self.notebook)
         self.tab4 = wx.Panel(self.notebook)
         self.tab5 = wx.Panel(self.notebook)
 
         self.notebook.AddPage(self.tab1, "Predictive Design")
         self.notebook.AddPage(self.tab2, "Asset Creator")
-        self.notebook.AddPage(self.tab3, "DOCX")
         self.notebook.AddPage(self.tab4, "Survey")
         self.notebook.AddPage(self.tab5, "Admin")
 
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab5_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -501,34 +484,6 @@ class MyFrame(wx.Frame):
         row_sizer.Add(self.zoomed_ap_crop_text_box, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, self.widget_margin)
         self.create_sizer.Add(row_sizer, 0, wx.EXPAND, wx.LEFT, self.row_sizer_margin)
 
-    def setup_tab3(self):
-        self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.tab3_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.setup_image_insertion_section()
-        self.setup_pdf_section()
-
-        self.tab3_row_sizer.Add(self.image_insertion_sizer, 1, wx.EXPAND | wx.ALL, 2)
-        self.tab3_row_sizer.Add(self.pdf_sizer, 1, wx.EXPAND | wx.ALL, 2)
-
-        self.tab3_sizer.Add(self.tab3_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
-        self.tab3.SetSizer(self.tab3_sizer)
-
-    def setup_image_insertion_section(self):
-        self.image_insertion_box = wx.StaticBox(self.tab3, label="Image Insertion")
-        self.image_insertion_sizer = wx.StaticBoxSizer(self.image_insertion_box, wx.VERTICAL)
-
-        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.insert_images_button, 0, wx.ALL, self.widget_margin)
-        self.image_insertion_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
-
-    def setup_pdf_section(self):
-        self.pdf_box = wx.StaticBox(self.tab3, label="PDF")
-        self.pdf_sizer = wx.StaticBoxSizer(self.pdf_box, wx.VERTICAL)
-
-        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        row_sizer.Add(self.convert_docx_to_pdf_button, 0, wx.ALL, self.widget_margin)
-        self.pdf_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_tab4(self):
         self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -554,7 +509,7 @@ class MyFrame(wx.Frame):
         self.survey_project_profile_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_survey_section_b(self):
-        self.b_box = wx.StaticBox(self.tab4, label="Section B")
+        self.b_box = wx.StaticBox(self.tab4, label="---")
         self.b_section_sizer = wx.StaticBoxSizer(self.b_box, wx.VERTICAL)
 
         # Row 1
@@ -1069,17 +1024,6 @@ class MyFrame(wx.Frame):
         if not self.basic_checks():
             return
         export_ap_images.export_ap_images(self.working_directory, self.esx_project_name, self.append_message)
-
-    def on_insert_images(self, event):
-        docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        self.stop_event.clear()
-        if docx_files:
-            for file in docx_files:
-                insert_images_threaded(file, self.append_message, self.update_last_message, self.stop_event)
-
-    def on_convert_docx_to_pdf(self, event):
-        docx_files = self.get_multiple_specific_file_type(DOCX_EXTENSION)
-        convert_docx_to_pdf(docx_files, self.append_message)
 
     def on_export_note_images(self, event):
         if not self.basic_checks():

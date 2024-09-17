@@ -79,6 +79,11 @@ def create_ap_location_maps(working_directory, project_name, message_callback, c
         # Check if the map is oversized
         oversize_map_check(source_floor_plan_image, message_callback)
 
+        # Ensure the map_image is in 'RGBA' mode
+        if source_floor_plan_image.mode != 'RGBA':
+            wx.CallAfter(message_callback, f'Converting {floor_id} to RGBA colour space')
+            source_floor_plan_image = source_floor_plan_image.convert('RGBA')
+
         map_cropped_within_ekahau, scaling_ratio, crop_bitmap = crop_assessment(floor, source_floor_plan_image, project_dir, floor_id, blank_plan_dir)
 
         aps_on_this_floor = []
