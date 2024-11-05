@@ -223,21 +223,29 @@ def annotate_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, s
     return map_image
 
 
-def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, message_callback, floor_plans_dict):
+def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_size, simulated_radio_dict, message_callback, floor_plans_dict):
     font = set_font(font_size)
     rrect_text_border_space = get_rrect_text_border_space(font_size)
+
+    ap_color = ap['color'] if 'color' in ap else 'FFFFFF'
 
     # establish x and y
     x, y = (ap['location']['coord']['x'] * scaling_ratio,
             ap['location']['coord']['y'] * scaling_ratio)
 
-    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId']).get('name')} ][ coordinates {round(x)}, {round(y)}")
+    wx.CallAfter(message_callback, f"{ap['name']} ({model_antenna_split(ap['model'])[0]}) ][ {floor_plans_dict.get(ap['location']['floorPlanId']).get('name')} ][ colour: {ekahau_color_dict.get(ap_color)} ][ coordinates {round(x)}, {round(y)}")
 
     spot = Image.open(ASSETS_DIR / 'custom' / 'spot.png')
     spot = spot.resize((custom_ap_icon_size, custom_ap_icon_size))
 
+    antenna_direction_angle = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaDirection']
+    antenna_tilt_angle = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaTilt']
+
+    arrow = Image.open(ASSETS_DIR / 'custom' / 'overlay-arrow.png')
+    arrow = arrow.resize((custom_ap_icon_size, custom_ap_icon_size))
+
     # Calculate AP icon rounded rectangle offset value for text below the AP icon
-    y_offset = (custom_ap_icon_size / 3)
+    y_offset = get_y_offset(arrow, antenna_direction_angle)
 
     # Define the centre point of the spot
     spot_centre_point = (spot.width // 2, spot.height // 2)
@@ -247,6 +255,29 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_siz
 
     # Paste the arrow onto the floor plan at the calculated location
     map_image.paste(spot, top_left, mask=spot)
+
+    antenna_mounting = simulated_radio_dict[ap['id']][FIVE_GHZ_RADIO_ID]['antennaMounting']
+
+    if antenna_mounting == 'WALL' or antenna_tilt_angle != 0:
+        wx.CallAfter(message_callback, f'AP directional arrow is considered relevant')
+
+        if antenna_mounting == 'WALL':
+            wx.CallAfter(message_callback, f'AP is WALL mounted')
+
+        if antenna_tilt_angle != 0:
+            wx.CallAfter(message_callback, f'AP has antenna tilt angle of: {round(antenna_tilt_angle)}')
+
+        rotated_arrow = arrow.rotate(-antenna_direction_angle, expand=True)
+
+        # Define the centre point of the rotated icon
+        rotated_arrow_centre_point = (rotated_arrow.width // 2, rotated_arrow.height // 2)
+
+        # Calculate the top-left corner of the icon based on the center point and x, y
+        top_left = (int(x) - rotated_arrow_centre_point[0], int(y) - rotated_arrow_centre_point[1])
+
+        # draw the rotated arrow onto the floor plan
+        map_image.paste(rotated_arrow, top_left, mask=rotated_arrow)
+
 
     # Calculate the height and width of the AP Name rounded rectangle
     text_width, text_height = text_width_and_height_getter(ap['name'], font_size)
@@ -264,7 +295,7 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_siz
     draw_map_image = ImageDraw.Draw(map_image)
 
     # draw the rounded rectangle for 'AP Name'
-    draw_map_image.rounded_rectangle((x1, y1, x2, y2), r, fill='white', outline='black', width=2)
+    draw_map_image.rounded_rectangle((x1, y1, x2, y2), r, fill=ap_color, outline='black', width=2)
 
     # draw the text for 'AP Name'
     draw_map_image.text((x, y + y_offset + rrect_text_border_space), ap['name'], anchor='mt', fill='black', font=font)

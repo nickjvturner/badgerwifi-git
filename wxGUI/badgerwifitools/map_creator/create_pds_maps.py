@@ -9,6 +9,7 @@ from PIL import Image
 from common import nl
 from common import load_json
 from common import create_floor_plans_dict
+from common import create_simulated_radios_dict
 
 from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
@@ -37,9 +38,11 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
     # Load JSON data
     floor_plans_json = load_json(project_dir, 'floorPlans.json', message_callback)
     access_points_json = load_json(project_dir, 'accessPoints.json', message_callback)
+    simulated_radios_json = load_json(project_dir, 'simulatedRadios.json', message_callback)
 
     # Process data
     floor_plans_dict = create_floor_plans_dict(floor_plans_json)
+    simulated_radio_dict = create_simulated_radios_dict(simulated_radios_json)
 
     # Create directory to hold output directories
     output_dir = working_directory / 'OUTPUT'
@@ -103,7 +106,7 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
                     wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
                     return
 
-                all_aps = annotate_pds_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, ap_name_label_size, message_callback, floor_plans_dict)
+                all_aps = annotate_pds_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, ap_name_label_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
         # If map was cropped within Ekahau, crop the all_AP map
         if map_cropped_within_ekahau:
