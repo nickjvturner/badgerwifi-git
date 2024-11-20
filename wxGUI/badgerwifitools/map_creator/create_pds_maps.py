@@ -82,6 +82,10 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
         # Check if the map is oversized
         oversize_map_check(source_floor_plan_image, message_callback)
 
+        # Ensure the map_image is in 'RGBA' mode
+        if source_floor_plan_image.mode != 'RGBA':
+            source_floor_plan_image = source_floor_plan_image.convert('RGBA')
+
         for ap in sorted(access_points_json['accessPoints'], key=lambda i: i['name']):
             if stop_event.is_set():
                 wx.CallAfter(message_callback, f'{nl}### PROCESS ABORTED ###')
