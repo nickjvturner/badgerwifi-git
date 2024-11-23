@@ -54,6 +54,7 @@ from admin.dir_creator import select_root_and_create_directory_structure
 from admin.dir_creator import preview_directory_structure
 
 from survey.surveyed_ap_list import create_surveyed_ap_list
+from survey.pds_project_creator import create_pds_project_esx
 
 
 class MyFrame(wx.Frame):
@@ -71,8 +72,8 @@ class MyFrame(wx.Frame):
         self.setup_text_input_boxes()
         self.setup_tab1()
         self.setup_tab2()
+        self.setup_tab3()
         self.setup_tab4()
-        self.setup_tab5()
         self.setup_panel_rows()
         self.setup_main_sizer()
         self.create_menu()
@@ -158,7 +159,7 @@ class MyFrame(wx.Frame):
         self.project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_design_project_profile_dropdown_selection)
 
         # Create a dropdown to select a Project Profile on the Survey tab
-        self.survey_project_profile_dropdown = wx.Choice(self.tab4, choices=self.available_project_profiles)
+        self.survey_project_profile_dropdown = wx.Choice(self.tab3, choices=self.available_project_profiles)
         self.survey_project_profile_dropdown.SetSelection(0)  # Set default selection
         self.survey_project_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_survey_project_profile_dropdown_selection)
 
@@ -166,7 +167,7 @@ class MyFrame(wx.Frame):
         self.available_project_detail_views = discover_available_scripts(PROJECT_DETAIL_DIR)
 
         # Create a dropdown to select a Project Detail View
-        self.project_detail_dropdown = wx.Choice(self.tab5, choices=self.available_project_detail_views)
+        self.project_detail_dropdown = wx.Choice(self.tab4, choices=self.available_project_detail_views)
         self.project_detail_dropdown.SetSelection(0)  # Set default selection
         self.project_detail_dropdown.Bind(wx.EVT_CHOICE, self.on_project_detail_dropdown_selection)
 
@@ -174,7 +175,7 @@ class MyFrame(wx.Frame):
         self.available_admin_actions = discover_available_scripts(ADMIN_ACTIONS_DIR)
 
         # Create a dropdown to select an Admin action
-        self.admin_actions_dropdown = wx.Choice(self.tab5, choices=self.available_admin_actions)
+        self.admin_actions_dropdown = wx.Choice(self.tab4, choices=self.available_admin_actions)
         self.admin_actions_dropdown.SetSelection(0)  # Set default selection
         self.admin_actions_dropdown.Bind(wx.EVT_CHOICE, self.on_admin_actions_dropdown_selection)
 
@@ -182,7 +183,7 @@ class MyFrame(wx.Frame):
         self.available_dir_structure_profiles = discover_available_scripts(DIR_STRUCTURE_PROFILES_DIR)
 
         # Create a dropdown to select a directory structure profile
-        self.dir_structure_profile_dropdown = wx.Choice(self.tab5, choices=self.available_dir_structure_profiles)
+        self.dir_structure_profile_dropdown = wx.Choice(self.tab4, choices=self.available_dir_structure_profiles)
         self.dir_structure_profile_dropdown.SetSelection(0)  # Set default selection
         self.dir_structure_profile_dropdown.Bind(wx.EVT_CHOICE, self.on_dir_structure_profile_dropdown_selection)
 
@@ -213,7 +214,7 @@ class MyFrame(wx.Frame):
         self.clear_log_button.Bind(wx.EVT_BUTTON, self.on_clear_log)
         self.clear_log_button.SetToolTip(wx.ToolTip("Clear the log"))
 
-        self.display_project_detail_button = wx.Button(self.tab5, label="Display")
+        self.display_project_detail_button = wx.Button(self.tab4, label="Display")
         self.display_project_detail_button.Bind(wx.EVT_BUTTON, self.on_display_project_detail)
         self.display_project_detail_button.SetToolTip(wx.ToolTip("Display detailed information about the current .esx project"))
 
@@ -278,31 +279,35 @@ class MyFrame(wx.Frame):
         self.export_pds_maps_button.Bind(wx.EVT_BUTTON, self.on_export_pds_maps)
         self.export_pds_maps_button.SetToolTip(wx.ToolTip("Generate maps with red circle AP markers for use during Post Deployment Surveys"))
 
-        self.create_surveyed_ap_list_button = wx.Button(self.tab4, label="Create Surveyed AP List")
+        self.create_pds_project_button = wx.Button(self.tab3, label="Create PDS Project")
+        self.create_pds_project_button.Bind(wx.EVT_BUTTON, self.on_create_pds_project)
+        self.create_pds_project_button.SetToolTip(wx.ToolTip("Create a PDS project from the current .esx project"))
+
+        self.create_surveyed_ap_list_button = wx.Button(self.tab3, label="Create Surveyed AP List")
         self.create_surveyed_ap_list_button.Bind(wx.EVT_BUTTON, self.on_create_surveyed_ap_list)
         self.create_surveyed_ap_list_button.SetToolTip(wx.ToolTip("Generate a dump of surveyed AP details"))
 
-        self.perform_admin_action_button = wx.Button(self.tab5, label="Perform Action")
+        self.perform_admin_action_button = wx.Button(self.tab4, label="Perform Action")
         self.perform_admin_action_button.Bind(wx.EVT_BUTTON, self.on_perform_admin_action)
         self.perform_admin_action_button.SetToolTip(wx.ToolTip("Perform the selected Admin action"))
 
-        self.check_for_updates_button = wx.Button(self.tab5, label="Check for Updates")
+        self.check_for_updates_button = wx.Button(self.tab4, label="Check for Updates")
         self.check_for_updates_button.Bind(wx.EVT_BUTTON, self.on_check_for_updates)
         self.check_for_updates_button.SetToolTip(wx.ToolTip("Check for new commits on GitHub"))
 
-        self.feedback_button = wx.Button(self.tab5, label="Feedback")
+        self.feedback_button = wx.Button(self.tab4, label="Feedback")
         self.feedback_button.Bind(wx.EVT_BUTTON, self.on_feedback)
         self.feedback_button.SetToolTip(wx.ToolTip("Send feedback to the developer"))
 
-        self.contribute_button = wx.Button(self.tab5, label="Contribute")
+        self.contribute_button = wx.Button(self.tab4, label="Contribute")
         self.contribute_button.Bind(wx.EVT_BUTTON, self.on_contribute)
         self.contribute_button.SetToolTip(wx.ToolTip("Buy the developer a coffee"))
 
-        self.preview_directory_structure_button = wx.Button(self.tab5, label="Preview")
+        self.preview_directory_structure_button = wx.Button(self.tab4, label="Preview")
         self.preview_directory_structure_button.Bind(wx.EVT_BUTTON, self.on_preview_directory_structure)
         self.preview_directory_structure_button.SetToolTip(wx.ToolTip("Preview selected directory structure profile"))
 
-        self.create_directory_structure_button = wx.Button(self.tab5, label="Create Directory Structure")
+        self.create_directory_structure_button = wx.Button(self.tab4, label="Create Directory Structure")
         self.create_directory_structure_button.Bind(wx.EVT_BUTTON, self.on_create_directory_structure)
         self.create_directory_structure_button.SetToolTip(wx.ToolTip("Specify a root dir, create selected directory structure, presumably for a new project"))
 
@@ -378,21 +383,22 @@ class MyFrame(wx.Frame):
         self.notebook = wx.Notebook(self.panel)
         self.tab1 = wx.Panel(self.notebook)
         self.tab2 = wx.Panel(self.notebook)
+        self.tab3 = wx.Panel(self.notebook)
         self.tab4 = wx.Panel(self.notebook)
-        self.tab5 = wx.Panel(self.notebook)
 
         self.notebook.AddPage(self.tab1, "Predictive Design")
         self.notebook.AddPage(self.tab2, "Asset Creator")
-        self.notebook.AddPage(self.tab4, "Survey")
-        self.notebook.AddPage(self.tab5, "Admin")
+        self.notebook.AddPage(self.tab3, "Survey")
+        self.notebook.AddPage(self.tab4, "Admin")
 
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.tab5_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Bind the tab change event
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
+
 
     def setup_tab1(self):
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -438,6 +444,7 @@ class MyFrame(wx.Frame):
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, self.widget_margin)
         self.rename_aps_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+
 
     def setup_tab2(self):
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -485,52 +492,57 @@ class MyFrame(wx.Frame):
         self.create_sizer.Add(row_sizer, 0, wx.EXPAND, wx.LEFT, self.row_sizer_margin)
 
 
-    def setup_tab4(self):
-        self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.tab4_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+    def setup_tab3(self):
+        self.tab3_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab3_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.setup_survey_project_profile_section()
-        self.setup_survey_section_b()
+        self.setup_survey_export_section()
 
-        self.tab4_row_sizer.Add(self.survey_project_profile_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
-        self.tab4_row_sizer.Add(self.b_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab3_row_sizer.Add(self.survey_project_profile_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab3_row_sizer.Add(self.survey_export_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
-        self.tab4_sizer.Add(self.tab4_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
-        self.tab4.SetSizer(self.tab4_sizer)
+        self.tab3_sizer.Add(self.tab3_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
+        self.tab3.SetSizer(self.tab3_sizer)
 
     def setup_survey_project_profile_section(self):
-        self.survey_project_profile_box = wx.StaticBox(self.tab4, label="Project Profile")
+        self.survey_project_profile_box = wx.StaticBox(self.tab3, label="Project Profile")
         self.survey_project_profile_section_sizer = wx.StaticBoxSizer(self.survey_project_profile_box, wx.VERTICAL)
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.survey_project_profile_dropdown, 0, wx.EXPAND | wx.ALL, self.widget_margin)
-        row_sizer.Add(self.create_surveyed_ap_list_button, 0, wx.ALL, self.widget_margin)
         self.survey_project_profile_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
-    def setup_survey_section_b(self):
-        self.b_box = wx.StaticBox(self.tab4, label="---")
-        self.b_section_sizer = wx.StaticBoxSizer(self.b_box, wx.VERTICAL)
+        # Row 2
+        row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        row_sizer.Add(self.create_pds_project_button, 0, wx.ALL, self.widget_margin)
+        self.survey_project_profile_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+
+    def setup_survey_export_section(self):
+        self.survey_export_box = wx.StaticBox(self.tab3, label="Export Survey Data")
+        self.survey_export_section_sizer = wx.StaticBoxSizer(self.survey_export_box, wx.VERTICAL)
 
         # Row 1
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.b_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
+        row_sizer.Add(self.create_surveyed_ap_list_button, 0, wx.ALL, self.widget_margin)
+        self.survey_export_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
-    def setup_tab5(self):
-        self.tab5_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.tab5_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+    def setup_tab4(self):
+        self.tab4_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.tab4_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.setup_application_section()
         self.setup_misc_section()
 
-        self.tab5_row_sizer.Add(self.application_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
-        self.tab5_row_sizer.Add(self.misc_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab4_row_sizer.Add(self.application_section_sizer, 1, wx.EXPAND | wx.ALL, 2)
+        self.tab4_row_sizer.Add(self.misc_sizer, 1, wx.EXPAND | wx.ALL, 2)
 
-        self.tab5_sizer.Add(self.tab5_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
-        self.tab5.SetSizer(self.tab5_sizer)
+        self.tab4_sizer.Add(self.tab4_row_sizer, 0, wx.EXPAND | wx.TOP, self.sizer_edge_margin)
+        self.tab4.SetSizer(self.tab4_sizer)
 
     def setup_application_section(self):
-        self.application_box = wx.StaticBox(self.tab5, label="Application")
+        self.application_box = wx.StaticBox(self.tab4, label="Application")
         self.application_section_sizer = wx.StaticBoxSizer(self.application_box, wx.VERTICAL)
 
         # Row 1
@@ -548,7 +560,7 @@ class MyFrame(wx.Frame):
         self.application_section_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
 
     def setup_misc_section(self):
-        self.misc_box = wx.StaticBox(self.tab5, label="Misc")
+        self.misc_box = wx.StaticBox(self.tab4, label="Misc")
         self.misc_sizer = wx.StaticBoxSizer(self.misc_box, wx.VERTICAL)
 
         # Row 1
@@ -957,6 +969,7 @@ class MyFrame(wx.Frame):
 
         # Load the selected project profile module for simulated AP list creation
         project_profile_module = self.load_project_profile(selected_profile)
+        self.project_profile_module = project_profile_module
         self.current_profile_ap_list_module = project_profile_module
 
         # Update the object variables with the configuration from the selected module
@@ -1093,6 +1106,11 @@ class MyFrame(wx.Frame):
         if not self.basic_checks():
             return
         extract_blank_maps(self.working_directory, self.esx_project_name, self.append_message)
+
+    def on_create_pds_project(self, event):
+        if not self.basic_checks():
+            return
+        create_pds_project_esx(self, self.append_message)
 
     def on_tab_changed(self, event):
         # Get the index of the newly selected tab

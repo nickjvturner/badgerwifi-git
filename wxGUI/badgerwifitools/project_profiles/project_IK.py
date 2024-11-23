@@ -24,6 +24,16 @@ project_specific_conventions = {
     }
 }
 
+# PDS Project Creator
+predictive_json_asset_deletion = [
+    "accessPoints",
+    "simulatedRadios",
+    "tagKeys",
+    "wallPoints",
+    "WallSegments",
+    "attenuationAreas",
+]
+
 
 # Custom AP List Constructor
 def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, simulated_radio_dict, antenna_types_dict, notes_dict):

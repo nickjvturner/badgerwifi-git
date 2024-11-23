@@ -19,7 +19,7 @@ def adjust_column_widths(df, writer):
     """Adjust column widths in the Excel sheet and apply text wrap to the 'Notes' column."""
     worksheet = writer.sheets['AP List']
 
-    # Create a format for wrapping text
+    # Create a format for aligning to the top with wrapping
     wrap_format = writer.book.add_format({'text_wrap': True, 'valign': 'top'})
     right_align_format = writer.book.add_format({'text_wrap': True, 'valign': 'top', 'align': 'right'})
 
