@@ -6,11 +6,6 @@ Adapted, modified, mangled by Nick Turner (@nickjvturner)
 
 This script will extract all image notes attached to an AP objects of an
 Ekahau project file (.esx)
-
-It will place ALL the pictures into a single, new directory called AP_images
-
-Script should still work if you have multiple pictures per AP note
-Working as of 01-FEB-2023
 """
 
 import shutil
@@ -51,6 +46,7 @@ def export_note_images(working_directory, project_name, message_callback):
 
 	for note in notes_json['notes']:
 		if note['id'] not in ap_note_ids:
+			# Skip notes that do not contain images
 			if len(note['imageIds']) > 0:
 				image_count = 1
 
