@@ -18,6 +18,28 @@ CAUTION = '-------\nCAUTION\n-------\n'
 HASH_BAR = '\n\n#########################\n\n'
 
 
+def validate_ap_name_formatting(offenders, total_ap_count, message_callback):
+    message_callback(f"{SPACER}### AP NAME FORMATTING ###")
+    if len(offenders.get('ap_name_format', [])) > 0:
+        message_callback(f"{FAIL}The following {len(offenders.get('ap_name_format', []))} APs have a non-conforming name")
+        for ap in offenders['ap_name_format']:
+            message_callback(ap)
+        return False
+    message_callback(f"{PASS}All {total_ap_count} APs have a conforming name format{nl}")
+    return True
+
+
+def validate_ap_name_uniqueness(offenders, total_ap_count, message_callback):
+    message_callback(f"{SPACER}### AP NAME UNIQUENESS ###")
+    if len(offenders.get('ap_name_duplication', [])) > 0:
+        message_callback(f"{FAIL}The following {len(offenders.get('ap_name_duplication', []))} APs have been automatically renamed, please check the original AP names")
+        for ap in offenders['ap_name_duplication']:
+            message_callback(ap)
+        return False
+    message_callback(f"{PASS}All {total_ap_count} APs have a unique name{nl}")
+    return True
+
+
 def validate_color_assignment(offenders, total_ap_count, message_callback):
     message_callback(f"{SPACER}### COLOUR ASSIGNMENT ###")
     if len(offenders.get('color', [])) > 0:
@@ -128,6 +150,13 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
     # Count occurrences of each
     for ap in custom_ap_dict.values():
 
+        if not ap['name'].startswith('AP-') or not ap['name'][3:].isdigit():
+            offenders['ap_name_format'].append(ap['name'])
+
+        # if an AP name contains string '_BW_DUPLICATE_AP_NAME_' it is not unique
+        if '_BW_DUPLICATE_AP_NAME_' in ap['name']:
+            offenders['ap_name_duplication'].append(ap['name'])
+
         if ap['color'] == 'none':
             offenders['color'].append(ap['name'])
 
@@ -153,6 +182,8 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
 
     # Perform all validations
     validations = [
+        validate_ap_name_formatting(offenders, total_ap_count, message_callback),
+        validate_ap_name_uniqueness(offenders, total_ap_count, message_callback),
         validate_color_assignment(offenders, total_ap_count, message_callback),
         validate_height_manipulation(offenders, total_ap_count, message_callback),
         validate_required_tags(offenders, total_ap_count, total_required_tag_keys_count, required_tag_keys, message_callback),
