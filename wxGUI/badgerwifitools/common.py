@@ -6,6 +6,7 @@ import json
 import shutil
 from pathlib import Path
 import importlib.util
+import base64
 
 
 # Constants
@@ -62,6 +63,15 @@ acceptable_antenna_tilt_angles = (0, -10, -20, -30, -40, -45, -50, -60, -70, -80
 range_two = (2400, 2500)
 range_five = (5000, 5900)
 range_six = (5901, 7200)
+
+# 2.4 GHz ISM band channels
+ISM_channels = list(range(1, 15))
+
+# 5 GHz UNII bands
+UNII_1_channels = [36, 40, 44, 48]
+UNII_2_channels = [52, 56, 60, 64]
+UNII_2e_channels = list(range(100, 145, 4)) + [144]
+UNII_3_channels = [149, 153, 157, 161, 165, 169, 173]
 
 wifi_channel_dict = {
     2412: 1,
@@ -165,6 +175,11 @@ wifi_channel_dict = {
     7095: 229
 }
 
+frequency_band_dict = {
+    2400: '2.4GHz',
+    5000: '5GHz',
+    6000: '6GHz'
+}
 
 antenna_band_references = (' BLE', ' 2.4GHz', ' 5GHz', ' 6GHz')
 
@@ -308,6 +323,8 @@ def file_or_dir_exists(path):
 
 def offender_constructor(required_tag_keys, optional_tag_keys):
     offenders = {
+        'ap_name_format': [],
+        'ap_name_duplication': [],
         'color': [],
         'antennaHeight': [],
         'bluetooth': [],
@@ -344,11 +361,22 @@ def re_bundle_project(project_dir, output_dir, output_name):
 
 def create_custom_ap_dict(access_points_json, floor_plans_dict, simulated_radio_dict):
     custom_ap_dict = {}
+    name_count = {}
+
     for ap in access_points_json['accessPoints']:
         ap_model, external_antenna, antenna_description = model_antenna_split(ap.get('model', ''))
+        ap_name = ap['name']
 
-        custom_ap_dict[ap['name']] = {
-            'name': ap['name'],
+        # Handle duplicate AP names
+        if ap_name in name_count:
+            name_count[ap_name] += 1
+            ap_name = f"{ap_name}_BW_DUPLICATE_AP_NAME_{name_count[ap_name]}"
+            # print(f"Duplicate AP name found: {ap['name']}, renamed to: {ap_name}")
+        else:
+            name_count[ap_name] = 1
+
+        custom_ap_dict[ap_name] = {
+            'name': ap_name,
             'color': ap.get('color', 'none'),
             'model': ap_model,
             'antenna': external_antenna,
@@ -361,7 +389,7 @@ def create_custom_ap_dict(access_points_json, floor_plans_dict, simulated_radio_
             'ap bracket': '',
             'antenna bracket': '',
             'tags': {}
-            }
+        }
 
     return custom_ap_dict
 
@@ -481,6 +509,136 @@ def get_security_and_technologies(measured_radios):
     return '\n'.join(f"{security} {technologies}" for mac, security, technologies in sorted_access_points)
 
 
+def get_tx_power_from_ies(measured_radios):
+    # Extract MAC addresses and SSIDs from the dictionary
+    access_points = []
+
+    for radio in measured_radios.values():
+        access_points.append((radio['mac'], radio['informationElements']))
+
+    # Sort the access points by MAC address
+    sorted_access_points = sorted(access_points)
+
+    # Format the output string
+    return '\n'.join(f"{decode_tx_power(informationElements)}" for mac, informationElements in sorted_access_points)
+
+
+def decode_tx_power(ie_base64):
+    # Decode the Base64-encoded IE string
+    ie_bytes = base64.b64decode(ie_base64)
+
+    index = 0
+    ie_length = len(ie_bytes)
+    tx_power = None  # Initialize transmit power as None
+
+    while index < ie_length:
+        # Ensure there are at least 2 bytes left for Element ID and Length
+        if index + 2 > ie_length:
+            break
+
+        element_id = ie_bytes[index]
+        length = ie_bytes[index + 1]
+        index += 2  # Move past Element ID and Length fields
+
+        # Ensure the data for the IE is within the bounds
+        if index + length > ie_length:
+            break
+
+        element_data = ie_bytes[index:index + length]
+
+        # Check if Element ID is 35 (TPC Report IE)
+        if element_id == 35:
+            if length >= 2:
+                tx_power_field = element_data[0]
+                link_margin = element_data[1]
+
+               # The Transmit Power field is an unsigned integer representing dBm
+                tx_power = tx_power_field  # in dBm
+                print(f"Transmit Power: {tx_power} dBm")
+        index += length  # Move to the next IE
+
+    if tx_power is None:
+        print("Element ID 35 (TPC Report IE) not found or does not contain transmit power.")
+    return tx_power
+
+
+def get_supported_rates_from_ies(measured_radios):
+    # Extract MAC addresses and SSIDs from the dictionary
+    access_points = []
+
+    for radio in measured_radios.values():
+        access_points.append((radio['mac'], radio['informationElements']))
+
+    # Sort the access points by MAC address
+    sorted_access_points = sorted(access_points)
+
+    # Format the output string
+    return '\n'.join(f"{decode_supported_data_rates(informationElements)}" for mac, informationElements in sorted_access_points)
+
+
+def decode_supported_data_rates(ie_base64):
+    # Decode the Base64-encoded IE string
+    ie_bytes = base64.b64decode(ie_base64)
+
+    index = 0
+    ie_length = len(ie_bytes)
+    supported_rates = []
+
+    while index < ie_length:
+        # Ensure there are at least 2 bytes left for Element ID and Length
+        if index + 2 > ie_length:
+            break
+
+        element_id = ie_bytes[index]
+        length = ie_bytes[index + 1]
+        index += 2  # Move past Element ID and Length fields
+
+        # Ensure the data for the IE is within the bounds
+        if index + length > ie_length:
+            break
+
+        element_data = ie_bytes[index:index + length]
+
+        # Check for Supported Rates IE (Element ID 1) and Extended Supported Rates IE (Element ID 50)
+        if element_id == 1 or element_id == 50:
+            for rate_byte in element_data:
+                rate = (rate_byte & 0x7F) * 0.5  # Rates are in units of 0.5 Mbps
+                # Check if the MSB is set; if so, it's a basic rate
+                is_basic = bool(rate_byte & 0x80)
+                supported_rates.append({'rate': rate, 'basic': is_basic})
+        index += length  # Move to the next IE
+
+    # Remove duplicates and sort rates in ascending order
+    unique_rates = {}
+    for rate_info in supported_rates:
+        rate = rate_info['rate']
+        is_basic = rate_info['basic']
+        # If the rate is already in the dict, mark it as basic if either occurrence is basic
+        if rate in unique_rates:
+            unique_rates[rate] = unique_rates[rate] or is_basic
+        else:
+            unique_rates[rate] = is_basic
+
+    # Sort the rates
+    sorted_rates = sorted(unique_rates.items())
+
+    # Create a list of rate strings
+    rates_display = []
+    for rate, is_basic in sorted_rates:
+        rate_str = f"{int(rate)}"
+        if is_basic:
+            rate_str += " (B)"
+        rates_display.append(rate_str)
+
+    # Join the rates into a single string
+    rates_output = ", ".join(rates_display)
+
+    # Output the supported data rates
+    print(rates_output)
+
+    return rates_output
+
+
 def extract_frequency_channel_and_width(data, band):
     channels_and_widths = []
     if band in data:
@@ -495,6 +653,96 @@ def extract_frequency_channel_and_width(data, band):
         channels_and_widths.append(('', '', ''))
 
     return tuple(channels_and_widths)
+
+
+def get_channel_from_ies(measured_radios):
+    # Extract MAC addresses and SSIDs from the dictionary
+    access_points = []
+
+    for radio in measured_radios.values():
+        access_points.append((radio['mac'], radio['informationElements']))
+
+    # Sort the access points by MAC address
+    sorted_access_points = sorted(access_points)
+
+    # Format the output string
+    return '\n'.join(f"{decode_channel(informationElements)}" for mac, informationElements in sorted_access_points)
+
+
+def decode_channel(ie_base64):
+    # Decode the Base64-encoded IE string
+    ie_bytes = base64.b64decode(ie_base64)
+
+    index = 0
+    ie_length = len(ie_bytes)
+    channel = None  # Initialize channel as None
+
+    while index < ie_length:
+        # Ensure there are at least 2 bytes left for Element ID and Length
+        if index + 2 > ie_length:
+            break
+
+        element_id = ie_bytes[index]
+        length = ie_bytes[index + 1]
+        index += 2  # Move past Element ID and Length fields
+
+        # Ensure the data for the IE is within the bounds
+        if index + length > ie_length:
+            break
+
+        element_data = ie_bytes[index:index + length]
+
+        # Check if Element ID is 3 (DS Parameter Set)
+        if element_id == 3:
+            if length >= 1:
+                channel = element_data[0]
+                print(f"Channel: {channel}")
+                # Optionally, you can return here if only one occurrence is expected
+                # return channel
+        index += length  # Move to the next IE
+
+    if channel is None:
+        print("Element ID 3 (DS Parameter Set) not found or does not contain channel information.")
+    return channel
+
+
+def get_wifi_band_from_ie_channel(measured_radios):
+    # Extract MAC addresses and SSIDs from the dictionary
+    access_points = []
+
+    for radio in measured_radios.values():
+        access_points.append((radio['mac'], radio['informationElements']))
+
+    # Sort the access points by MAC address
+    sorted_access_points = sorted(access_points)
+
+    # Format the output string
+    return '\n'.join(f"{lookup_wifi_band(decode_channel(informationElements))}" for mac, informationElements in sorted_access_points)
+
+
+def lookup_wifi_band(channel):
+    """
+    Returns the Wi-Fi band for a given channel number.
+
+    Parameters:
+    - channel (int): The Wi-Fi channel number.
+
+    Returns:
+    - str: The band in which the channel exists.
+    """
+
+    if channel in ISM_channels:
+        return 'ISM'
+    elif channel in UNII_1_channels:
+        return 'UNII-1'
+    elif channel in UNII_2_channels:
+        return 'UNII-2'
+    elif channel in UNII_2e_channels:
+        return 'UNII-2e'
+    elif channel in UNII_3_channels:
+        return 'UNII-3'
+    else:
+        return 'Unknown or unsupported channel'
 
 
 def antenna_name_cleanup(antenna_name):

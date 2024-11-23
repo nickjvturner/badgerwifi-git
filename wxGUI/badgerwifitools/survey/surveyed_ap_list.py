@@ -10,40 +10,66 @@ from common import create_notes_dict
 
 from common import nl
 
+channel_bands = ['2.4', '5', '6']
 
-right_align = ['2.4 SSIDs', '2.4 GHz', '2.4 Security / Standards', '5 SSIDs', '5 GHz', '5 Security / Standards', '6 SSIDs', '6 GHz', '6 Security / Standards']
-fixed_width = ['2.4 Ch Primary', '2.4 Width', '5 Ch Primary', '5 Width', '6 Ch Primary', '6 Width']
+
+right_align_cols =\
+    (
+        [f'{band} SSIDs' for band in channel_bands] +
+        [f'{band} GHz' for band in channel_bands] +
+        [f'{band} Supported Rates' for band in channel_bands]
+    )
+
+narrow_fixed_width_cols =\
+    (
+        [f'{band} Ch Primary' for band in channel_bands] +
+        [f'{band} Width' for band in channel_bands] +
+        [f'{band} Tx Power' for band in channel_bands] +
+        [f'{band} WiFi Band' for band in channel_bands] +
+        ['Colour', 'hidden']
+    )
+
+wide_fixed_width_cols =\
+    (
+        [f'{band} Security / Standards' for band in channel_bands] +
+        [f'{band} Channel from IEs' for band in channel_bands] +
+        ['flagged as My AP', 'manually positioned']
+    )
 
 
 def adjust_column_widths(df, writer):
     """Adjust column widths in the Excel sheet and apply text wrap to the 'Notes' column."""
     worksheet = writer.sheets['AP List']
 
-    # Create a format for aligning to the top with wrapping
-    wrap_format = writer.book.add_format({'text_wrap': True, 'valign': 'top'})
-    right_align_format = writer.book.add_format({'text_wrap': True, 'valign': 'top', 'align': 'right'})
+    # Create column text formatting styles
+    left_align_wrap = writer.book.add_format({'text_wrap': True, 'valign': 'top'})
+    right_align_wrap = writer.book.add_format({'text_wrap': True, 'valign': 'top', 'align': 'right'})
 
     # Create a format for aligning to the top without wrapping
-    top_align_format = writer.book.add_format({'valign': 'top'})
+    left_align = writer.book.add_format({'valign': 'top'})
 
     for idx, col in enumerate(df.columns):
         column_len = max(df[col].astype(str).map(len).max(), len(col)) + 1
 
         # Check if the current column is one we want to wrap
-        if col in right_align:
+        if col in right_align_cols:
             max_line_len = df[col].astype(str).apply(lambda x: max(len(line) for line in x.split('\n'))).max()
             column_len = max(max_line_len, len(col)) - 1
-            worksheet.set_column(idx, idx, column_len, right_align_format)
+            worksheet.set_column(idx, idx, column_len, right_align_wrap)
 
-        elif col in fixed_width:
+        elif col in narrow_fixed_width_cols:
             column_len = 18
-            worksheet.set_column(idx, idx, column_len, right_align_format)
+            worksheet.set_column(idx, idx, column_len, right_align_wrap)
+
+        elif col in wide_fixed_width_cols:
+            column_len = 30
+            worksheet.set_column(idx, idx, column_len, right_align_wrap)
 
         elif col == 'Notes':
-            worksheet.set_column(idx, idx, column_len, wrap_format)
+            worksheet.set_column(idx, idx, column_len, left_align_wrap)
 
         else:
-            worksheet.set_column(idx, idx, column_len, top_align_format)
+            worksheet.set_column(idx, idx, column_len, left_align)
 
 
 def format_headers(df, writer):

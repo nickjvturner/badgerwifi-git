@@ -399,7 +399,6 @@ class MyFrame(wx.Frame):
         # Bind the tab change event
         self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.on_tab_changed)
 
-
     def setup_tab1(self):
         self.tab1_sizer = wx.BoxSizer(wx.VERTICAL)
         self.tab1_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -444,7 +443,6 @@ class MyFrame(wx.Frame):
         row_sizer = wx.BoxSizer(wx.HORIZONTAL)
         row_sizer.Add(self.visualise_ap_renaming_button, 0, wx.ALL, self.widget_margin)
         self.rename_aps_sizer.Add(row_sizer, 0, wx.EXPAND | wx.LEFT, self.row_sizer_margin)
-
 
     def setup_tab2(self):
         self.tab2_sizer = wx.BoxSizer(wx.VERTICAL)

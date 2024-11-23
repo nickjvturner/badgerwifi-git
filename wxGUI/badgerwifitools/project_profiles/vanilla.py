@@ -31,6 +31,7 @@ def create_custom_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, s
         custom_ap_list.append(ap_details)
     return sorted(custom_ap_list, key=lambda x: x['Name'])
 
+
 def create_custom_measured_ap_list(access_points_json, floor_plans_dict, tag_keys_dict, measured_radios_dict, notes_dict):
     """Process access points to a structured list."""
 
