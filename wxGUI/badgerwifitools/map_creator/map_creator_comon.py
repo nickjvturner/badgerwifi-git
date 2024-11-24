@@ -301,3 +301,66 @@ def annotate_pds_map(map_image, ap, scaling_ratio, custom_ap_icon_size, font_siz
     draw_map_image.text((x, y + y_offset + rrect_text_border_space), ap['name'], anchor='mt', fill='black', font=font)
 
     return map_image
+
+
+def add_project_filename_to_map(map_image, font_size, project_filename):
+    """
+    Adds the project filename to the bottom-left corner of the map image.
+
+    Args:
+        map_image (Image): The map image to annotate.
+        font_size (int): The size of the font for the text.
+        project_filename (str): The filename to annotate on the image.
+
+    Returns:
+        Image: The map image with the filename annotated.
+    """
+    # Set the font
+    font = set_font(font_size)
+
+    # Create a drawing context
+    draw = ImageDraw.Draw(map_image)
+
+    # Calculate the size of the text
+    text_width, text_height = text_width_and_height_getter(project_filename, font_size)
+
+    # Define border space
+    rrect_text_border_space = get_rrect_text_border_space(font_size)
+
+    # Rectangle coordinates
+    box_left = 0  # Attach to the left edge
+    box_top = map_image.height - text_height - rrect_text_border_space
+    box_right = text_width + rrect_text_border_space
+    box_bottom = map_image.height  # Attach to the bottom edge
+
+    # Radius for the top-right corner
+    radius = (box_bottom - box_top) / 3  # Keep consistent with other rounded rectangles
+
+    # Draw the custom rectangle
+    # 1. Draw the main rectangle (excluding the rounded corner area)
+    draw.rectangle([box_left, box_top, box_right - radius, box_bottom], fill=(255, 255, 255, 128))
+
+    # 2. Draw the top-right rounded corner using a pie slice
+    draw.pieslice(
+        [
+            box_right - (2 * radius),  # x0
+            box_top,  # y0
+            box_right,  # x1
+            box_top + (2 * radius)  # y1
+        ],
+        start=270,  # Angle for starting point of the slice
+        end=0,  # Angle for ending point of the slice
+        fill=(255, 255, 255, 128)  # Same fill color as the rectangle
+    )
+
+    # 3. Overlay the filled rectangle for the bottom part of the rounded corner
+    draw.rectangle(
+        [box_right - radius, box_top + radius, box_right, box_bottom],
+        fill=(255, 255, 255, 128)
+    )
+
+    # Add the text
+    text_position = (rrect_text_border_space / 2, map_image.height - text_height - (rrect_text_border_space / 1.5))
+    draw.text(text_position, project_filename, fill="black", font=font)
+
+    return map_image
