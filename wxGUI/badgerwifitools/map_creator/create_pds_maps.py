@@ -15,6 +15,7 @@ from map_creator.map_creator_comon import vector_source_check
 from map_creator.map_creator_comon import crop_assessment
 from map_creator.map_creator_comon import annotate_pds_map
 from map_creator.map_creator_comon import oversize_map_check
+from map_creator.map_creator_comon import add_project_filename_to_map
 
 CUSTOM_AP_ICON_SIZE_ADJUSTER = 5.3
 
@@ -115,6 +116,10 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
         # If map was cropped within Ekahau, crop the all_AP map
         if map_cropped_within_ekahau:
             all_aps = all_aps.crop(crop_bitmap)
+
+        # add project filename to the output image
+        all_aps = add_project_filename_to_map(all_aps, ap_name_label_size, project_name)
+        wx.CallAfter(message_callback, "map stamped with project filename")
 
         # Save the output images
         all_aps.save(Path(pds_plan_dir / floor['name']).with_suffix('.png'))
