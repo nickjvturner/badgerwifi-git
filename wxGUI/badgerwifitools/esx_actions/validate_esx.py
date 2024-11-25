@@ -120,6 +120,16 @@ def validate_view_as_mobile_disabled(project_configuration_json, message_callbac
         return False
     return True
 
+# check if the floor plan has been cropped within Ekahau
+def validate_ekahau_crop(floor_plans_json, message_callback):
+    for floor in floor_plans_json['floorPlans']:
+        if floor.get('cropMinX') != 0 or floor.get('cropMinY') != 0 or floor.get('cropMaxX') != floor.get('width') or floor.get('cropMaxY') != floor.get('height'):
+            message_callback(f"{SPACER}### MAP CROPPED WITHIN EKAHAU ###")
+            message_callback(f"{FAIL}{floor.get('name')} has been cropped within Ekahau")
+            message_callback(f"This will prevent post-deployment map creation and seamless map swaps in later phases of the project")
+            return False
+        return True
+
 
 def validate_esx(working_directory, project_name, message_callback, required_tag_keys, optional_tag_keys):
     message_callback(f'Performing Validation for: {project_name}')
@@ -190,6 +200,7 @@ def validate_esx(working_directory, project_name, message_callback, required_tag
         validate_antenna_tilt(offenders, total_ap_count, message_callback),
         validate_antenna_mounting_and_tilt_mismatch(offenders, total_ap_count, message_callback, custom_ap_dict),
         validate_view_as_mobile_disabled(project_configuration_json, message_callback),
+        validate_ekahau_crop(floor_plans_json, message_callback)
     ]
 
     # Print pass/fail states
