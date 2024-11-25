@@ -114,8 +114,8 @@ def create_pds_maps(working_directory, project_name, message_callback, custom_ap
                 all_aps = annotate_pds_map(current_map_image, ap, scaling_ratio, custom_ap_icon_size, ap_name_label_size, simulated_radio_dict, message_callback, floor_plans_dict)
 
         # If map was cropped within Ekahau, crop the all_AP map
-        if map_cropped_within_ekahau:
-            all_aps = all_aps.crop(crop_bitmap)
+        # if map_cropped_within_ekahau:
+        #     all_aps = all_aps.crop(crop_bitmap)
 
         # add project filename to the output image
         all_aps = add_project_filename_to_map(all_aps, ap_name_label_size, project_name)
