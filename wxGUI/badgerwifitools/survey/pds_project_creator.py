@@ -1,4 +1,5 @@
 import wx
+import re
 import shutil
 
 from common import load_json
@@ -67,17 +68,26 @@ def create_pds_project_esx(self, message_callback):
         # Rebundle project from the temporary directory
         rebundle_project(temp_dir, self.esx_project_name, self.append_message)
 
-        # Move the new .esx file to the working directory
-        rebundled_filename = f"{self.esx_project_name}_re-zip.esx"
-        rebundled_file = temp_dir / rebundled_filename
-        if rebundled_file.exists():
-            shutil.move(rebundled_file, self.working_directory / rebundled_filename)
-            wx.CallAfter(message_callback, f"Rebundled file moved to {self.working_directory}")
-        else:
-            wx.CallAfter(message_callback, f"Error: Rebundled file {rebundled_file} not found.")
+        # Rename and move the rebundled file to the working directory
+        try:
+            rebundled_filename = f"{self.esx_project_name}_re-zip.esx"
+            rebundled_file = temp_dir / rebundled_filename
 
-    except Exception as e:
-        wx.CallAfter(message_callback, f"Unexpected error: {e}")
+            if rebundled_file.exists():
+                # Extract the base name and apply the new naming convention
+                post_deployment_filename = re.sub(
+                    r' - predictive design v(\d+\.\d+)',  # Match the version pattern
+                    r' - post-deployment v0.1',  # Replace with the new pattern
+                    self.esx_project_name
+                ) + '.esx'
+
+                destination_path = self.working_directory / post_deployment_filename
+                shutil.move(rebundled_file, destination_path)
+                wx.CallAfter(message_callback, f"Rebundled file renamed and moved to {destination_path}")
+            else:
+                wx.CallAfter(message_callback, f"Error: Rebundled file {rebundled_file} not found.")
+        except Exception as e:
+            wx.CallAfter(message_callback, f"Unexpected error while renaming file: {e}")
 
     finally:
         # Clean up the temporary directory
