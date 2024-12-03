@@ -16,6 +16,14 @@ FIVE_GHZ_RADIO_ID = 1
 
 nl = '\n'
 
+ERROR = '######### ERROR #########\n\n'
+
+SPACER = '\n\n\n'
+PASS = '----\nPASS\n----\n'
+FAIL = '----\nFAIL\n----\n'
+CAUTION = '-------\nCAUTION\n-------\n'
+HASH_BAR = '\n\n#########################\n\n'
+
 ESX_EXTENSION = '.esx'
 DOCX_EXTENSION = '.docx'
 CONFIGURATION_DIR = 'configuration'

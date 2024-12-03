@@ -19,6 +19,8 @@ optionalTagKeys = ()
 
 preferred_ap_rename_script = 'Dynamic Rows'
 
+PREDICTIVE_DESIGN_EXPECTED_PATTERN = r' - predictive design v\d+\.\d+'
+
 project_specific_conventions = {
     "AP-514": {
         "color": "red",

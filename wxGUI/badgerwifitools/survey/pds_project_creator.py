@@ -3,7 +3,7 @@ import re
 import shutil
 
 from common import load_json
-from common import nl
+from common import nl, ERROR, HASH_BAR
 from esx_actions.rebundle_esx import rebundle_project
 
 
@@ -74,18 +74,26 @@ def create_pds_project_esx(self, message_callback):
             rebundled_file = temp_dir / rebundled_filename
 
             if rebundled_file.exists():
-                # Extract the base name and apply the new naming convention
-                post_deployment_filename = re.sub(
-                    r' - predictive design v(\d+\.\d+)',  # Match the version pattern
-                    r' - post-deployment v0.1',  # Replace with the new pattern
-                    self.esx_project_name
-                ) + '.esx'
+                # Check if the expected pattern is found in the filename
+                if re.search(r' - predictive design v(\d+\.\d+)', self.esx_project_name):
+                    # If pattern is found, apply the new naming convention
+                    post_deployment_filename = re.sub(
+                        r' - predictive design v(\d+\.\d+)',  # Match the version pattern
+                        r' - post-deployment v0.1',  # Replace with the new pattern
+                        self.esx_project_name
+                    ) + '.esx'
+                else:
+                    # If pattern is not found, leave the rebundled filename unchanged
+                    wx.CallAfter(message_callback, f"'predictive design vx.x' pattern NOT found in source filename")
+                    post_deployment_filename = f"{self.esx_project_name}_re-zip.esx"
 
                 destination_path = self.working_directory / post_deployment_filename
+
+                # Move and rename the rebundled file
                 shutil.move(rebundled_file, destination_path)
-                wx.CallAfter(message_callback, f"Rebundled file renamed and moved to {destination_path}")
+                wx.CallAfter(message_callback, f"{nl}Rebundled file renamed and moved to:{nl}{destination_path}{nl}")
             else:
-                wx.CallAfter(message_callback, f"Error: Rebundled file {rebundled_file} not found.")
+                wx.CallAfter(message_callback, f"Error: Rebundled file {rebundled_file} not found")
         except Exception as e:
             wx.CallAfter(message_callback, f"Unexpected error while renaming file: {e}")
 
@@ -93,4 +101,4 @@ def create_pds_project_esx(self, message_callback):
         # Clean up the temporary directory
         if temp_dir.exists():
             shutil.rmtree(temp_dir)
-            wx.CallAfter(message_callback, f"Temporary directory {temp_dir} has been deleted.")
+            wx.CallAfter(message_callback, f"Temporary directory {temp_dir} has been deleted")

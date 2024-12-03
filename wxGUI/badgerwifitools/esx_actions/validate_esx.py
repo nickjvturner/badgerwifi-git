@@ -10,12 +10,7 @@ from common import acceptable_antenna_tilt_angles
 
 from common import FIVE_GHZ_RADIO_ID
 
-nl = '\n'
-SPACER = '\n\n\n'
-PASS = '----\nPASS\n----\n'
-FAIL = '----\nFAIL\n----\n'
-CAUTION = '-------\nCAUTION\n-------\n'
-HASH_BAR = '\n\n#########################\n\n'
+from common import nl, SPACER, PASS, FAIL, CAUTION, HASH_BAR
 
 
 def validate_ap_name_formatting(offenders, total_ap_count, message_callback):
